@@ -7,13 +7,15 @@ import iitglogo from '../assets/iitglogo.jpg';
 const Navbar = () => {
     return (
         <>
-        <nav class="navbar bg-body-tertiary">
-            <div class="container-fluid">
-                <img src={iitglogo} alt="Logo" height="90" class="d-inline-block align-text-top"/>
-                <h3>Institute Automation</h3>
-                <button type="button" class="btn btn-outline-success me-4">Logout</button>
+        <nav className="bg-gray-100 py-1 shadow">
+            <div className="container mx-auto flex items-center justify-between pe-5">
+                <img src={iitglogo} alt="Logo" className="h-[90px] inline-block align-text-top" />
+                <h2 className="text-xl font-semibold">Institute Automation</h2>
+                <button type="button" className="border border-green-600 text-green-600 hover:bg-green-600 hover:text-white px-4 py-2 rounded-md transition duration-200">
+                Logout
+                </button>
             </div>
-            </nav>
+        </nav>
         </>
     );
 };
