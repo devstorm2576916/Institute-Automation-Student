@@ -1,4 +1,5 @@
 import './App.css';
+import ComplaintSection from './components/complaintSection';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 
@@ -9,7 +10,11 @@ function App() {
     // </div>
     <>
     <Navbar/>
+    <div className='flex'>
     <Sidebar/>
+    <ComplaintSection/>
+    </div>
+    
     </>
   );
 }
