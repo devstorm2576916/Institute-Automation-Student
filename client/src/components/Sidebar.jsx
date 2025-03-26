@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { IoMenuOutline } from "react-icons/io5";
+import { IoMdArrowDropright } from "react-icons/io";
+import { IoMdArrowDropdown } from "react-icons/io";
 
 const Sidebar = () => {
     const [isOpen, setIsOpen] = useState(true);
@@ -23,17 +25,8 @@ const Sidebar = () => {
         <>
             {!isOpen && 
                 <>
-                    <div style={{padding: '10px'}}>
-                        <button
-                            onClick={() => setIsOpen(!isOpen)}
-                            style={{
-                                background: 'none',
-                                border: 'none',
-                                fontSize: '24px',
-                                cursor: 'pointer',
-                                marginRight: '10px',
-                            }}
-                        >
+                    <div className="p-2">
+                        <button onClick={() => setIsOpen(!isOpen)} className="bg-transparent border-none text-2xl cursor-pointer mr-2">
                             <IoMenuOutline />
                         </button>
                     </div>
@@ -41,106 +34,80 @@ const Sidebar = () => {
             }
             {isOpen && 
                 <>
-                    <div
-                        style={{
-                            width: '250px',
-                            height: '100vh',
-                            backgroundColor: '#f5f5f5',
-                            borderRight: '2px solid #ccc',
-                            padding: '10px',
-                            fontFamily: 'sans-serif',
-                        }}
-                    >
-                        <button
-                            onClick={() => setIsOpen(!isOpen)}
-                            style={{
-                                background: 'none',
-                                border: 'none',
-                                fontSize: '24px',
-                                cursor: 'pointer',
-                                marginRight: '10px',
-                            }}
-                        >
+                    <div className="w-[250px] h-screen bg-gray-100 border-r-2 border-gray-300 p-2 font-sans">
+                        <button onClick={() => setIsOpen(!isOpen)} className="bg-transparent border-none text-2xl cursor-pointer mr-2">
                             <IoMenuOutline />
                         </button>
-                        <ul style={{ listStyleType: 'none', paddingLeft: '20px', marginTop: '20px' }}>
+                        <ul className="list-none pl-5 mt-5">
                             <li>
-                                <span 
-                                    style={{ fontWeight: 'bold', color: '#333', cursor: 'pointer' }}
-                                    onClick={() => toggleSection('course')}
-                                >
-                                    {expandedSections.course ? '▼' : '▶'} Course
+                                <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('course')}>
+                                    {expandedSections.course ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Course
                                 </span>
                                 {expandedSections.course && (
-                                    <ul style={{ paddingLeft: '20px' }}>
+                                    <ul className="pl-5">
                                         <li>Registration</li>
-                                        <li className="list-unstyled">
-                                            <span 
-                                                style={{ fontWeight: 'bold', color: '#333', cursor: 'pointer' }}
-                                                onClick={() => toggleSection('activeCourses')}
-                                            >
-                                                {expandedSections.activeCourses ? '▼' : '▶'} Active Courses
+                                        <li>
+                                            <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('activeCourses')}>
+                                                {expandedSections.activeCourses ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Active Courses
                                             </span>
                                             {expandedSections.activeCourses && (
-                                                <ul style={{ paddingLeft: '20px' }}>
-                                                    <li>Assignment</li>
-                                                    <li>Attendance</li>
-                                                    <li>Drop Course</li>
-                                                    <li>Announcements</li>
-                                                    <li>Feedback</li>
-                                                </ul>
+                                            <ul className="pl-5">
+                                                <li>Assignment</li>
+                                                <li>Attendance</li>
+                                                <li>Drop Course</li>
+                                                <li>Announcements</li>
+                                                <li>Feedback</li>
+                                            </ul>
                                             )}
                                         </li>
                                     </ul>
                                 )}
                             </li>
-                            <li style={{ marginTop: '10px' }}>
-                                <span 
-                                    style={{ fontWeight: 'bold', color: '#333', cursor: 'pointer' }}
-                                    onClick={() => toggleSection('document')}
-                                >
-                                    {expandedSections.document ? '▼' : '▶'} Document
-                                </span>
-                                {expandedSections.document && (
-                                    <ul style={{ paddingLeft: '20px' }}>
-                                        <li>Transcript</li>
-                                        <li>ID</li>
-                                        <li>Passport</li>
-                                        <li>Bonafide</li>
-                                        <li>Fee Receipt</li>
-                                    </ul>
-                                )}
+                            <li className="mt-2">
+                            <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('document')}>
+                                {expandedSections.document ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Document
+                            </span>
+                            {expandedSections.document && (
+                                <ul className="pl-5">
+                                    <li>Transcript</li>
+                                    <li>ID</li>
+                                    <li>Passport</li>
+                                    <li>Bonafide</li>
+                                    <li>Fee Receipt</li>
+                                </ul>
+                            )}
                             </li>
-                            <li style={{ marginTop: '10px' }}>
-                                <span 
-                                    style={{ fontWeight: 'bold', color: '#333', cursor: 'pointer' }}
-                                    onClick={() => toggleSection('hostel')}
-                                >
-                                    {expandedSections.hostel ? '▼' : '▶'} Hostel
-                                </span>
-                                {expandedSections.hostel && (
-                                    <ul style={{ paddingLeft: '20px' }}>
-                                        <li>Leave</li>
-                                        <li>Mess</li>
-                                        <li>Hostel Transfer</li>
-                                    </ul>
-                                )}
+                            <li className="mt-2">
+                            <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('hostel')}>
+                                {expandedSections.hostel ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Hostel
+                            </span>
+                            {expandedSections.hostel && (
+                                <ul className="pl-5">
+                                    <li>Leave</li>
+                                    <li>Mess</li>
+                                    <li>Hostel Transfer</li>
+                                </ul>
+                            )}
                             </li>
-                            <li style={{ marginTop: '10px' }}>
-                                <span 
-                                    style={{ fontWeight: 'bold', color: '#333', cursor: 'pointer' }}
-                                    onClick={() => toggleSection('complaint')}
-                                >
-                                    {expandedSections.complaint ? '▼' : '▶'} Complaint
-                                </span>
+                            <li className="mt-2">
+                            <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('complaint')}>
+                                {expandedSections.complaint ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Complaint
+                            </span>
+                            {expandedSections.complaint && (
+                                <ul className="pl-5">
+                                    <li>Complaint Form</li>
+                                </ul>
+                            )}
                             </li>
-                            <li style={{ marginTop: '10px' }}>
-                                <span 
-                                    style={{ fontWeight: 'bold', color: '#333', cursor: 'pointer' }}
-                                    onClick={() => toggleSection('profile')}
-                                >
-                                    {expandedSections.profile ? '▼' : '▶'} Profile
-                                </span>
+                            <li className="mt-2">
+                            <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('profile')}>
+                                {expandedSections.profile ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Profile
+                            </span>
+                            {expandedSections.profile && (
+                                <ul className="pl-5">
+                                    <li>View Profile</li>
+                                </ul>
+                            )}
                             </li>
                         </ul>
                     </div>
