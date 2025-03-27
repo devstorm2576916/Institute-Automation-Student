@@ -1,33 +1,58 @@
 import React, { useState } from 'react';
-import DocumentLayout from './components/DocumentLayout';
+import DocumentLayout from '../../components/documentSection/DocumentLayout';
+import PDFPreview from '../../components/documentSection/PDFPreview';
 
 const FeeReceiptPage = () => {
+    const [isLoading, setIsLoading] = useState(false);
+    const [pdfUrl, setPdfUrl] = useState(null);
     const [selectedSemester, setSelectedSemester] = useState('');
+
+    const handleGenerate = async () => {
+        if (!selectedSemester) return;
+        setIsLoading(true);
+        try {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            setPdfUrl('/sample-receipt.pdf');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <DocumentLayout title="Fee Receipt">
-            <div className="space-y-6">
-                {/* Semester Selection */}
-                <div className="max-w-xs">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Select Semester
-                    </label>
+            <div className="max-w-6xl mx-auto space-y-6">
+                <div className="w-full max-w-xs mx-auto mb-8">
                     <select
                         value={selectedSemester}
                         onChange={(e) => setSelectedSemester(e.target.value)}
-                        className="w-full border border-gray-300 rounded-md p-2"
+                        className="select select-bordered w-full"
                     >
-                        <option value="">Choose semester</option>
-                        {/* Add semester options */}
+                        <option value="">Select Semester</option>
+                        {[1,2,3,4,5,6,7,8].map(num => (
+                            <option key={num} value={num}>Semester {num}</option>
+                        ))}
                     </select>
                 </div>
 
-                {/* Receipt List */}
-                <div className="border rounded-lg divide-y">
-                    {/* Receipt items will go here */}
-                    <div className="p-4 text-center text-gray-500">
-                        Select a semester to view receipts
-                    </div>
+                <PDFPreview pdfUrl={pdfUrl} isLoading={isLoading} />
+                
+                <div className="flex justify-center gap-4 pt-4">
+                    <button
+                        onClick={handleGenerate}
+                        disabled={isLoading || !selectedSemester}
+                        className="btn btn-primary min-w-[200px]"
+                    >
+                        {isLoading ? 'Generating...' : 'Generate Receipt'}
+                    </button>
+                    {pdfUrl && (
+                        <a 
+                            href={pdfUrl} 
+                            download 
+                            className="btn btn-accent min-w-[200px]"
+                        >
+                            Download PDF
+                        </a>
+                    )}
                 </div>
             </div>
         </DocumentLayout>
