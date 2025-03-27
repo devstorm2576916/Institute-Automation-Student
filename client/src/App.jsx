@@ -3,6 +3,8 @@ import ComplaintSection from './components/complaintSection';
 import HostelLeave from './components/HostelLeave/HostelLeave';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
+import CourseRegistration from './components/CourseRegistration';
+
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import {
     QueryClient,
@@ -40,7 +42,10 @@ function App() {
                     path: "/hostel/leave",
                     element: <HostelLeave />,
                 },
-                
+                { 
+                    path: "/registration", 
+                    element: <CourseRegistration /> 
+                },
             ],
         },
     ]);
