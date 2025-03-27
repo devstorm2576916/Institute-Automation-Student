@@ -2,6 +2,8 @@ import './App.css';
 import ComplaintSection from './components/complaintSection';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
+import CourseRegistration from './components/CourseRegistration';
+
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import {
     QueryClient,
@@ -35,7 +37,10 @@ function App() {
                     path: "/complaint",
                     element: <ComplaintSection />,
                 },
-                
+                { 
+                    path: "/registration", 
+                    element: <CourseRegistration /> 
+                },
             ],
         },
     ]);
