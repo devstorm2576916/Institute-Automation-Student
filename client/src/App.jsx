@@ -1,5 +1,6 @@
 import './App.css';
 import ComplaintSection from './components/complaintSection';
+import HostelLeave from './components/HostelLeave/HostelLeave';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
@@ -34,6 +35,10 @@ function App() {
                 {
                     path: "/complaint",
                     element: <ComplaintSection />,
+                },
+                {
+                    path: "/hostel/leave",
+                    element: <HostelLeave />,
                 },
                 
             ],
