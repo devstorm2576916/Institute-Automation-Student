@@ -46,17 +46,6 @@ function HostelLeave() {
 
     return (
         <div className="page-wrapper">
-            <nav className="navbar">
-                <h1 className="navbar-title">IITG Automation System</h1>
-                <div className="profile-container">
-                    <img
-                        src="src\assets\default_profile_photo.png"
-                        alt="Profile"
-                        className="profile-image"
-                    />
-                    <button className="logout-button">Logout</button>
-                </div>
-            </nav>
 
             <div className="main-container">
                 <h2 className="heading">Requests</h2>

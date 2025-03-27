@@ -88,7 +88,11 @@ const Sidebar = () => {
                             </span>
                             {expandedSections.hostel && (
                                 <ul className="pl-5">
-                                    <li>Leave</li>
+                                    <li>
+                                        <Link to="/hostel/leave" className="text-blue-500 hover:underline">
+                                            Leave
+                                        </Link>
+                                    </li>
                                     <li>Mess</li>
                                     <li>Hostel Transfer</li>
                                 </ul>
@@ -100,7 +104,11 @@ const Sidebar = () => {
                             </span>
                             {expandedSections.complaint && (
                                 <ul className="pl-5">
-                                    <li>Complaint Form</li>
+                                    <li>
+                                        <Link to="/complaint" className="text-blue-500 hover:underline">
+                                            Complaint Form
+                                        </Link>
+                                    </li>
                                 </ul>
                             )}
                             </li>
