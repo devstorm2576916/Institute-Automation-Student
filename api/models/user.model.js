@@ -1,27 +1,3 @@
-// import mongoose from "mongoose";
-// const { Schema } = mongoose;
-
-// const userSchema = new Schema({
-//     username: {
-//         type: String,
-//         required: true,
-//         unique: true,
-//     },
-//     email: {
-//         type: String,
-//         required: true,
-//         unique: true,
-//     },
-//     password: {
-//         type: String,
-//         required: true,
-//     },
-// }, {
-//     timestamps: true
-// });
-
-// export default mongoose.model('User', userSchema);
-
 import mongoose from "mongoose";
 
 // Admin Model
@@ -53,6 +29,7 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  refreshToken:{type:String,required:true},
   contactNo: { type: String },
   profilePicture: { type: String },
   address: { type: String },
@@ -279,25 +256,20 @@ const feeReceiptSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
-// Remaining models will follow the same pattern...
-
-// Export all models
-module.exports = {
-  Admin: mongoose.model('Admin', adminSchema),
-  Administrator: mongoose.model('Administrator', administratorSchema),
-  User: mongoose.model('User', userSchema),
-  Student: mongoose.model('Student', studentSchema),
-  Faculty: mongoose.model('Faculty', facultySchema),
-  Course: mongoose.model('Course', courseSchema),
-  Assignment: mongoose.model('Assignment', assignmentSchema),
-  Submission: mongoose.model('Submission', submissionSchema),
-  AssignmentGrade: mongoose.model('AssignmentGrade', assignmentGradeSchema),
-  Grade: mongoose.model('Grade', gradeSchema),
-  Notification: mongoose.model('Notification', notificationSchema),
-  RegistrationRequest: mongoose.model('RegistrationRequest', registrationRequestSchema),
-  AttendanceRecord: mongoose.model('AttendanceRecord', attendanceRecordSchema),
-  IDCard: mongoose.model('IDCard', idCardSchema),
-  Transcript: mongoose.model('Transcript', transcriptSchema),
-  BonafideCertificate: mongoose.model('BonafideCertificate', bonafideCertificateSchema),
-  FeeReceipt: mongoose.model('FeeReceipt', feeReceiptSchema)
-};
+export const Admin = mongoose.model('Admin', adminSchema);
+export const Administrator = mongoose.model('Administrator', administratorSchema);
+export const User = mongoose.model('User', userSchema);
+export const Student = mongoose.model('Student', studentSchema);
+export const Faculty = mongoose.model('Faculty', facultySchema);
+export const Course = mongoose.model('Course', courseSchema);
+export const Assignment = mongoose.model('Assignment', assignmentSchema);
+export const Submission = mongoose.model('Submission', submissionSchema);
+export const AssignmentGrade = mongoose.model('AssignmentGrade', assignmentGradeSchema);
+export const Grade = mongoose.model('Grade', gradeSchema);
+export const Notification = mongoose.model('Notification', notificationSchema);
+export const RegistrationRequest = mongoose.model('RegistrationRequest', registrationRequestSchema);
+export const AttendanceRecord = mongoose.model('AttendanceRecord', attendanceRecordSchema);
+export const IDCard = mongoose.model('IDCard', idCardSchema);
+export const Transcript = mongoose.model('Transcript', transcriptSchema);
+export const BonafideCertificate = mongoose.model('BonafideCertificate', bonafideCertificateSchema);
+export const FeeReceipt = mongoose.model('FeeReceipt', feeReceiptSchema);
