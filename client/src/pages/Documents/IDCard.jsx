@@ -1,36 +1,54 @@
-import React from 'react';
-import DocumentLayout from './components/DocumentLayout';
+import React, { useState } from 'react';
+import DocumentLayout from '../../components/documentSection/DocumentLayout';
+import PDFPreview from '../../components/documentSection/PDFPreview';
 
 const IDCardPage = () => {
+    const [isLoading, setIsLoading] = useState(false);
+    const [pdfUrl, setPdfUrl] = useState(null);
+
+    // Hardcoded student data
+    const studentInfo = {
+        name: "JOHN SMITH DOE",
+        rollNo: "220103045",
+        programme: "BTech",
+        department: "Computer Science and Engineering",
+        validUntil: "2024-05-31",
+        bloodGroup: "B+",
+        emergencyContact: "+91 9876543210"
+    };
+
+    const handleGenerate = async () => {
+        setIsLoading(true);
+        try {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            setPdfUrl('/sample-idcard.pdf');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <DocumentLayout title="ID Card">
-            <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Photo Upload Section */}
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                        <div className="text-center">
-                            <label className="block text-gray-700 text-sm font-bold mb-2">
-                                Upload Photo
-                            </label>
-                            <input type="file" className="hidden" accept="image/*" />
-                            <button className="bg-blue-500 text-white px-4 py-2 rounded">
-                                Choose File
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Preview Section */}
-                    <div className="border rounded-lg p-4">
-                        <h3 className="font-semibold mb-2">ID Card Preview</h3>
-                        {/* Preview content will go here */}
-                    </div>
-                </div>
-
-                {/* Generate Button */}
-                <div className="flex justify-end">
-                    <button className="bg-green-500 text-white px-6 py-2 rounded">
-                        Generate ID Card
+            <div className="max-w-6xl mx-auto space-y-6">
+                <PDFPreview pdfUrl={pdfUrl} isLoading={isLoading} />
+                
+                <div className="flex justify-center gap-4 pt-4">
+                    <button
+                        onClick={handleGenerate}
+                        disabled={isLoading}
+                        className="btn btn-primary min-w-[200px]"
+                    >
+                        {isLoading ? 'Generating...' : 'Generate ID Card'}
                     </button>
+                    {pdfUrl && (
+                        <a 
+                            href={pdfUrl} 
+                            download 
+                            className="btn btn-accent min-w-[200px]"
+                        >
+                            Download PDF
+                        </a>
+                    )}
                 </div>
             </div>
         </DocumentLayout>
