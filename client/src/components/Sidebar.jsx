@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { IoMenuOutline } from "react-icons/io5";
 import { IoMdArrowDropright } from "react-icons/io";
 import { IoMdArrowDropdown } from "react-icons/io";
+import { Link } from 'react-router-dom';
 
 const Sidebar = () => {
     const [isOpen, setIsOpen] = useState(true);
@@ -45,7 +46,11 @@ const Sidebar = () => {
                                 </span>
                                 {expandedSections.course && (
                                     <ul className="pl-5">
-                                        <li>Registration</li>
+                                        <li>
+                                            <Link to="/registration" className="text-blue-500 hover:underline">
+                                                Registration
+                                            </Link>
+                                        </li>
                                         <li>
                                             <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('activeCourses')}>
                                                 {expandedSections.activeCourses ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Active Courses
