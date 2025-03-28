@@ -61,8 +61,8 @@ const Sidebar = () => {
                                                 <li>
                                                 <Link to="/attendancelanding" className="text-blue-500 hover:underline">
                                                     Attendance
-                                                </Link>               
-                                                </li>                                 
+                                                </Link>
+                                                </li>
                                                 <li>Drop Course</li>
                                                 <li>Announcements</li>
                                                 <li>Feedback</li>
