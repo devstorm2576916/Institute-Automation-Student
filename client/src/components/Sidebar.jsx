@@ -58,7 +58,11 @@ const Sidebar = () => {
                                             {expandedSections.activeCourses && (
                                             <ul className="pl-5">
                                                 <li>Assignment</li>
-                                                <li>Attendance</li>
+                                                <li>
+                                                <Link to="/attendancelanding" className="text-blue-500 hover:underline">
+                                                    Attendance
+                                                </Link>               
+                                                </li>                                 
                                                 <li>Drop Course</li>
                                                 <li>Announcements</li>
                                                 <li>Feedback</li>

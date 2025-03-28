@@ -4,6 +4,8 @@ import HostelLeave from './components/HostelLeave/HostelLeave';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import CourseRegistration from './components/CourseRegistration';
+import AttendanceLandingPage from './components/Attendance/AttendanceLandingPage';
+import AttendanceCoursePage from './components/Attendance/AttendanceCoursePage';
 
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import {
@@ -45,6 +47,14 @@ function App() {
                 { 
                     path: "/registration", 
                     element: <CourseRegistration /> 
+                },
+                {
+                    path:"/attendancelanding",
+                    element: <AttendanceLandingPage/>
+                },
+                {
+                    path:"/course/:id",
+                    element: <AttendanceCoursePage/>
                 },
             ],
         },
