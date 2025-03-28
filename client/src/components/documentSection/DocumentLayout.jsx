@@ -16,7 +16,10 @@ const DocumentLayout = ({ children, title }) => {
             </div>
 
             {/* Title */}
-            <h1 className="text-2xl font-bold mb-6">{title}</h1>
+            <h1 className="text-4xl font-extrabold text-center text-blue-900 mb-6">
+                {title}
+                <div className="w-16 h-1 bg-indigo-500 mx-auto mt-2 rounded-full"></div>
+            </h1>
 
             {/* Main Content */}
             <div className="bg-white rounded-lg shadow-md p-6">
