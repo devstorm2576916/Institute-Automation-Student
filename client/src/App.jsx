@@ -6,6 +6,8 @@ import Sidebar from './components/Sidebar';
 import CourseRegistration from './components/CourseRegistration';
 import AttendanceLandingPage from './components/Attendance/AttendanceLandingPage';
 import AttendanceCoursePage from './components/Attendance/AttendanceCoursePage';
+import CourseFeedbackSelectionPage from './components/courseFeedback/courseFeedbackSelectionPage';
+import CourseFeedbackFormPage from './components/courseFeedback/courseFeedbackFormPage';
 
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import {
@@ -55,6 +57,14 @@ function App() {
                 {
                     path:"/course/:id",
                     element: <AttendanceCoursePage/>
+                },
+                {
+                    path: "/courseFeedback",
+                    element: <CourseFeedbackSelectionPage/>
+                },
+                {
+                    path: "/courseFeedback/selectedCourse",
+                    element: <CourseFeedbackFormPage/>
                 },
             ],
         },
