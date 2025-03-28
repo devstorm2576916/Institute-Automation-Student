@@ -65,7 +65,9 @@ const Sidebar = () => {
                                                 </li>                                 
                                                 <li>Drop Course</li>
                                                 <li>Announcements</li>
-                                                <li>Feedback</li>
+                                                <li>
+                                                    <Link to="/courseFeedback" className="text-blue-500 hover:underline">Feedback</Link>
+                                                </li>
                                             </ul>
                                             )}
                                         </li>
