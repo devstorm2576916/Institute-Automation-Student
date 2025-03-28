@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { IoMenuOutline } from "react-icons/io5";
 import { IoMdArrowDropright } from "react-icons/io";
@@ -61,8 +62,8 @@ const Sidebar = () => {
                                                 <li>
                                                 <Link to="/attendancelanding" className="text-blue-500 hover:underline">
                                                     Attendance
-                                                </Link>               
-                                                </li>                                 
+                                                </Link>
+                                                </li>
                                                 <li>Drop Course</li>
                                                 <li>Announcements</li>
                                                 <li>
@@ -80,11 +81,36 @@ const Sidebar = () => {
                             </span>
                             {expandedSections.document && (
                                 <ul className="pl-5">
-                                    <li>Transcript</li>
-                                    <li>ID</li>
-                                    <li>Passport</li>
-                                    <li>Bonafide</li>
-                                    <li>Fee Receipt</li>
+                                    <li>
+                                        <Link to="/documents" className="text-gray-700 hover:text-gray-900">
+                                            All Documents
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link to="/documents/transcript" className="text-gray-700 hover:text-gray-900">
+                                            Transcript
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link to="/documents/idcard" className="text-gray-700 hover:text-gray-900">
+                                            ID Card
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link to="/documents/passport" className="text-gray-700 hover:text-gray-900">
+                                            Passport
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link to="/documents/bonafide" className="text-gray-700 hover:text-gray-900">
+                                            Bonafide
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link to="/documents/feereceipt" className="text-gray-700 hover:text-gray-900">
+                                            Fee Receipt
+                                        </Link>
+                                    </li>
                                 </ul>
                             )}
                             </li>
