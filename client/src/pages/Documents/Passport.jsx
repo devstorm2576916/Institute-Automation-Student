@@ -46,11 +46,11 @@ const PassportPage = () => {
     const renderApplicationForm = () => (
         <form onSubmit={handleSubmit} className="space-y-8">
             {/* Form Header */}
-            <div className="card bg-base-200 border-2 border-base-300">
+            <div className="card bg-base-200  border-base-300">
                 <div className="card-body">
                     <h2 className="card-title text-sm">FORM NO. CERTI/02</h2>
-                    <p className="text-xs">APPLICATION FORM FOR PASSPORT RELATED CERTIFICATES</p>
-                    <p className="text-xs italic">Please fill up the form in capital letters</p>
+                    <p className="text-xs">Application Form For Passport Related Certificates</p>
+                    <p className="text-xs italic">*Please fill up the form in capital letters</p>
                 </div>
             </div>
 
@@ -65,7 +65,7 @@ const PassportPage = () => {
                             <input
                                 type="radio"
                                 name="applicationType"
-                                className="radio radio-primary"
+                                className="radio-primary"
                                 value={type}
                                 checked={formData.applicationType === type}
                                 onChange={handleInputChange}
@@ -100,7 +100,7 @@ const PassportPage = () => {
                     </label>
                     <select
                         name="semester"
-                        className="select select-bordered w-full focus:outline-none focus:border-primary"
+                        className="select select-bordered w-full border-b-2 focus:outline-none focus:border-primary"
                         value={formData.semester}
                         onChange={handleInputChange}
                     >
@@ -119,12 +119,21 @@ const PassportPage = () => {
                     <input
                         type="text"
                         name="placeOfBirth"
-                        className="input input-bordered w-full focus:outline-none focus:border-primary"
+                        className="
+                        input
+                        w-full
+                        border-b-2
+                        border-base-300
+                        focus:border-primary
+                        focus:outline-none
+                        rounded-none
+                        bg-transparent
+                        "
                         value={formData.placeOfBirth}
                         onChange={handleInputChange}
                         placeholder="Enter your place of birth"
                     />
-                </div>
+                    </div>
             </div>
 
             {/* Mode Selection */}
@@ -237,12 +246,12 @@ const PassportPage = () => {
             <div className="flex justify-end gap-4 mt-8">
                 <button 
                     type="button" 
-                    className="btn btn-outline hover:bg-base-200"
+                    className="px-6 py-2 rounded-lg text-primary-content shadow-md btn btn-outline hover:bg-base-300 "
                     onClick={() => setFormData({})}
                 >
                     Reset
                 </button>
-                <button type="submit" className="btn btn-primary">
+                <button type="submit" className="px-6 py-2 rounded-lg text-primary-content shadow-md btn btn-primary ">
                     Submit Application
                 </button>
             </div>
