@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { IoMenuOutline } from "react-icons/io5";
 import { IoMdArrowDropright } from "react-icons/io";
@@ -46,7 +47,11 @@ const Sidebar = () => {
                                 </span>
                                 {expandedSections.course && (
                                     <ul className="pl-5">
-                                        <li>Registration</li>
+                                        <li>
+                                            <Link to="/registration" className="text-blue-500 hover:underline">
+                                                Registration
+                                            </Link>
+                                        </li>
                                         <li>
                                             <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('activeCourses')}>
                                                 {expandedSections.activeCourses ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Active Courses
@@ -54,7 +59,11 @@ const Sidebar = () => {
                                             {expandedSections.activeCourses && (
                                             <ul className="pl-5">
                                                 <li>Assignment</li>
-                                                <li>Attendance</li>
+                                                <li>
+                                                <Link to="/attendancelanding" className="text-blue-500 hover:underline">
+                                                    Attendance
+                                                </Link>               
+                                                </li>                                 
                                                 <li>Drop Course</li>
                                                 <li>Announcements</li>
                                                 <li>Feedback</li>
@@ -109,7 +118,11 @@ const Sidebar = () => {
                             </span>
                             {expandedSections.hostel && (
                                 <ul className="pl-5">
-                                    <li>Leave</li>
+                                    <li>
+                                        <Link to="/hostel/leave" className="text-blue-500 hover:underline">
+                                            Leave
+                                        </Link>
+                                    </li>
                                     <li>Mess</li>
                                     <li>Hostel Transfer</li>
                                 </ul>
@@ -121,7 +134,11 @@ const Sidebar = () => {
                             </span>
                             {expandedSections.complaint && (
                                 <ul className="pl-5">
-                                    <li>Complaint Form</li>
+                                    <li>
+                                        <Link to="/complaint" className="text-blue-500 hover:underline">
+                                            Complaint Form
+                                        </Link>
+                                    </li>
                                 </ul>
                             )}
                             </li>

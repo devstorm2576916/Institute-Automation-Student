@@ -1,9 +1,18 @@
+
 import './App.css';
 import ComplaintSection from './components/complaintSection';
+import HostelLeave from './components/HostelLeave/HostelLeave';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
+import CourseRegistration from './components/CourseRegistration';
+import AttendanceLandingPage from './components/Attendance/AttendanceLandingPage';
+import AttendanceCoursePage from './components/Attendance/AttendanceCoursePage';
+
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+    QueryClient,
+    QueryClientProvider,
+} from '@tanstack/react-query';
 
 // Import pages
 import Documents from './pages/Documents/index.jsx';
@@ -12,6 +21,7 @@ import IDCardPage from './pages/Documents/IDCard.jsx';
 import PassportPage from './pages/Documents/Passport.jsx';
 import BonafidePage from './pages/Documents/Bonafide.jsx';
 import FeeReceiptPage from './pages/Documents/FeeReceipt.jsx';
+
 
 const queryClient = new QueryClient()
 function App() {
@@ -41,6 +51,22 @@ function App() {
                     element: <ComplaintSection />,
                 },
                 {
+                    path: "/hostel/leave",
+                    element: <HostelLeave />,
+                },
+                { 
+                    path: "/registration", 
+                    element: <CourseRegistration /> 
+                },
+                {
+                    path:"/attendancelanding",
+                    element: <AttendanceLandingPage/>
+                },
+                {
+                    path:"/course/:id",
+                    element: <AttendanceCoursePage/>
+                },
+                  {
                     path: "/documents",
                     element: <Documents />,
                     children: [
