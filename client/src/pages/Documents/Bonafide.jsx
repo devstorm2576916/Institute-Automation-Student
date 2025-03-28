@@ -46,10 +46,10 @@ const BonafidePage = () => {
     const renderApplicationForm = () => (
         <form onSubmit={handleSubmit} className="space-y-8">
             {/* Form Header */}
-            <div className="card bg-base-200 border-2 border-base-300">
+            <div className="card bg-base-200 ">
                 <div className="card-body">
-                    <h2 className="card-title text-sm">BONAFIDE CERTIFICATE APPLICATION</h2>
-                    <p className="text-xs italic">Please verify your information below</p>
+                    <h2 className="card-title text-m">Bonafide Certificate Application</h2>
+                    <p className="text-xs italic">*Please verify your information below</p>
                 </div>
             </div>
 
@@ -57,7 +57,7 @@ const BonafidePage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 card bg-base-100 shadow-lg border-2 border-base-200 p-6">
                 <InfoDisplay label="Name" value={studentInfo.name} />
                 <InfoDisplay label="Roll No" value={studentInfo.rollNo} />
-                <InfoDisplay label="S/o / D/o" value={studentInfo.fatherName} />
+                <InfoDisplay label="Son of / Daughter of" value={studentInfo.fatherName} />
                 <InfoDisplay label="Enrolled Year" value={studentInfo.enrolledYear} />
                 <InfoDisplay label="Programme" value={studentInfo.programme} />
                 <InfoDisplay label="Department" value={studentInfo.department} />
@@ -71,11 +71,11 @@ const BonafidePage = () => {
                 {/* Current Semester Selection */}
                 <div className="form-control w-full">
                     <label className="label">
-                        <span className="label-text font-semibold">Current Semester</span>
+                        <span className="label-text font-semibold ">Current Semester</span>
                     </label>
                     <select
                         name="currentSemester"
-                        className="select select-bordered w-full focus:outline-none focus:border-primary"
+                        className="select select-bordered w-full focus:outline-none focus:border-primary border-b-2"
                         value={formData.currentSemester}
                         onChange={handleInputChange}
                     >
@@ -93,7 +93,7 @@ const BonafidePage = () => {
                     </label>
                     <select
                         name="certificateFor"
-                        className="select select-bordered w-full focus:outline-none focus:border-primary"
+                        className="select select-bordered w-full focus:outline-none focus:border-primary border-b-2"
                         value={formData.certificateFor}
                         onChange={handleInputChange}
                     >
@@ -109,12 +109,12 @@ const BonafidePage = () => {
             <div className="flex justify-end gap-4 mt-8">
                 <button 
                     type="button" 
-                    className="btn btn-outline hover:bg-base-200"
+                    className="px-6 py-2 rounded-lg text-primary-content shadow-md btn btn-outline hover:bg-base-300 "
                     onClick={() => setFormData({})}
                 >
                     Reset
                 </button>
-                <button type="submit" className="btn btn-primary">
+                <button type="submit" className="px-6 py-2 rounded-lg text-primary-content shadow-md btn btn-primary ">
                     Submit Application
                 </button>
             </div>
