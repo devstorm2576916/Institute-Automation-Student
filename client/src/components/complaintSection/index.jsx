@@ -98,7 +98,7 @@ const ComplaintSection = () => {
 
       {/* Main Content */}
       <div className="bg-gray-50 p-6 rounded-lg drop-shadow-md w-[98%] min-h-full mb-4 m-auto">
-        {activePage === "New Complaint" && !showNewComplaintForm && (
+        {(activePage === "New Complaint" && !showNewComplaintForm) ? (
           <div className="max-w-md mx-auto p-6 bg-white shadow-md rounded-lg">
             <label className="block font-semibold mb-2">Register to:</label>
             <select
@@ -134,9 +134,9 @@ const ComplaintSection = () => {
               GO
             </button>
           </div>
-        )}
+        ):""}
 
-        {activePage === "New Complaint" && showNewComplaintForm && (
+        {(activePage === "New Complaint" && showNewComplaintForm) ? (
           <div className="relative">
             {/* Back Button */}
             <button
@@ -148,14 +148,14 @@ const ComplaintSection = () => {
             {/* Render the NewComplaintForm */}
             <NewComplaintForm />
           </div>
-        )}
+        ):""}
 
-        { ((activePage === "My Complaints")
+        { (((activePage === "My Complaints")
          |(activePage === "Pending")
          |(activePage === "In Progress")
          |(activePage === "Resolved")
          |(activePage === "Delete Complaint"))
-          && !selectedComplaint && (
+          && !selectedComplaint) ? (
           <div className="max-w-2xl mx-auto">
             <div className="flex justify-between items-center mb-4">
               <input
@@ -191,20 +191,20 @@ const ComplaintSection = () => {
               <p className="text-gray-600">No complaints found.</p>
             )}
           </div>
-        )}
+        ):""}
 
         {/* Show Complaint Details if a complaint is selected */}
-        {((activePage === "My Complaints")
+        {(((activePage === "My Complaints")
          |(activePage === "Pending")
          |(activePage === "In Progress")
          |(activePage === "Resolved")
-         |(activePage === "Delete Complaint")) && selectedComplaint && (
+         |(activePage === "Delete Complaint")) && selectedComplaint) ?(
           <ComplaintDetails
             complaint={selectedComplaint}
             onBack={handleBackFromDetails}
             role={role}
           />
-        )}
+        ):""}
       </div>
     </div>
   );
