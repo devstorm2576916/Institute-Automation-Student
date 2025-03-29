@@ -100,7 +100,7 @@ const ComplaintSection = () => {
       <div className="bg-gray-50 p-6 rounded-lg drop-shadow-md w-[98%] min-h-full mb-4 m-auto">
         {activePage === "New Complaint" && !showNewComplaintForm && (
           <div className="max-w-md mx-auto p-6 bg-white shadow-md rounded-lg">
-            <label className="block font-semibold mb-2">Register complaint to:</label>
+            <label className="block font-semibold mb-2">Register to:</label>
             <select
               className="w-full p-2 border rounded-md"
               value={department}
