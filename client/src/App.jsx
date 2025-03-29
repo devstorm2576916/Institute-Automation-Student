@@ -23,6 +23,9 @@ import IDCardPage from './pages/Documents/IDCard.jsx';
 import PassportPage from './pages/Documents/Passport.jsx';
 import BonafidePage from './pages/Documents/Bonafide.jsx';
 import FeeReceiptPage from './pages/Documents/FeeReceipt.jsx';
+import AssignmentLanding from './components/Assignment/AssignmentLanding.jsx';
+import AssignmentList from './components/Assignment/AssignmentList.jsx';
+import AssignmentDetail from './components/Assignment/AssignmentDetails.jsx';
 
 
 const queryClient = new QueryClient()
@@ -63,6 +66,18 @@ function App() {
                 { 
                     path: "/registration", 
                     element: <CourseRegistration /> 
+                },
+                {
+                    path:"/assigngmentlanding",
+                    element: <AssignmentLanding/>
+                },
+                {
+                    path:"/course/:courseId/assignment/",
+                    element: <AssignmentList/>
+                },
+                {
+                    path:"/course/:courseId/assignment/:assignmentId",
+                    element: <AssignmentDetail/>
                 },
                 {
                     path:"/attendancelanding",
