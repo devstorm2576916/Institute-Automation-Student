@@ -1,6 +1,7 @@
 import './App.css';
 import ComplaintSection from './components/complaintSection';
 import HostelLeave from './components/HostelLeave/HostelLeave';
+import HostelTransfer from './components/HostelTransfer/HostelTransfer.jsx';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import CourseRegistration from './components/CourseRegistration';
@@ -54,6 +55,10 @@ function App() {
                 {
                     path: "/hostel/leave",
                     element: <HostelLeave />,
+                },
+                {
+                    path: "/hostel/transfer",
+                    element: <HostelTransfer />,
                 },
                 { 
                     path: "/registration", 
