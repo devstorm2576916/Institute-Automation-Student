@@ -1,16 +1,15 @@
 import express from "express";
-import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-
+import authRouter from "../api/routes/auth.route.js";
 const app=express();
 dotenv.config();
 
 app.use(cors({origin:"http://localhost:3000",credentials:true}));
 app.use(express.json());
 app.use(cookieParser());
-
+app.use(authRouter);
 // try{
 //     // console.log(process.env.MONGO_URI)
 //     await mongoose.connect(process.env.MONGO_URI);
@@ -27,6 +26,10 @@ app.use(cookieParser());
 
 //     return res.status(errorStatus).send(errorMessage);
 // })
+
+app.get('/', (req, res) => {
+    res.send('Hello, World!');
+  });
 
 app.listen(8000,()=>{
     console.log(`Backend server is running on port ${8000}`)
