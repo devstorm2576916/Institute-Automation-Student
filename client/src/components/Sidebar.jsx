@@ -126,7 +126,11 @@ const Sidebar = () => {
                                         </Link>
                                     </li>
                                     <li>Mess</li>
-                                    <li>Hostel Transfer</li>
+                                    <li>
+                                        <Link to="/hostel/transfer" className="text-blue-500 hover:underline">
+                                            Transfer
+                                        </Link>
+                                    </li>
                                 </ul>
                             )}
                             </li>
