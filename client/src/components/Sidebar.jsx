@@ -129,7 +129,11 @@ const Sidebar = () => {
                                             Leave
                                         </Link>
                                     </li>
-                                    <li>Mess</li>
+                                    <li>
+                                        <Link to="/hostel/mess" className="text-blue-500 hover:underline">
+                                        Mess
+                                        </Link>
+                                    </li>
                                     <li>
                                         <Link to="/hostel/transfer" className="text-blue-500 hover:underline">
                                             Transfer
