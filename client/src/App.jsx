@@ -9,6 +9,9 @@ import AttendanceLandingPage from './components/Attendance/AttendanceLandingPage
 import AttendanceCoursePage from './components/Attendance/AttendanceCoursePage';
 import CourseFeedbackSelectionPage from './components/courseFeedback/courseFeedbackSelectionPage';
 import CourseFeedbackFormPage from './components/courseFeedback/courseFeedbackFormPage';
+import Mess from './components/HostelMess/Mess.jsx';
+import StudentSubscriptionForm from './components/HostelMess/StudentSubscriptionForm.jsx';
+import AdminSubscriptionRequests from './components/HostelMess/AdminSubscriptionRequests.jsx';
 
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import {
@@ -62,6 +65,20 @@ function App() {
                 {
                     path: "/hostel/transfer",
                     element: <HostelTransfer />,
+                },
+                {
+                    path: "/hostel/mess",
+                    element: <Mess />,
+                    children: [
+                        {
+                            path: "student",
+                            element: <StudentSubscriptionForm />,
+                        },
+                        {
+                            path: "admin",
+                            element: <AdminSubscriptionRequests />,
+                        }
+                    ]
                 },
                 { 
                     path: "/registration", 
