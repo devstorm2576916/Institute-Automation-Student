@@ -30,7 +30,7 @@ const Student = () => {
                     {expandedSections.course && (
                         <ul className="pl-5">
                             <li>
-                                <Link to="/registration" className="text-blue-500 hover:underline">
+                                <Link to="/registration" className="text-gray-700 hover:text-gray-900">
                                     Registration
                                 </Link>
                             </li>
@@ -41,19 +41,27 @@ const Student = () => {
                                 {expandedSections.activeCourses && (
                                 <ul className="pl-5">
                                     <li>
-                                    <Link to="/assigngmentlanding" className="text-blue-500 hover:underline">
+                                    <Link to="/assigngmentlanding" className="text-gray-700 hover:text-gray-900">
                                         Assignment
                                     </Link>
                                     </li>
                                     <li>
-                                    <Link to="/attendancelanding" className="text-blue-500 hover:underline">
+                                    <Link to="/attendancelanding" className="text-gray-700 hover:text-gray-900">
                                         Attendance
                                     </Link>
                                     </li>
-                                    <li>Drop Course</li>
-                                    <li>Announcements</li>
                                     <li>
-                                        <Link to="/courseFeedback" className="text-blue-500 hover:underline">Feedback</Link>
+                                        <Link to="/dropcourse" className="text-gray-700 hover:text-gray-900">
+                                            Drop Course
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link to="/course/:courseId/announcements" className="text-gray-700 hover:text-gray-900">
+                                            Announcements
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link to="/courseFeedback" className="text-gray-700 hover:text-gray-900">Feedback</Link>
                                     </li>
                                 </ul>
                                 )}
@@ -107,17 +115,17 @@ const Student = () => {
                 {expandedSections.hostel && (
                     <ul className="pl-5">
                         <li>
-                            <Link to="/hostel/leave" className="text-blue-500 hover:underline">
+                            <Link to="/hostel/leave" className="text-gray-700 hover:text-gray-900">
                                 Leave
                             </Link>
                         </li>
                         <li>
-                            <Link to="/hostel/mess" className="text-blue-500 hover:underline">
+                            <Link to="/hostel/mess" className="text-gray-700 hover:text-gray-900">
                             Mess
                             </Link>
                         </li>
                         <li>
-                            <Link to="/hostel/transfer" className="text-blue-500 hover:underline">
+                            <Link to="/hostel/transfer" className="text-gray-700 hover:text-gray-900">
                                 Transfer
                             </Link>
                         </li>
@@ -131,7 +139,7 @@ const Student = () => {
                 {expandedSections.complaint && (
                     <ul className="pl-5">
                         <li>
-                            <Link to="/complaint" className="text-blue-500 hover:underline">
+                            <Link to="/complaint" className="text-gray-700 hover:text-gray-900">
                                 Complaint Form
                             </Link>
                         </li>
