@@ -37,7 +37,7 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
                         Delete
                     </button>
                 )}
-                {role === "Admin" && complaint.status === "Pending" && (
+                {role === "NonAcadAdmin" && complaint.status === "Pending" && (
                     <div>
                         <button
                             className="top-4 left-4 bg-green-500 text-white px-2 py-1 rounded-md selection:bg-gray-700"
@@ -47,7 +47,7 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
                         </button>
                     </div>
                 )}
-                 {role === "Admin" && complaint.status === "In Progress" && (
+                 {role === "NonAcadAdmin" && complaint.status === "In Progress" && (
                     <div>
                         <button
                             className="top-4 left-4 bg-green-500 text-white px-2 py-1 rounded-md selection:bg-gray-700"
