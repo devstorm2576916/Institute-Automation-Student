@@ -3,7 +3,7 @@ import ComplaintSection from './components/complaintSection';
 import HostelLeave from './components/HostelLeave/HostelLeave';
 import HostelTransfer from './components/HostelTransfer/HostelTransfer.jsx';
 import Navbar from './components/Navbar';
-import Sidebar from './components/Sidebar';
+import Sidebar from './components/Sidebar/Sidebar';
 import CourseRegistration from './components/CourseRegistration';
 import AttendanceLandingPage from './components/Attendance/AttendanceLandingPage';
 import AttendanceCoursePage from './components/Attendance/AttendanceCoursePage';
@@ -12,6 +12,7 @@ import CourseFeedbackFormPage from './components/courseFeedback/courseFeedbackFo
 import Mess from './components/HostelMess/Mess.jsx';
 import StudentSubscriptionForm from './components/HostelMess/StudentSubscriptionForm.jsx';
 import AdminSubscriptionRequests from './components/HostelMess/AdminSubscriptionRequests.jsx';
+import { useLocation } from "react-router-dom";
 
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import {
@@ -29,27 +30,36 @@ import FeeReceiptPage from './pages/Documents/FeeReceipt.jsx';
 import AssignmentLanding from './components/Assignment/AssignmentLanding.jsx';
 import AssignmentList from './components/Assignment/AssignmentList.jsx';
 import AssignmentDetail from './components/Assignment/AssignmentDetails.jsx';
+import LoginPage from './components/LoginPage/Login.jsx';
 
 
 const queryClient = new QueryClient()
 function App() {
     const Layout = () => {
+        const location = useLocation();
+        const role = location.state?.role;
         return (
+            <>
             <div className="app">
             <QueryClientProvider client={queryClient}>
                 <Navbar />
                 <div style={{ display: 'flex' }}>
-                <Sidebar />
+                <Sidebar role={role} />
                 <div style={{ flexGrow: 1 }}>
                     <Outlet />
                 </div>
                 </div>
             </QueryClientProvider>
             </div>
+            </>
         );
     };
 
     const router = createBrowserRouter([
+        {
+            path: "/login",
+            element: <LoginPage/>,
+        },
         {
             path: "/",
             element: <Layout />,
@@ -134,7 +144,7 @@ function App() {
                         }
                     ]
                 },
-                 {
+                {
                     path: "/courseFeedback",
                     element: <CourseFeedbackSelectionPage/>
                 },
@@ -145,7 +155,6 @@ function App() {
             ],
         },
     ]);
-
     return <RouterProvider router={router} />;
 }
 
