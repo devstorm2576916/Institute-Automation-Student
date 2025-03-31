@@ -1,4 +1,4 @@
-import React, { useEffect,useState } from "react";
+import React, { useEffect, useState } from "react";
 import NewComplaintForm from "./newComplaintForm.jsx"; // Import the NewComplaintForm component
 import ComplaintDetails from "./ComplaintDetails"; // Import the updated ComplaintDetails component
 import complaintHistory from "./complaintHistory.json"; // Import the complaint history data
@@ -74,6 +74,7 @@ const ComplaintSection = () => {
     // Reset the selected complaint when the active page changes
     setSelectedComplaint(null);
   }, [activePage]);
+
   return (
     <div className="flex flex-col h-[100%] border-1 w-[98%] m-2">
       {/* Permanent Navbar */}
