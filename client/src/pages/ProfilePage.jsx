@@ -5,7 +5,7 @@ const StudentProfile = () => {
   const student = {
     rollNumber: "220101125",
     name: "Priyanshu Pratyay",
-    photo: "/student.png", // Place a student image in `public/` folder
+    photo: "/tnmy.png", // Place a student image in `public/` folder
     hostel: "Brahmaputra Hostel",
     branch: "Computer Science & Engineering",
     yearOfJoining: 2021,
