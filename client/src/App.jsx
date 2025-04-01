@@ -1,13 +1,18 @@
 import './App.css';
 import ComplaintSection from './components/complaintSection';
 import HostelLeave from './components/HostelLeave/HostelLeave';
+import HostelTransfer from './components/HostelTransfer/HostelTransfer.jsx';
 import Navbar from './components/Navbar';
-import Sidebar from './components/Sidebar';
+import Sidebar from './components/Sidebar/Sidebar';
 import CourseRegistration from './components/CourseRegistration';
 import AttendanceLandingPage from './components/Attendance/AttendanceLandingPage';
 import AttendanceCoursePage from './components/Attendance/AttendanceCoursePage';
 import CourseFeedbackSelectionPage from './components/courseFeedback/courseFeedbackSelectionPage';
 import CourseFeedbackFormPage from './components/courseFeedback/courseFeedbackFormPage';
+import Mess from './components/HostelMess/Mess.jsx';
+import StudentSubscriptionForm from './components/HostelMess/StudentSubscriptionForm.jsx';
+import AdminSubscriptionRequests from './components/HostelMess/AdminSubscriptionRequests.jsx';
+import { useLocation } from "react-router-dom";
 
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import {
@@ -22,27 +27,42 @@ import IDCardPage from './pages/Documents/IDCard.jsx';
 import PassportPage from './pages/Documents/Passport.jsx';
 import BonafidePage from './pages/Documents/Bonafide.jsx';
 import FeeReceiptPage from './pages/Documents/FeeReceipt.jsx';
+import AssignmentLanding from './components/Assignment/AssignmentLanding.jsx';
+import AssignmentList from './components/Assignment/AssignmentList.jsx';
+import AssignmentDetail from './components/Assignment/AssignmentDetails.jsx';
+import LoginPage from './components/LoginPage/Login.jsx';
+import DropCourse from './components/dropCourse/drop.jsx';
+import CourseAnnouncements from './components/Announcements/CourseAnnouncements.jsx';
+import MyCourses from './components/mycourses/myCourse.jsx';
 
 
 const queryClient = new QueryClient()
 function App() {
     const Layout = () => {
+        const location = useLocation();
+        const role = location.state?.role;
         return (
+            <>
             <div className="app">
             <QueryClientProvider client={queryClient}>
                 <Navbar />
                 <div style={{ display: 'flex' }}>
-                <Sidebar />
+                <Sidebar role={role} />
                 <div style={{ flexGrow: 1 }}>
                     <Outlet />
                 </div>
                 </div>
             </QueryClientProvider>
             </div>
+            </>
         );
     };
 
     const router = createBrowserRouter([
+        {
+            path: "/login",
+            element: <LoginPage/>,
+        },
         {
             path: "/",
             element: <Layout />,
@@ -55,13 +75,55 @@ function App() {
                     path: "/hostel/leave",
                     element: <HostelLeave />,
                 },
+                {
+                    path: "/hostel/transfer",
+                    element: <HostelTransfer />,
+                },
+                {
+                    path: "/hostel/mess",
+                    element: <Mess />,
+                    children: [
+                        {
+                            path: "student",
+                            element: <StudentSubscriptionForm />,
+                        },
+                        {
+                            path: "admin",
+                            element: <AdminSubscriptionRequests />,
+                        }
+                    ]
+                },
                 { 
                     path: "/registration", 
                     element: <CourseRegistration /> 
                 },
                 {
+                    path:"/assigngmentlanding",
+                    element: <AssignmentLanding/>
+                },
+                {
+                    path:"/course/:courseId/assignment/",
+                    element: <AssignmentList/>
+                },
+                {
+                    path:"/course/:courseId/assignment/:assignmentId",
+                    element: <AssignmentDetail/>
+                },
+                {
                     path:"/attendancelanding",
                     element: <AttendanceLandingPage/>
+                },
+                {
+                    path:"/dropcourse",
+                    element: <DropCourse/>
+                },
+                {
+                    path:"/course/:courseId/announcements",
+                    element: <CourseAnnouncements/>
+                },
+                {
+                    path:"/myCourses",
+                    element: <MyCourses/>
                 },
                 {
                     path:"/course/:id",
@@ -97,7 +159,7 @@ function App() {
                         }
                     ]
                 },
-                 {
+                {
                     path: "/courseFeedback",
                     element: <CourseFeedbackSelectionPage/>
                 },
@@ -108,7 +170,6 @@ function App() {
             ],
         },
     ]);
-
     return <RouterProvider router={router} />;
 }
 
