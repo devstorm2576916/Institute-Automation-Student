@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import NewComplaintForm from "./newComplaintForm.jsx"; // Import the NewComplaintForm component
 import ComplaintDetails from "./ComplaintDetails"; // Import the updated ComplaintDetails component
 import complaintHistory from "./complaintHistory.json"; // Import the complaint history data
+import { useOutletContext } from "react-router-dom";
 
 const ComplaintSection = () => {
-  const [role,setRole]= useState("NonAcadAdmin"); // State to track the role of the user
+  const { role } = useOutletContext(); // State to track the role of the user
 
   const [department, setDepartment] = useState("Computer & Comm. Centre");
   const [category, setCategory] = useState("");
@@ -13,7 +14,7 @@ const ComplaintSection = () => {
   const [showNewComplaintForm, setShowNewComplaintForm] = useState(false); // State to control NewComplaintForm visibility
   const [selectedComplaint, setSelectedComplaint] = useState(null); // State to track the selected complaint for details
 
-
+  console.log(role);
   const categories = {
     "Computer & Comm. Centre": [
       "Automation",
@@ -87,7 +88,7 @@ const ComplaintSection = () => {
               }`}
               onClick={(event) => setActivePage(event.target.innerText)}
             >
-              {role==="Student" ? ("My Complaints"):"Pending"}
+              {role==="student" ? ("My Complaints"):"Pending"}
             </li>
             <li
               className={`text-white px-4 py-2 rounded-md p-2 cursor-pointer ${
@@ -95,7 +96,7 @@ const ComplaintSection = () => {
               }`}
               onClick={(event) => setActivePage(event.target.innerText)}
             >
-              {role==="Student" ? ("New Complaint"):"In Progress"}
+              {role==="student" ? ("New Complaint"):"In Progress"}
             </li>
             <li
               className={`text-white px-4 py-2 rounded-md p-2 cursor-pointer ${
@@ -103,7 +104,7 @@ const ComplaintSection = () => {
               }`}
               onClick={(event) => setActivePage(event.target.innerText)}
             >
-              {role==="Student" ? ("Delete Complaint"):"Resolved"}
+              {role==="student" ? ("Delete Complaint"):"Resolved"}
             </li>
           </ul>
         </nav>

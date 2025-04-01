@@ -34,13 +34,19 @@ import LoginPage from './components/LoginPage/Login.jsx';
 import DropCourse from './components/dropCourse/drop.jsx';
 import CourseAnnouncements from './components/Announcements/CourseAnnouncements.jsx';
 import MyCourses from './components/mycourses/myCourse.jsx';
+import { useEffect, useState } from 'react';
 
 
 const queryClient = new QueryClient()
 function App() {
     const Layout = () => {
+        const [role, setRole] = useState("NonAcadAdmin");
         const location = useLocation();
-        const role = location.state?.role;
+        useEffect   (() => {
+            if (location.state?.role) {
+                setRole(location.state.role);
+            }
+        }   , [location.state?.role]);
         return (
             <>
             <div className="app">
@@ -49,7 +55,7 @@ function App() {
                 <div style={{ display: 'flex' }}>
                 <Sidebar role={role} />
                 <div style={{ flexGrow: 1 }}>
-                    <Outlet />
+                    <Outlet context={{role}} />
                 </div>
                 </div>
             </QueryClientProvider>
