@@ -12,6 +12,7 @@ import CourseFeedbackFormPage from './components/courseFeedback/courseFeedbackFo
 import Mess from './components/HostelMess/Mess.jsx';
 import StudentSubscriptionForm from './components/HostelMess/StudentSubscriptionForm.jsx';
 import AdminSubscriptionRequests from './components/HostelMess/AdminSubscriptionRequests.jsx';
+import ProfilePage from './pages/ProfilePage.jsx'
 import { useLocation } from "react-router-dom";
 
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
@@ -167,6 +168,10 @@ function App() {
                     path: "/courseFeedback/selectedCourse",
                     element: <CourseFeedbackFormPage/>
                 },
+                {
+                    path: "/profile",
+                    element: <ProfilePage/>
+                }
             ],
         },
     ]);
