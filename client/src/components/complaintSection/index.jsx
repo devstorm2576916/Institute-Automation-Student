@@ -1,11 +1,12 @@
-import React, { useEffect,useState } from "react";
+import React, { useContext, useEffect,useState } from "react";
 import NewComplaintForm from "./newComplaintForm.jsx"; // Import the NewComplaintForm component
 import ComplaintDetails from "./ComplaintDetails"; // Import the updated ComplaintDetails component
 import complaintHistory from "./complaintHistory.json"; // Import the complaint history data
+import { RoleContext } from "../../context/Rolecontext.jsx";
 
 const ComplaintSection = () => {
-  const [role,setRole]= useState("NonAcadAdmin"); // State to track the role of the user
-
+  const {role}=useContext(RoleContext); // State to track the role of the user
+//   const [role,setRole]=useState("student");
   const [department, setDepartment] = useState("Computer & Comm. Centre");
   const [category, setCategory] = useState("");
   const [activePage, setActivePage] = useState(role==='NonAcadAdmin'?"Pending":"My Complaints");
@@ -86,7 +87,7 @@ const ComplaintSection = () => {
               }`}
               onClick={(event) => setActivePage(event.target.innerText)}
             >
-              {role==="Student" ? ("My Complaints"):"Pending"}
+              {role==="student" ? ("My Complaints"):"Pending"}
             </li>
             <li
               className={`text-white px-4 py-2 rounded-md p-2 cursor-pointer ${
@@ -94,7 +95,7 @@ const ComplaintSection = () => {
               }`}
               onClick={(event) => setActivePage(event.target.innerText)}
             >
-              {role==="Student" ? ("New Complaint"):"In Progress"}
+              {role==="student" ? ("New Complaint"):"In Progress"}
             </li>
             <li
               className={`text-white px-4 py-2 rounded-md p-2 cursor-pointer ${
@@ -102,7 +103,7 @@ const ComplaintSection = () => {
               }`}
               onClick={(event) => setActivePage(event.target.innerText)}
             >
-              {role==="Student" ? ("Delete Complaint"):"Resolved"}
+              {role==="student" ? ("Delete Complaint"):"Resolved"}
             </li>
           </ul>
         </nav>
