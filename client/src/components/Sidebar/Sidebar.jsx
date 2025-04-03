@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { IoMenuOutline } from "react-icons/io5";
 import Student from './Student';
 import Faculty from './Faculty';
 import AcadAdmin from './AcadAdmin';
 import HostelAdmin from './HostelAdmin';
+import { RoleContext } from '../../context/Rolecontext';
 
-const Sidebar = ({ role }) => {
+const Sidebar = () => {
     const [isOpen, setIsOpen] = useState(true);
+    const { role } = useContext(RoleContext);
 
     return (
         <>
@@ -27,8 +29,8 @@ const Sidebar = ({ role }) => {
                         </button>
                     {role === "student" && <Student/>}
                     {role === "faculty" && <Faculty/>}
-                    {role === "academic-admin" && <AcadAdmin/>}
-                    {role === "hostel-admin" && <HostelAdmin/>}
+                    {role === "acadAdmin" && <AcadAdmin/>}
+                    {role === "nonAcadAdmin" && <HostelAdmin/>}
                     </div>
                 </>
             }

@@ -1,0 +1,144 @@
+/* General Container */
+.profileContainer {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  /* Profile Header */
+  .profileHeader {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-bottom: 2px solid #d9d9d9;
+    padding-bottom: 20px;
+  }
+  
+  /* Profile Image */
+  .profilePhoto {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    border: 3px solid #007bff;
+    object-fit: cover;
+    box-shadow: 0 3px 10px rgba(0, 123, 255, 0.2);
+  }
+  
+  /* Profile Info */
+  .profileInfo {
+    flex-grow: 1;
+  }
+  
+  .profileInfo h1 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: bold;
+    color: #222;
+  }
+  
+  /* Keeping only labels in black, values in blue */
+  .profileInfo p {
+    margin: 6px 0;
+    font-size: 16px;
+    color: #000; /* Labels remain black */
+  }
+  
+  .profileInfo p strong {
+    font-weight: bold;
+    color: #000; /* Ensure labels remain black */
+  }
+  
+  .profileInfo p span {
+    font-weight: normal;
+  }
+  
+  /* Faculty Section */
+  .facultySection {
+    margin-top: 30px;
+    padding-top: 10px;
+  }
+  
+  .facultySection h2 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+    border-bottom: 3px solid #007bff;
+    display: inline-block;
+    padding-bottom: 5px;
+  }
+  
+  .facultySection ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .facultySection li {
+    font-size: 16px;
+    color: #444;
+    padding: 5px 0;
+  }
+  
+  /* Course Section */
+  .courseSection {
+    margin-top: 30px;
+  }
+  
+  .courseSection h2 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    border-bottom: 3px solid #007bff;
+    display: inline-block;
+    padding-bottom: 5px;
+  }
+  
+  /* Course Table */
+  .courseSection table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  .courseSection th,
+  .courseSection td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+    font-size: 15px;
+  }
+  
+  .courseSection th {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+  }
+  
+  .courseSection tr:hover {
+    background-color: #f1f9ff;
+    transition: 0.3s;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 600px) {
+    .profileHeader {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .profileInfo {
+      text-align: center;
+    }
+  
+    .courseSection table {
+      font-size: 14px;
+    }
+  }
+  

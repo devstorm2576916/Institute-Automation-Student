@@ -12,7 +12,7 @@ import CourseFeedbackFormPage from './components/courseFeedback/courseFeedbackFo
 import Mess from './components/HostelMess/Mess.jsx';
 import StudentSubscriptionForm from './components/HostelMess/StudentSubscriptionForm.jsx';
 import AdminSubscriptionRequests from './components/HostelMess/AdminSubscriptionRequests.jsx';
-import { useLocation } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import {
@@ -34,26 +34,23 @@ import LoginPage from './components/LoginPage/Login.jsx';
 import DropCourse from './components/dropCourse/drop.jsx';
 import CourseAnnouncements from './components/Announcements/CourseAnnouncements.jsx';
 import MyCourses from './components/mycourses/myCourse.jsx';
-import { useEffect, useState } from 'react';
+
+import { RoleProvider } from './context/Rolecontext.jsx';
+import StudentProfile from './pages/ProfilePage.jsx';
 
 
 const queryClient = new QueryClient()
 function App() {
     const Layout = () => {
-        const [role, setRole] = useState("NonAcadAdmin");
-        const location = useLocation();
-        useEffect   (() => {
-            if (location.state?.role) {
-                setRole(location.state.role);
-            }
-        }   , [location.state?.role]);
+        // const location = useLocation();
+        // const role = location.state?.role;
         return (
             <>
             <div className="app">
             <QueryClientProvider client={queryClient}>
                 <Navbar />
                 <div style={{ display: 'flex' }}>
-                <Sidebar role={role} />
+                <Sidebar />
                 <div style={{ flexGrow: 1 }}>
                     <Outlet context={{role}} />
                 </div>
@@ -73,6 +70,10 @@ function App() {
             path: "/",
             element: <Layout />,
             children: [
+                {
+                    index: true,
+                    element: <Navigate to="/login" replace />,
+                  },
                 {
                     path: "/complaint",
                     element: <ComplaintSection />,
@@ -128,7 +129,7 @@ function App() {
                     element: <CourseAnnouncements/>
                 },
                 {
-                    path:"/myCourses",
+                    path:"/my-courses",
                     element: <MyCourses/>
                 },
                 {
@@ -173,10 +174,18 @@ function App() {
                     path: "/courseFeedback/selectedCourse",
                     element: <CourseFeedbackFormPage/>
                 },
+                {
+                    path: "/profile",
+                    element: <StudentProfile/>
+                },
             ],
         },
     ]);
-    return <RouterProvider router={router} />;
+    return (
+        <RoleProvider>
+          <RouterProvider router={router} />
+        </RoleProvider>
+    );
 }
 
 export default App;
