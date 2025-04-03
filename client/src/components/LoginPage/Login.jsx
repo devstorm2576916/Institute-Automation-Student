@@ -14,7 +14,7 @@ export default function LoginPage() {
         return;
     }
     console.log({ email, password, role });
-    navigate("/", { state: { role } });
+    navigate("/profile", { state: { role } });
   };
 
   return (
