@@ -52,7 +52,7 @@ function App() {
                 <div style={{ display: 'flex' }}>
                 <Sidebar />
                 <div style={{ flexGrow: 1 }}>
-                    <Outlet context={{role}} />
+                    <Outlet />
                 </div>
                 </div>
             </QueryClientProvider>
