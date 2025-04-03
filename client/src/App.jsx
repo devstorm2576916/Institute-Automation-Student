@@ -134,7 +134,7 @@ function App() {
                     element: <MyCourses/>
                 },
                 {
-                    path:"/course/:id",
+                    path:"/attendance/:id",
                     element: <AttendanceCoursePage/>
                 },
                   {
