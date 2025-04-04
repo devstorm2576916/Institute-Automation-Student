@@ -1,3 +1,4 @@
+
 import './App.css';
 import ComplaintSection from './components/complaintSection';
 import HostelLeave from './components/HostelLeave/HostelLeave';
@@ -17,26 +18,26 @@ import AdminSubscriptionRequests from './components/HostelMess/AdminSubscription
 import { Navigate, useLocation } from "react-router-dom";
 import { useContext } from 'react';
 import CourseRegistrationFaculty from './components/registration/faculty_reg_dashboard.jsx';
+
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
-import {
-    QueryClient,
-    QueryClientProvider,
-} from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // Import pages
-import Documents from './pages/Documents/index.jsx';
-import TranscriptPage from './pages/Documents/Transcript.jsx';
-import IDCardPage from './pages/Documents/IDCard.jsx';
-import PassportPage from './pages/Documents/Passport.jsx';
-import BonafidePage from './pages/Documents/Bonafide.jsx';
-import FeeReceiptPage from './pages/Documents/FeeReceipt.jsx';
-import AssignmentLanding from './components/Assignment/AssignmentLanding.jsx';
-import AssignmentList from './components/Assignment/AssignmentList.jsx';
-import AssignmentDetail from './components/Assignment/AssignmentDetails.jsx';
-import LoginPage from './components/LoginPage/Login.jsx';
-import DropCourse from './components/dropCourse/drop.jsx';
-import CourseAnnouncements from './components/Announcements/CourseAnnouncements.jsx';
-import MyCourses from './components/mycourses/myCourse.jsx';
+import Documents from "./pages/Documents/index.jsx";
+import TranscriptPage from "./pages/Documents/Transcript.jsx";
+import IDCardPage from "./pages/Documents/IDCard.jsx";
+import PassportPage from "./pages/Documents/Passport.jsx";
+import BonafidePage from "./pages/Documents/Bonafide.jsx";
+import FeeReceiptPage from "./pages/Documents/FeeReceipt.jsx";
+import AssignmentLanding from "./components/Assignment/AssignmentLanding.jsx";
+import AssignmentList from "./components/Assignment/AssignmentList.jsx";
+import AssignmentDetail from "./components/Assignment/AssignmentDetails.jsx";
+import LoginPage from "./components/LoginPage/Login.jsx";
+import DropCourse from "./components/dropCourse/drop.jsx";
+import CourseAnnouncements from "./components/Announcements/CourseAnnouncements.jsx";
+import MyCourses from "./components/mycourses/myCourse.jsx";
+import DocumentManager from "./pages/Documents/admin/DocumentManager.jsx";
+import DocumentAccessControl from "./pages/Documents/admin/DocumentAccessControl.jsx";
 
 import { RoleProvider } from './context/Rolecontext.jsx';
 import StudentProfile from './pages/ProfilePage.jsx';
@@ -206,14 +207,19 @@ function App() {
                     path: "/timetable",
                     element: <TimeTable/>
                 },
+                 {
+                  path: "/feepayment",
+                  element: <FeePayment />,
+                },
+                {
+                  path: "/admin/documents",
+                  element: <DocumentManager />,
+                },
+                {
+                  path: "/admin/documents/access",
+                  element: <DocumentAccessControl />,
+                },
             ],
         },
     ]);
-    return (
-        <RoleProvider>
-          <RouterProvider router={router} />
-        </RoleProvider>
-    );
-}
 
-export default App;
