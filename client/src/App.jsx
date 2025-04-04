@@ -15,7 +15,8 @@ import Mess from './components/HostelMess/Mess.jsx';
 import StudentSubscriptionForm from './components/HostelMess/StudentSubscriptionForm.jsx';
 import AdminSubscriptionRequests from './components/HostelMess/AdminSubscriptionRequests.jsx';
 import { Navigate, useLocation } from "react-router-dom";
-
+import { useContext } from 'react';
+import CourseRegistrationFaculty from './components/registration/faculty_reg_dashboard.jsx';
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import {
     QueryClient,
@@ -40,10 +41,13 @@ import MyCourses from './components/mycourses/myCourse.jsx';
 import { RoleProvider } from './context/Rolecontext.jsx';
 import StudentProfile from './pages/ProfilePage.jsx';
 import TimeTable from './components/TimeTable/timetable.jsx';
-
+import { RoleContext } from './context/Rolecontext.jsx';
+import FacultyDashboard from "./components/registration/faculty_registration_page.jsx";  // New Course Selection Page
+//import CourseRegistration from "./pages/CourseRegistration";  // New Registration Page
 
 const queryClient = new QueryClient()
 function App() {
+    //const {role}=useContext(RoleContext)
     const Layout = () => {
         // const location = useLocation();
         // const role = location.state?.role;
@@ -107,6 +111,15 @@ function App() {
                     path: "/registration", 
                     element: <CourseRegistration /> 
                 },
+                {
+                  path:'/facultyregistration',
+                  element:<FacultyDashboard/>  
+                },
+                {
+                    path:'facultyregistration/:id',
+                    element:<CourseRegistrationFaculty/>
+                },
+                
                 {
                     path:"/assigngmentlanding",
                     element: <AssignmentLanding/>
