@@ -38,6 +38,7 @@ import CourseAnnouncements from "./components/Announcements/CourseAnnouncements.
 import MyCourses from "./components/mycourses/myCourse.jsx";
 import DocumentManager from "./pages/Documents/admin/DocumentManager.jsx";
 import DocumentAccessControl from "./pages/Documents/admin/DocumentAccessControl.jsx";
+import FeePayment from "./pages/FeePayment.jsx";
 
 import { RoleProvider } from './context/Rolecontext.jsx';
 import StudentProfile from './pages/ProfilePage.jsx';
@@ -222,4 +223,11 @@ function App() {
             ],
         },
     ]);
+    return (
+        <RoleProvider>
+          <RouterProvider router={router} />
+        </RoleProvider>
+    );
+}
 
+export default App;
