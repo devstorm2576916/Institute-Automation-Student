@@ -7,6 +7,7 @@ const Student = () => {
     const [expandedSections, setExpandedSections] = useState({
         course: false,
         activeCourses: false,
+        feepayment: false,
         document: false,
         hostel: false,
         complaint: false,
@@ -74,6 +75,21 @@ const Student = () => {
                         </ul>
                     )}
                 </li>
+                
+                <li className="mt-2">
+                <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('feepayment')}>
+                    {expandedSections.feepayment ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Fee Payment
+                </span>
+                {expandedSections.feepayment && (
+                    <ul className="pl-5">
+                        <li><Link to="/feepayment" className="text-gray-700 hover:text-gray-900">
+                                Pay Fee
+                            </Link>
+                        </li>
+                    </ul>
+                )}
+                </li>
+
                 <li className="mt-2">
                 <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('document')}>
                     {expandedSections.document ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Document

@@ -77,8 +77,8 @@ export default function LoginPage() {
             <option value="" disabled selected>Select your role</option>
             <option value="student">Student</option>
             <option value="faculty">Faculty</option>
-            <option value="academic-admin">Academic Admin</option>
-            <option value="hostel-admin">Hostel Admin</option>
+            <option value="acadAdmin">Academic Admin</option>
+            <option value="nonAcadAdmin">Hostel Admin</option>
           </select>
         </div>
         <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600" onClick={handleLogin}>Login</button>
