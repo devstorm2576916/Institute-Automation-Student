@@ -43,10 +43,25 @@ const AcadAdmin = () => {
                     {expandedSections.documents ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Documents
                 </span>
                 {expandedSections.documents && (
-                    <ul className="pl-5">
-                        <li>View Requests</li>
-                    </ul>
-                )}
+            <ul className="pl-5">
+              <li >
+                <Link
+                  to="/admin/documents"
+                  className="text-gray-700 hover:text-primary hover:underline flex items-center gap-2"
+                >
+                  Manage Applications
+                </Link>
+              </li>
+              <li >
+                <Link
+                  to="/admin/documents/access"
+                  className="text-gray-700 hover:text-primary hover:underline flex items-center gap-2"
+                >
+                  Access Control
+                </Link>
+              </li>
+            </ul>
+          )}
                 </li>
                 <li className="mt-2">
                 <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('complaint')}>
@@ -69,79 +84,7 @@ const AcadAdmin = () => {
                 )}
                 </li>
 
-            </ul>
-          )}
-        </li>
-        <li className="mt-2">
-          <span
-            className="font-bold text-gray-800 cursor-pointer flex items-center"
-            onClick={() => toggleSection("documents")}
-          >
-            {expandedSections.documents ? (
-              <IoMdArrowDropdown />
-            ) : (
-              <IoMdArrowDropright />
-            )}{" "}
-            Documents
-          </span>
-          {expandedSections.documents && (
-            <ul className="pl-5">
-              <li >
-                <Link
-                  to="/admin/documents"
-                  className="text-gray-700 hover:text-primary hover:underline flex items-center gap-2"
-                >
-                  Manage Applications
-                </Link>
-              </li>
-              <li >
-                <Link
-                  to="/admin/documents/access"
-                  className="text-gray-700 hover:text-primary hover:underline flex items-center gap-2"
-                >
-                  Access Control
-                </Link>
-              </li>
-            </ul>
-          )}
-        </li>
-        <li className="mt-2">
-          <span
-            className="font-bold text-gray-800 cursor-pointer flex items-center"
-            onClick={() => toggleSection("complaint")}
-          >
-            {expandedSections.complaint ? (
-              <IoMdArrowDropdown />
-            ) : (
-              <IoMdArrowDropright />
-            )}{" "}
-            Complaint
-          </span>
-          {expandedSections.complaint && (
-            <ul className="pl-5">
-              <li>View Complaints</li>
-            </ul>
-          )}
-        </li>
-        <li className="mt-2">
-          <span
-            className="font-bold text-gray-800 cursor-pointer flex items-center"
-            onClick={() => toggleSection("profile")}
-          >
-            {expandedSections.profile ? (
-              <IoMdArrowDropdown />
-            ) : (
-              <IoMdArrowDropright />
-            )}{" "}
-            Profile
-          </span>
-          {expandedSections.profile && (
-            <ul className="pl-5">
-              <li>View Profile</li>
-            </ul>
-          )}
-        </li>
-      </ul>
+        </ul>
     </>
   );
 };
