@@ -44,8 +44,15 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
                 <p className="text-sm text-gray-600 mb-4">
                     <span className="font-semibold">Description:</span> {complaint.description || "No additional details provided."}
                 </p>
+                {role==="student"&&complaint.status === "In Progress"&&(
+                <p className="text-sm text-gray-600 mb-4">
+                    <div> <span className="font-semibold">Assigned Pesron : </span>{complaint.assignedPerson.name}</div>
+                    <div> <span className="font-semibold">Phone Number : </span>{complaint.assignedPerson.phoneNo}</div>
+                    
+                </p>)}
+                
             </div>
-            {showAssignModal && <AssignForm onClose={() => setShowAssignModal(false)} onAssign={handleAssign} />}
+            {showAssignModal && <AssignForm onClose={() => setShowAssignModal(false)} onAssign={handleAssign} complaint = {complaint} />}
         </div>
     );
 };

@@ -25,20 +25,34 @@ const availablePeople = {
     "Other": ["Admin1", "Admin2"]
 };
 
-const AssignForm = ({ onClose, onAssign }) => {
+const peopleWithPhoneNumbers = {
+    "Alice": "987-654-3210",
+    "Bob": "912-345-6789",
+    "Charlie": "923-456-7890",
+    "Dave": "934-567-8901",
+    "Eve": "945-678-9012",
+    "Frank": "956-789-0123",
+    "Grace": "967-890-1234",
+    "Hank": "978-901-2345",
+    "Ivy": "989-012-3456",
+    "Jack": "900-123-4567",
+    "Admin1": "911-234-5678",
+    "Admin2": "922-345-6789"
+};
+
+
+const AssignForm = ({ onClose, onAssign ,complaint}) => {
     const [selectedCategory, setSelectedCategory] = useState("");
     const [selectedSubTask, setSelectedSubTask] = useState("");
     const [selectedPerson, setSelectedPerson] = useState("");
 
     const handleAssign = () => {
-        if (!selectedCategory) {
-            alert("Please select a category.");
-        } else if (!selectedSubTask) {
-            alert("Please select a subtask.");
-        } else if (!selectedPerson) {
-            alert("No Person Available!!");
+        
+        if (!selectedPerson) {
+            alert("Please Seclect a person/No Person Available!!");
         } else {
             onAssign(selectedCategory, selectedSubTask, selectedPerson);
+            alert("Assigned to : "+selectedPerson + "\n"+ "Phone Number : "+ peopleWithPhoneNumbers[selectedPerson])
         }
     };
 
@@ -46,35 +60,13 @@ const AssignForm = ({ onClose, onAssign }) => {
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
                 <h2 className="text-xl font-semibold mb-4">Assign Complaint</h2>
-                <label className="block mb-2">Category:</label>
-                <select className="w-full p-2 border rounded" onChange={(e) => setSelectedCategory(e.target.value)}>
-                    <option value="">Select Category</option>
-                    {Object.keys(taskData).map((category) => (
-                        <option key={category} value={category}>{category}</option>
-                    ))}
-                </select>
-                {selectedCategory && (
-                    <>
-                        <label className="block mt-4 mb-2">Subtask:</label>
-                        <select className="w-full p-2 border rounded" onChange={(e) => setSelectedSubTask(e.target.value)}>
-                            <option value="">Select Subtask</option>
-                            {taskData[selectedCategory].map((task) => (
-                                <option key={task} value={task}>{task}</option>
-                            ))}
-                        </select>
-                    </>
-                )}
-                {selectedSubTask && availablePeople[selectedSubTask] && (
-                    <>
-                        <label className="block mt-4 mb-2">Assign To:</label>
+                <label className="block mt-4 mb-2">Assign To:</label>
                         <select className="w-full p-2 border rounded" onChange={(e) => setSelectedPerson(e.target.value)}>
                             <option value="">Select Person</option>
-                            {availablePeople[selectedSubTask].map((person) => (
+                            {availablePeople[complaint.subcategory].map((person) => (
                                 <option key={person} value={person}>{person}</option>
                             ))}
                         </select>
-                    </>
-                )}
                 <div className="flex justify-end mt-4">
                     <button className="bg-gray-400 text-white px-4 py-2 rounded mr-2" onClick={onClose}>Cancel</button>
                     <button className="bg-green-500 text-white px-4 py-2 rounded" onClick={handleAssign}>Assign</button>
