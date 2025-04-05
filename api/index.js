@@ -21,7 +21,6 @@ app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(authRouter);
-app.use('/api/complaints', complaintsRouter);
 
 const port = process.env.PORT || 8000;
 
@@ -35,6 +34,7 @@ const razorpay = new Razorpay({
 });
 
 // --- Routes ---
+app.use('/api/complaints', complaintsRouter);
 
 // Endpoint to create a Razorpay order
 app.post("/api/payment/create-order", async (req, res) => {
