@@ -256,6 +256,30 @@ const feeReceiptSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
+// Complaint Model
+const complaintSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  title: { type: String, required: true },
+  date: { type: Date, required: true },
+  status: { 
+    type: String, 
+    enum: ['Pending', 'In Progress', 'Resolved', 'Rejected'], 
+    default: 'Pending' 
+  },
+  description: { type: String, required: true },
+  image: { type: String },
+  phoneNumber: { type: String, required: true },
+  address: { type: String },
+  category: { type: String, required: true },
+  subcategory: { type: String },
+  assignedPerson: {
+    name: { type: String },
+    phoneNo: { type: String },
+  },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
+
 export const Admin = mongoose.model('Admin', adminSchema);
 export const Administrator = mongoose.model('Administrator', administratorSchema);
 export const User = mongoose.model('User', userSchema);
@@ -273,3 +297,4 @@ export const IDCard = mongoose.model('IDCard', idCardSchema);
 export const Transcript = mongoose.model('Transcript', transcriptSchema);
 export const BonafideCertificate = mongoose.model('BonafideCertificate', bonafideCertificateSchema);
 export const FeeReceipt = mongoose.model('FeeReceipt', feeReceiptSchema);
+export const Complaint = mongoose.model('Complaint', complaintSchema);

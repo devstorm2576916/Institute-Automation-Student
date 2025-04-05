@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import mongoose from "mongoose";
 import authRouter from "../api/routes/auth.route.js";
+import complaintsRouter from "../api/routes/complaints.route.js";
 
 import Razorpay from "razorpay";
 import crypto from "crypto"; // Needed for signature verification (production)
@@ -20,6 +21,7 @@ app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(authRouter);
+app.use('/api/complaints', complaintsRouter);
 
 const port = process.env.PORT || 8000;
 
