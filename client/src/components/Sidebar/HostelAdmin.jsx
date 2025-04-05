@@ -21,19 +21,20 @@ const HostelAdmin = () => {
         <>
             <ul className="list-none pl-5 mt-5">
                 <li className="mt-2">
-                    <span
-                        className="font-bold text-gray-800 cursor-pointer flex items-center"
-                        onClick={() => toggleSection("hostel")}
-                    >
-                        {expandedSections.hostel ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Hostel
-                    </span>
-                    {expandedSections.hostel && (
-                        <ul className="pl-5">
+                <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('hostel')}>
+                    {expandedSections.hostel ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Hostel
+                </span>
+                {expandedSections.hostel && (
+                    <ul className="pl-5">
+                        <Link to="/hostel/leave" className='text-gray-700 hover:text-gray-900'>
                             <li>Leave</li>
+                        </Link>
+                        <Link to="/hostel/mess" className='text-gray-700 hover:text-gray-900'>
                             <li>Mess</li>
-                            <li>Transfer</li>
-                        </ul>
-                    )}
+                        </Link>
+                        <li>Transfer</li>
+                    </ul>
+                )}
                 </li>
                 <li className="mt-2">
                     <span
