@@ -29,6 +29,7 @@ import IDCardPage from "./pages/Documents/IDCard.jsx";
 import PassportPage from "./pages/Documents/Passport.jsx";
 import BonafidePage from "./pages/Documents/Bonafide.jsx";
 import FeeReceiptPage from "./pages/Documents/FeeReceipt.jsx";
+import OthersForm from "./pages/Documents/OthersForm.jsx";
 import AssignmentLanding from "./components/Assignment/AssignmentLanding.jsx";
 import AssignmentList from "./components/Assignment/AssignmentList.jsx";
 import AssignmentDetail from "./components/Assignment/AssignmentDetails.jsx";
@@ -197,6 +198,10 @@ function App() {
                         {
                             path: "feereceipt",
                             element: <FeeReceiptPage />,
+                        },
+                        {
+                            path: "othersform",
+                            element: <OthersForm />,
                         }
                     ]
                 },
