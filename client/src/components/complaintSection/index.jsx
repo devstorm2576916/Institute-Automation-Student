@@ -1,16 +1,17 @@
 import React, { useContext, useEffect, useState } from "react";
 import NewComplaintForm from "./newComplaintForm.jsx";
 import ComplaintDetails from "./ComplaintDetails";
-import complaintHistory from "./complaintHistory.json";
+// import complaintHistory from "./complaintHistory.json";
 import { RoleContext } from "../../context/Rolecontext.jsx";
 
 const ComplaintSection = () => {
   const { role } = useContext(RoleContext);
-  const [department, setDepartment] = useState("Computer & Comm. Centre");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState("Computer & Comm. Centre");
+  const [subCategory, setSubCategory] = useState("");
   const [showNewComplaintForm, setShowNewComplaintForm] = useState(false);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [complaintHistory, setComplaintHistory] = useState([]);
 
   // Determine if the user is a student or faculty (similar UI)
   const isStudentOrFaculty = role === "student" || role === "faculty";
@@ -82,6 +83,30 @@ const ComplaintSection = () => {
     setSelectedComplaint(null);
   }, [activePage]);
 
+  // useEffect(() => {
+  //   // Fetch complaint history from the server (mocked here for demonstration)    
+  //   const fetchComplaintHistory = async () => {
+  //     try {
+  //       const response = await fetch("http://localhost:8000/api/complaints/", {
+  //         method: "GET",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify(),
+  //       });
+  //       const data = await response.json();
+  //       if (response.ok) {
+  //         setComplaintHistory(data.data);
+  //       } else {  
+  //         console.error("Failed to fetch complaint history:", data.message);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching complaint history:", error);
+  //     }
+  //   };
+  //   fetchComplaintHistory();
+  // }, [activePage, role]);
+
   // If the role is Academic Admin, don't show the complaint section
   if (role === "acadAdmin") {
     return null;
@@ -129,10 +154,10 @@ const ComplaintSection = () => {
             <label className="block font-semibold mb-2">Register to:</label>
             <select
               className="w-full p-2 border rounded-md"
-              value={department}
+              value={category}
               onChange={(e) => {
-                setDepartment(e.target.value);
-                setCategory("");
+                setCategory(e.target.value);
+                setSubCategory("");
               }}
             >
               <option>Computer & Comm. Centre</option>
@@ -143,11 +168,11 @@ const ComplaintSection = () => {
             <label className="block font-semibold mt-4 mb-2">Select Category</label>
             <select
               className="w-full p-2 border rounded-md"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              value={subCategory}
+              onChange={(e) => setSubCategory(e.target.value)}
             >
               <option value="">--Select Category--</option>
-              {categories[department]?.map((cat, index) => (
+              {categories[category]?.map((cat, index) => (
                 <option key={index} value={cat}>
                   {cat}
                 </option>
@@ -174,7 +199,7 @@ const ComplaintSection = () => {
               Back
             </button>
             {/* Render the NewComplaintForm */}
-            <NewComplaintForm />
+            <NewComplaintForm  subCategory={subCategory} category={category}/>
           </div>
         )}
 
