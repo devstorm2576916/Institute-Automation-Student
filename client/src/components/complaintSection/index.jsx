@@ -64,8 +64,12 @@ const ComplaintSection = () => {
   };
 
   // Handle Back button to hide the NewComplaintForm
-  const handleBackClick = () => {
+  const handleBackClick = (wasNewAdded) => {
     setShowNewComplaintForm(false);
+    if (wasNewAdded) {
+      // Fetch the complaint history again if a new complaint was added
+      fetchComplaintHistory();
+    }
   };
 
   // Handle View Details button click to show complaint details
@@ -74,8 +78,12 @@ const ComplaintSection = () => {
   };
 
   // Handle Back button from ComplaintDetails to return to the list
-  const handleBackFromDetails = () => {
+  const handleBackFromDetails = (wasDeleted) => {
     setSelectedComplaint(null);
+    if(wasDeleted) {
+      // Fetch the complaint history again if a complaint was deleted
+      fetchComplaintHistory();
+    }
   };
 
   useEffect(() => {
@@ -83,30 +91,33 @@ const ComplaintSection = () => {
     setSelectedComplaint(null);
   }, [activePage]);
 
-  // useEffect(() => {
-  //   // Fetch complaint history from the server (mocked here for demonstration)    
-  //   const fetchComplaintHistory = async () => {
-  //     try {
-  //       const response = await fetch("http://localhost:8000/api/complaints/", {
-  //         method: "GET",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify(),
-  //       });
-  //       const data = await response.json();
-  //       if (response.ok) {
-  //         setComplaintHistory(data.data);
-  //       } else {  
-  //         console.error("Failed to fetch complaint history:", data.message);
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching complaint history:", error);
-  //     }
-  //   };
-  //   fetchComplaintHistory();
-  // }, [activePage, role]);
+    // Fetch complaint history from the server (mocked here for demonstration)    
+    const fetchComplaintHistory = async () => {
+      console.log("Fetching complaint history...");
+      // try {
+      //   const response = await fetch("http://localhost:8000/api/complaints/", {
+      //     method: "GET",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //     body: JSON.stringify(),
+      //   });
+      //   const data = await response.json();
+      //   if (response.ok) {
+      //     setComplaintHistory(data.data);
+      //   } else {  
+      //     console.error("Failed to fetch complaint history:", data.message);
+      //   }
+      // } catch (error) {
+      //   console.error("Error fetching complaint history:", error);
+      // }
+    };
 
+  useEffect(() => {
+    console.log("first")
+    fetchComplaintHistory();
+  }, [role]);
+  
   // If the role is Academic Admin, don't show the complaint section
   if (role === "acadAdmin") {
     return null;
@@ -194,12 +205,12 @@ const ComplaintSection = () => {
             {/* Back Button */}
             <button
               className="absolute top-4 left-4 bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700"
-              onClick={handleBackClick}
+              onClick={()=>handleBackClick(false)}
             >
               Back
             </button>
             {/* Render the NewComplaintForm */}
-            <NewComplaintForm  subCategory={subCategory} category={category}/>
+            <NewComplaintForm  subCategory={subCategory} category={category} />
           </div>
         )}
 
