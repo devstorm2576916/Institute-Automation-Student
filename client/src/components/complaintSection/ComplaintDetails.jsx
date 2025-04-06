@@ -4,8 +4,28 @@ import AssignForm from "./AssignForm";
 const ComplaintDetails = ({ complaint, onBack, role }) => {
     const [showAssignModal, setShowAssignModal] = useState(false);
 
-    const handleDelete = () => {
-        console.log("Complaint deleted");
+    const handleDelete = async (e) => {
+        console.log(complaint._id);
+        e.preventDefault();
+        try {
+            const response = await fetch(`http://localhost:8000/api/complaints/delete`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ complaintId: complaint._id }),
+            });
+
+            if (response.ok) {
+                console.log("Complaint deleted successfully");
+                onBack(true); // Go back to the previous page with a refresh complaint list
+            } else {
+                console.error("Failed to delete complaint");
+            }
+        }
+        catch (error) {
+            console.error("Error deleting complaint:", error);
+        }
     };
 
     const handleMarkAsDone = () => {

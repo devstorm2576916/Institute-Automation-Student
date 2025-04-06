@@ -84,11 +84,12 @@ export const getAllComplaints = [
   ];
 
 // complaintId
-export const deleteComplaint = [
-    validateAccessToken,
+export const deleteComplaint = 
     async (req, res) => {
         const complaintId = req.body.complaintId;
-        const userId = req.user._id;
+        // const userId = req.user._id;
+        // clg(`UserId : ${userId}`);
+        console.log(req.body);
         if(!complaintId){
             res.status(400).json({
                 message : "Missing required attribute 'complaintId'"
@@ -127,7 +128,6 @@ export const deleteComplaint = [
             });
         }
     }
-];
 
 // complaintId
 // updatedStatus
