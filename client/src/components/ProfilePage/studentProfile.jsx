@@ -6,25 +6,40 @@ const StudentProfile = () =>{
         rollNumber: "220101125",
         name: "Priyanshu Pratyay",
         photo: "/student.jpg", // Place a student image in `public/` folder
+        signphoto: "/sign.jpg",
         hostel: "Brahmaputra Hostel",
+        email: "tanush@iitg.ac.in",
+        Bloodgr: "B+",
+        contactno: "9032145678",
+        dob: "06.04.2004",
+        roomNo: "C-302",
+        semester: 6,
         branch: "Computer Science & Engineering",
         yearOfJoining: 2021,
         programme: "B.Tech",
         facultyAdvisors: ["Dr. Aryabartta Sahu", "Prof. XYZ"],
         courses: [
-          { code: "CS101", name: "Data Structures", creditAudit: "Credit", year: 2023, session: "Autumn", status: "Approved", grade: "A" },
-          { code: "CS202", name: "Operating Systems", creditAudit: "Credit", year: 2024, session: "Spring", status: "Pending", grade: "NA" },
-           { code: "CS202", name: "Operating Systems", creditAudit: "Credit", year: 2024, session: "Spring", status: "Pending", grade: "NA" }
+          { code: "CS101", name: "Data Structures", department: "CS", creditAudit: "Credit", year: 2023, session: "Autumn", status: "Approved", grade: "A" },
+          { code: "CS202", name: "Operating Systems", department: "CS", creditAudit: "Credit", year: 2024, session: "Spring", status: "Pending", grade: "NA" },
+           { code: "CS202", name: "Operating Systems", department: "CS", creditAudit: "Credit", year: 2024, session: "Spring", status: "Pending", grade: "NA" }
         ],
       };
     return (
-    <div className={styles.profileContainer}>
-      <div className={styles.profileHeader}>
+      <div className={styles.profileContainer}>
         <img src={student.photo} alt="Student" className={styles.profilePhoto} />
+        <img src={student.signphoto} alt="Student" className={styles.signPhoto} />
+      <div className={styles.profileHeader}>
+      <div/>
         <div className={styles.profileInfo}>
             <h1>{student.name}</h1>
             <p><strong>Roll No:</strong> <span>{student.rollNumber}</span></p>
             <p><strong>Hostel:</strong> <span>{student.hostel}</span></p>
+            <p><strong>Semester:</strong> <span>{student.semester}</span></p>
+            <p><strong>Room Number:</strong> <span>{student.roomNo}</span></p>
+            <p><strong>Email:</strong> <span>{student.email}</span></p>
+            <p><strong>Blood Group:</strong> <span>{student.Bloodgr}</span></p>
+            <p><strong>Contact Number:</strong> <span>{student.contactno}</span></p>
+            <p><strong>DOB:</strong> <span>{student.dob}</span></p>
             <p><strong>Branch:</strong> <span>{student.branch}</span></p>
             <p><strong>Year of Joining:</strong> <span>{student.yearOfJoining}</span></p>
             <p><strong>Programme:</strong> <span>{student.programme}</span></p>
@@ -49,6 +64,7 @@ const StudentProfile = () =>{
             <tr>
               <th>Course Code</th>
               <th>Course Name</th>
+              <th>Department</th>
               <th>Credit/Audit</th>
               <th>Year</th>
               <th>Session</th>
@@ -61,6 +77,7 @@ const StudentProfile = () =>{
               <tr key={index}>
                 <td>{course.code}</td>
                 <td>{course.name}</td>
+                <td>{course.department}</td>
                 <td>{course.creditAudit}</td>
                 <td>{course.year}</td>
                 <td>{course.session}</td>
