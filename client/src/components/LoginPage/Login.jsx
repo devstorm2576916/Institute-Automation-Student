@@ -6,7 +6,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRoleInput] = useState("");
-
+  
   const { setRole } = useContext(RoleContext);
 
   const navigate = useNavigate();
@@ -16,6 +16,7 @@ export default function LoginPage() {
         alert("All fields are required!");
         return;
     }
+    setRole(role);
     console.log({ email, password, role });
     // try {
     //   const response = await fetch("http://localhost:8000/login", {
