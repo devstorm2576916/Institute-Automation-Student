@@ -12,35 +12,35 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-    if (!email || !password || !role) {
-        alert("All fields are required!");
-        return;
-    }
-    console.log({ email, password, role });
-    try {
-      const response = await fetch("http://localhost:8000/api/auth/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password, role }),
-      });
+    // if (!email || !password || !role) {
+    //     alert("All fields are required!");
+    //     return;
+    // }
+    // console.log({ email, password, role });
+    // try {
+    //   const response = await fetch("http://localhost:8000/api/auth/login", {
+    //       method: "POST",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //       },
+    //       body: JSON.stringify({ email, password, role }),
+    //   });
 
-      const data = await response.json();
+    //   const data = await response.json();
 
-      if (response.ok) {
-          console.log("Login successful:", data);
-          setRole(data.user.role);
-          navigate("/profile", { state: { role } });
-      } else {
-        alert(`Login failed: ${data.message || "Unknown error"}`);
-      }
-    } catch (error) {
-        console.error("Error logging in:", error);
-        alert("Failed to connect to the server.");
-    }
+    //   if (response.ok) {
+    //       console.log("Login successful:", data);
+    //       setRole(data.user.role);
+    //       navigate("/profile", { state: { role } });
+    //   } else {
+    //     alert(`Login failed: ${data.message || "Unknown error"}`);
+    //   }
+    // } catch (error) {
+    //     console.error("Error logging in:", error);
+    //     alert("Failed to connect to the server.");
+    // }
     
-    // navigate("/profile", { state: {role}});
+    navigate("/profile", { state: {role}});
   };
 
   return (
