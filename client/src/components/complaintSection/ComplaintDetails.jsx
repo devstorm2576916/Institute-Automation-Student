@@ -7,33 +7,74 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
     const handleDelete = async (e) => {
         console.log(complaint._id);
         e.preventDefault();
-        try {
-            const response = await fetch(`http://localhost:8000/api/complaints/delete`, {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ complaintId: complaint._id }),
-            });
+        // try {
+        //     const response = await fetch(`http://localhost:8000/api/complaints/delete`, {
+        //         method: "DELETE",
+        //         headers: {
+        //             "Content-Type": "application/json",
+        //         },
+        //         body: JSON.stringify({ complaintId: complaint._id }),
+        //     });
 
-            if (response.ok) {
-                console.log("Complaint deleted successfully");
-                onBack(true); // Go back to the previous page with a refresh complaint list
-            } else {
-                console.error("Failed to delete complaint");
-            }
-        }
-        catch (error) {
-            console.error("Error deleting complaint:", error);
-        }
+        //     if (response.ok) {
+        //         console.log("Complaint deleted successfully");
+        //         onBack(true); // Go back to the previous page with a refresh complaint list
+        //     } else {
+        //         console.error("Failed to delete complaint");
+        //     }
+        // }
+        // catch (error) {
+        //     console.error("Error deleting complaint:", error);
+        // }
     };
 
-    const handleMarkAsDone = () => {
+    const handleMarkAsDone = async (e) => {
         console.log("Complaint marked as done");
+        e.preventDefault();
+        // try {
+        //     const response = await fetch(`http://localhost:8000/api/complaints/delete`, {
+        //         method: "PATCH",
+        //         headers: {
+        //             "Content-Type": "application/json",
+        //         },
+        //         body: JSON.stringify({ complaintId: complaint._id , status : "Resolved"}),
+        //     });
+
+        //     if (response.ok) {
+        //         console.log("Complaint updated successfully");
+        //         onBack(true); // Go back to the previous page with a refresh complaint list
+        //     } else {
+        //         console.error("Failed to update complaint");
+        //     }
+        // }
+        // catch (error) {
+        //     console.error("Error updating complaint:", error);
+        // }
+
     };
 
-    const handleAssign = (category, subTask, person) => {
-        console.log(`Complaint assigned to ${person} under ${category} -> ${subTask}`);
+    const handleAssign = async(e,category, subTask, assignedPerson) => {
+        console.log(`Complaint assigning to ${assignedPerson} under ${category} -> ${subTask} ....`);
+        e.preventDefault();
+        // try {
+        //     const response = await fetch(`http://localhost:8000/api/complaints/update`, {
+        //         method: "PATCH",
+        //         headers: {
+        //             "Content-Type": "application/json",
+        //         },
+        //         body: JSON.stringify({ complaintId: complaint._id , status : "In Progress", assignedPerson :assignedPerson ,category: category, subTask: subTask}),
+        //     });
+
+        //     if (response.ok) {
+        //         console.log("Complaint updated successfully");
+        //         onBack(true); // Go back to the previous page with a refresh complaint list
+        //     } else {
+        //         console.error("Failed to update complaint");
+        //     }
+        // }
+        // catch (error) {
+        //     console.error("Error updating complaint:", error);
+        // }
         setShowAssignModal(false);
     };
 
