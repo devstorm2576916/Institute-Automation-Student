@@ -3,7 +3,8 @@ import mongoose from 'mongoose';
 // Student Model
 const studentSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    registerNo: { type: String, unique: true, required: true },
+    rollNo: { type: String, unique: true, required: true },
+    hostel: { type: String, required: true },
     department: { type: String, required: true },
     semester: { type: Number, required: true },
     batch: { type: String, required: true },
