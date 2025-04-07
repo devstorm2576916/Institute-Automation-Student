@@ -8,6 +8,8 @@ import bcrypt from "bcrypt"; // Import the bcrypt library
 const userData = {
   name: "John Doe",
   email: "testStudent@iitg.ac.in",
+  hostel: "Lohit",
+  rollNo: "220101039",
   password: "password123", // In a real app, you should hash this
   refreshToken: "sample-refresh-token-1",
   contactNo: "1234567890",
@@ -36,7 +38,8 @@ const seedDatabase = async () => {
     // Create a student with the same email
     const student = await Student.create({
       userId: createdUser._id,
-      registerNo: "CS2023001",
+      hostel: "Lohit",
+      rollNo: "220101039",
       department: "Computer Science",
       semester: 3,
       batch: "2023-2027",

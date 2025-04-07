@@ -55,7 +55,7 @@ export const login = async (req, res) => {
         return res.status(200)
             .cookie('refreshToken', refreshToken, { httpOnly: true, sameSite: 'strict' })
             .header('Authorization', accessToken)
-            .json({ user: { email: user.email, role: role } });
+            .json({ specificUser: { email: user.email, rollNo: user.rollNo } });
 
     } catch (err) {
         console.error("Error during login:", err);
