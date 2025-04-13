@@ -21,9 +21,9 @@ dotenv.config(); // Load environment variables first
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
-app.use("/api/auth",authRoute);
-app.use("/api/hostel",hostelRoute);
-app.use("/api/student",studentRoute);
+app.use("/api/auth", authRoute);
+app.use("/api/hostel", hostelRoute);
+app.use("/api/student", studentRoute);
 
 const port = process.env.PORT || 8000;
 
@@ -105,7 +105,7 @@ app.post("/api/payment/verify", (req, res) => {
 const startServer = async () => {
   try {
     await connectDB();
-      app.listen(8000, () => {
+    app.listen(8000, () => {
       console.log(`Backend server is running on port ${8000}`);
       if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
         console.warn(
