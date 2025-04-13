@@ -52,6 +52,8 @@ import HostelTransfer from './components/HostelTransfer/HostelTransfer.jsx';
 //import CourseRegistration from "./pages/CourseRegistration";  // New Registration Page
 import { Toaster } from 'react-hot-toast';
 
+import AdminRegistration from './components/registration/admin_reg.jsx';
+
 const queryClient = new QueryClient()
 function App() {
     //const {role}=useContext(RoleContext)
@@ -142,7 +144,10 @@ function App() {
                     path:'facultyregistration/:id',
                     element:<CourseRegistrationFaculty/>
                 },
-                
+                {
+                    path: '/adminregistration',
+                    element:<AdminRegistration/>
+                },
                 {
                     path:"/assigngmentlanding",
                     element: <AssignmentLanding/>
