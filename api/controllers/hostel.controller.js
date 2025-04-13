@@ -87,4 +87,21 @@ export const getAllLeaves = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 }
-  
+
+export const updateAnyLeave = async (req, res) => {
+    try {
+        const { status } = req.body;
+        const leaveId = req.params.id;
+
+        const leave = await HostelLeave.findByIdAndUpdate(leaveId, { status }, { new: true });
+
+        if (!leave) {
+            return res.status(404).json({ message: "Leave request not found" });
+        }
+
+        res.status(200).json({ message: "Leave request updated successfully", leave });
+    } catch (error) {
+        console.error("Error in updateAnyLeave:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+} 
