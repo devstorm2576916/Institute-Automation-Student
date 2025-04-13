@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import DocumentLayout from '../../components/documentSection/DocumentLayout';
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import newRequest from "../../utils/newRequest";
+import { toast } from 'react-hot-toast';
 import {
   FaUser, FaIdBadge, FaUserTie, FaCalendarAlt, FaGraduationCap, FaBook, FaHome, FaDoorOpen, FaBirthdayCake, FaChartLine, FaFileAlt, FaInfoCircle, FaListAlt, FaPlus, FaExclamationCircle
 } from "react-icons/fa";
@@ -9,36 +10,46 @@ import {
 const BonafidePage = () => {
   const initialFormData = {
     currentSemester: '',
-    certificateFor: ''
+    certificateFor: '',
+    otherReason: ''  // Add new field
   };
 
   const [formData, setFormData] = useState(initialFormData);
+  const [formErrors, setFormErrors] = useState({}); // Add form errors state
   const [activeTab, setActiveTab] = useState('application');
+  const queryClient = useQueryClient();
   
-  const [statusData] = useState([
-    {
-      applicationDate: '2025-03-05',
-      certificateFor: 'Bank Account Opening',
-      otherDetails: 'No additional docs required',
-      currentStatus: 'Under Review'
-    },
-    {
-      applicationDate: '2025-03-10',
-      certificateFor: 'Visa Application',
-      otherDetails: 'Pending Dean approval',
-      currentStatus: 'Approved'
-    }
-  ]);
   // Get user data from localStorage
   const {data:userData} = JSON.parse(localStorage.getItem("currentUser"));
-  const { userId} = userData.user;
-  console.log(userId);
+  const {userId} = userData.user;
 
   // Fetch student data
   const { isLoading, error, data: studentData } = useQuery({
     queryKey: [`bonafide-${userId}`],
     queryFn: () =>
       newRequest.get(`/student/${userId}/bonafide`).then((res) => res.data),
+  });
+
+  // Fetch application history
+  const { data: applications = [] } = useQuery({
+    queryKey: ['bonafide-applications'],
+    queryFn: () =>
+      newRequest.get(`/student/${userId}/bonafide/applications`).then((res) => res.data),
+  });
+
+  // Create bonafide application mutation
+  const createApplication = useMutation({
+    mutationFn: (formData) => {
+      return newRequest.post(`/student/${userId}/bonafide/apply`, formData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['bonafide-applications']);
+      toast.success('Bonafide application submitted successfully');
+      setFormData(initialFormData);
+    },
+    onError: (error) => {
+      toast.error(error?.response?.data?.message || 'Error submitting application');
+    },
   });
 
   // Show loading or error states
@@ -95,19 +106,50 @@ const BonafidePage = () => {
     'Other'
   ];
 
+  const validateForm = () => {
+    const errors = {};
+    
+    if (!formData.currentSemester) {
+      errors.currentSemester = 'Please select a semester';
+    }
+    
+    if (!formData.certificateFor) {
+      errors.certificateFor = 'Please select a purpose';
+    }
+    
+    if (formData.certificateFor === 'Other' && !formData.otherReason?.trim()) {
+      errors.otherReason = 'Please specify the reason';
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
+      // Clear otherReason if certificateFor is not "Other"
+      ...(name === 'certificateFor' && value !== 'Other' ? { otherReason: '' } : {})
     }));
+    // Clear error when user types
+    if (formErrors[name]) {
+      setFormErrors(prev => ({ ...prev, [name]: '' }));
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log({ ...studentInfo, ...formData });
-    alert('Application Submitted (Simulated)');
+    if (validateForm()) {
+      // Send the form data with otherReason as a separate field
+      const submissionData = {
+        currentSemester: formData.currentSemester,
+        certificateFor: formData.certificateFor,
+        otherReason: formData.certificateFor === 'Other' ? formData.otherReason : undefined
+      };
+      createApplication.mutate(submissionData);
+    }
   };
 
   const InfoDisplay = ({ label, value, icon: Icon }) => (
@@ -158,7 +200,9 @@ const BonafidePage = () => {
             </label>
             <select
               name="currentSemester"
-              className="select select-bordered w-full focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              className={`select select-bordered w-full focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${
+                formErrors.currentSemester ? 'border-red-500' : ''
+              }`}
               value={formData.currentSemester}
               onChange={handleInputChange}
               required
@@ -168,6 +212,11 @@ const BonafidePage = () => {
                 <option key={num} value={num}>{num}</option>
               ))}
             </select>
+            {formErrors.currentSemester && (
+              <label className="label">
+                <span className="label-text-alt text-red-500">{formErrors.currentSemester}</span>
+              </label>
+            )}
           </div>
 
           <div className="form-control w-full">
@@ -178,7 +227,9 @@ const BonafidePage = () => {
             </label>
             <select
               name="certificateFor"
-              className="select select-bordered w-full focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              className={`select select-bordered w-full focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${
+                formErrors.certificateFor ? 'border-red-500' : ''
+              }`}
               value={formData.certificateFor}
               onChange={handleInputChange}
               required
@@ -188,7 +239,39 @@ const BonafidePage = () => {
                 <option key={reason} value={reason}>{reason}</option>
               ))}
             </select>
+            {formErrors.certificateFor && (
+              <label className="label">
+                <span className="label-text-alt text-red-500">{formErrors.certificateFor}</span>
+              </label>
+            )}
           </div>
+
+          {/* Conditional Other Reason Text Input */}
+          {formData.certificateFor === 'Other' && (
+            <div className="form-control w-full md:col-span-2">
+              <label className="label pb-1">
+                <span className="label-text font-semibold flex items-center text-sm text-gray-600">
+                  <FaFileAlt className="w-4 h-4 mr-2 text-gray-400" /> Please Specify Reason
+                </span>
+              </label>
+              <input
+                type="text"
+                name="otherReason"
+                className={`input input-bordered w-full focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${
+                  formErrors.otherReason ? 'border-red-500' : ''
+                }`}
+                value={formData.otherReason}
+                onChange={handleInputChange}
+                placeholder="Enter your specific reason for the certificate"
+                required
+              />
+              {formErrors.otherReason && (
+                <label className="label">
+                  <span className="label-text-alt text-red-500">{formErrors.otherReason}</span>
+                </label>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -217,7 +300,7 @@ const BonafidePage = () => {
           <FaListAlt className="w-7 h-7 mr-3" /> Application Status History
         </h3>
         <div className="text-sm font-medium text-gray-600 bg-base-200 px-3 py-1 rounded-full">
-          Total Applications: {statusData.length}
+          Total Applications: {applications.length}
         </div>
       </div>
 
@@ -233,34 +316,36 @@ const BonafidePage = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-base-200">
-            {statusData.length === 0 ? (
+            {applications.length === 0 ? (
               <tr>
                 <td colSpan="5" className="text-center py-10 text-gray-500 italic">
                   <FaInfoCircle className="inline w-5 h-5 mr-2" /> No applications found.
                 </td>
               </tr>
             ) : (
-              statusData.map((row, index) => (
+              applications.map((app, index) => (
                 <tr key={index} className="hover:bg-indigo-50/50 transition-colors duration-150">
                   <td className="px-6 py-4 text-sm font-medium text-gray-600">{index + 1}.</td>
                   <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
-                    {row.applicationDate}
+                    {new Date(app.applicationDate).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <span className="bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap">
-                      {row.certificateFor}
+                      {app.certificateFor}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate" title={row.otherDetails}>
-                    {row.otherDetails || '-'}
+                  <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate" title={app.remarks}>
+                    {app.remarks || '-'}
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <span className={`inline-flex items-center text-xs px-2.5 py-1 rounded-full font-medium whitespace-nowrap
-                      ${row.currentStatus.toLowerCase() === 'approved'
+                      ${app.currentStatus.toLowerCase() === 'approved'
                         ? 'bg-green-100 text-green-800'
+                        : app.currentStatus.toLowerCase() === 'rejected'
+                        ? 'bg-red-100 text-red-800'
                         : 'bg-yellow-100 text-yellow-800'}
                     `}>
-                      {row.currentStatus}
+                      {app.currentStatus}
                     </span>
                   </td>
                 </tr>
