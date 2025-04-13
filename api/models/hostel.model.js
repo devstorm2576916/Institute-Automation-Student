@@ -6,7 +6,7 @@ const hostelLeaveSchema = new mongoose.Schema({
   rollNo: { type: String, required: true, ref: 'Student' },
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
-  reason: { type: String },
+  reason: { type: String, required: true },
   status: { type: String, required: true, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
   remarks: { type: String },
   createdAt: { type: Date, default: Date.now },
@@ -28,6 +28,7 @@ const hostelTransferSchema = new mongoose.Schema({
     enum: ['Brahmaputra', 'Lohit', 'Disang', 'Subansiri', 'Dhansiri', 'Kapili', 'Manas', 'Dihing', 'Barak', 'Siang', 'Kameng', 'Umiam', 'Married Scholar'],
     required: true
   },
+  reason: { type: String, required: true },
   status: { type: String, required: true, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
   remarks: { type: String },
   createdAt: { type: Date, default: Date.now },
