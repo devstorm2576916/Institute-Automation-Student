@@ -450,14 +450,24 @@ const PassportPage = () => {
                                             {row.mode}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate" title={row.remarks}>
-                                        {row.remarks || '-'}
+                                    <td className="px-6 py-4 text-sm text-gray-600">
+                                        {Array.isArray(row.remarks) ? (
+                                            <div className="max-w-xs space-y-1">
+                                                {row.remarks.map((remark, idx) => (
+                                                    <div key={idx} className="truncate" title={remark}>
+                                                        • {remark}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <span className="text-gray-400">No remarks</span>
+                                        )}
                                     </td>
                                     <td className="px-6 py-4 text-sm">
                                         <span className={`inline-flex items-center text-xs px-2.5 py-1 rounded-full font-medium whitespace-nowrap capitalize
-                                            ${row.currentStatus === 'approved' 
+                                            ${row.currentStatus === 'Approved' 
                                                 ? 'bg-green-100 text-green-800' 
-                                                : row.currentStatus === 'rejected'
+                                                : row.currentStatus === 'Rejected'
                                                     ? 'bg-red-100 text-red-800'
                                                     : 'bg-yellow-100 text-yellow-800'}`}>
                                             <FaCircle className="w-1.5 h-1.5 mr-1.5" />
