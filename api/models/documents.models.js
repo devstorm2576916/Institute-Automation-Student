@@ -9,7 +9,7 @@ const applicationDocumentSchema = new mongoose.Schema({
   approvalDetails: {
     approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     approvalDate: { type: Date },
-    remarks: { type: String }
+    remarks: [{ type: String }]  // Changed from String to Array of Strings
   },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }

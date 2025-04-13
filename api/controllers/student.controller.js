@@ -64,20 +64,18 @@ export const createBonafideApplication = async (req, res) => {
         const applicationDoc = new ApplicationDocument({
             studentId: student._id,
             documentType: 'Bonafide',
-            status: 'Pending'
+            status: 'Pending' // This matches the enum in ApplicationDocument model
         });
         await applicationDoc.save();
 
-        console.log('created application request' , applicationDoc)
         // Create bonafide document
         const bonafide = new Bonafide({
             applicationId: applicationDoc._id,
             currentSemester,
-            purpose: certificateFor, // This will be 'Other' when a custom reason is provided
+            purpose: certificateFor,
             otherReason: certificateFor === 'Other' ? otherReason : undefined
         });
         await bonafide.save();
-        console.log('created bonafide doc' , bonafide)
 
         res.status(201).json({ 
             message: 'Bonafide application submitted successfully',
@@ -94,19 +92,16 @@ export const getBonafideApplications = async (req, res) => {
     try {
         const studentId = req.params.id;
         
-        // Find student
         const student = await Student.findOne({ userId: studentId });
         if (!student) {
             return res.status(404).json({ message: 'Student not found' });
         }
 
-        // Get all applications
         const applications = await ApplicationDocument.find({ 
             studentId: student._id,
             documentType: 'Bonafide'
         }).sort({ createdAt: -1 });
 
-        // Get bonafide details for each application
         const applicationDetails = await Promise.all(applications.map(async (app) => {
             const bonafide = await Bonafide.findOne({ applicationId: app._id });
             if (!bonafide) return null;
@@ -115,13 +110,12 @@ export const getBonafideApplications = async (req, res) => {
                 applicationDate: app.createdAt,
                 certificateFor: bonafide.purpose === 'Other' ? bonafide.otherReason : bonafide.purpose,
                 currentSemester: bonafide.currentSemester,
-                remarks: app.remarks || '',
-                documentStatus: app.status === 'pending' ? 'Documents Under Review' : 'Documents Verified',
-                currentStatus: app.status.charAt(0).toUpperCase() + app.status.slice(1)
+                remarks: app.approvalDetails?.remarks || '',
+                documentStatus: app.status === 'Pending' ? 'Documents Under Review' : 'Documents Verified',
+                currentStatus: app.status // Status is already in proper case from model
             };
         }));
 
-        // Filter out any null values from failed lookups
         const validApplications = applicationDetails.filter(app => app !== null);
         res.status(200).json(validApplications);
     } catch (error) {
@@ -184,15 +178,14 @@ export const submitPassportApplication = async (req, res) => {
             return res.status(404).json({ message: 'Student not found' });
         }
 
-        // Create application document
+        // Create application document with proper status case
         const applicationDoc = new ApplicationDocument({
             studentId: student._id,
             documentType: 'Passport',
-            status: 'Pending'
+            status: 'Pending' // This matches the enum in ApplicationDocument model
         });
         await applicationDoc.save();
 
-        console.log('application object for passport' , applicationDoc)
         // Create passport document
         const passport = new Passport({
             applicationId: applicationDoc._id,
@@ -207,7 +200,7 @@ export const submitPassportApplication = async (req, res) => {
             toDate: travelPlans === 'yes' ? toDate : undefined
         });
         await passport.save();
-        console.log('paspport object for passport' , passport)
+
         res.status(201).json({ 
             message: 'Passport application submitted successfully',
             applicationId: applicationDoc._id 
@@ -248,10 +241,10 @@ export const getPassportApplications = async (req, res) => {
                     }),
                     applicationType: passportDoc.applicationType,
                     mode: passportDoc.mode,
-                    remarks: app.remarks || '',
+                    remarks: app.approvalDetails?.remarks || '',
                     otherDetails: passportDoc.mode === 'tatkal' ? `Tatkal Application - ${passportDoc.tatkalReason}` : 'Regular Application',
-                    documentStatus: app.status === 'pending' ? 'Documents Under Review' : 'Documents Verified',
-                    currentStatus: app.status.toLowerCase()
+                    documentStatus: app.status === 'Pending' ? 'Documents Under Review' : 'Documents Verified',
+                    currentStatus: app.status // Status is already in proper case from model
                 };
             })
         );

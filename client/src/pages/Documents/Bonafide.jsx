@@ -343,9 +343,9 @@ const BonafidePage = () => {
                   </td>
                   <td className="px-6 py-4 text-sm">
                       <span className={`inline-flex items-center text-xs px-2.5 py-1 rounded-full font-medium whitespace-nowrap capitalize
-                          ${app.currentStatus === 'approved' 
+                          ${app.currentStatus === 'Approved' 
                               ? 'bg-green-100 text-green-800' 
-                              : app.currentStatus === 'rejected'
+                              : app.currentStatus === 'Rejected'
                                   ? 'bg-red-100 text-red-800'
                                   : 'bg-yellow-100 text-yellow-800'}`}>
                           <FaCircle className="w-1.5 h-1.5 mr-1.5" />
@@ -353,7 +353,17 @@ const BonafidePage = () => {
                       </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate" title={app.remarks}>
-                    {app.remarks || '-'}
+                    {Array.isArray(app.remarks) ? (
+                        <div className="max-w-xs space-y-1">
+                            {app.remarks.map((remark, idx) => (
+                                <div key={idx} className="truncate" title={remark}>
+                                    • {remark}
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <span className="text-gray-400">No remarks</span>
+                    )}
                   </td>
                 </tr>
               ))
