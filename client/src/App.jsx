@@ -28,6 +28,7 @@ import IDCardPage from "./pages/Documents/IDCard.jsx";
 import PassportPage from "./pages/Documents/Passport.jsx";
 import BonafidePage from "./pages/Documents/Bonafide.jsx";
 import FeeReceiptPage from "./pages/Documents/FeeReceipt.jsx";
+import OthersForm from "./pages/Documents/OthersForm.jsx";
 import AssignmentLanding from "./components/Assignment/AssignmentLanding.jsx";
 import AssignmentList from "./components/Assignment/AssignmentList.jsx";
 import AssignmentDetail from "./components/Assignment/AssignmentDetails.jsx";
@@ -49,6 +50,7 @@ import { RoleContext } from './context/Rolecontext.jsx';
 import FacultyDashboard from "./components/registration/faculty_registration_page.jsx";  // New Course Selection Page
 import HostelTransfer from './components/HostelTransfer/HostelTransfer.jsx';
 //import CourseRegistration from "./pages/CourseRegistration";  // New Registration Page
+import { Toaster } from 'react-hot-toast';
 
 const queryClient = new QueryClient()
 function App() {
@@ -59,6 +61,22 @@ function App() {
         return (
             <>
             <div className="app">
+                <Toaster
+                    position="top-right"
+                    toastOptions={{
+                        duration: 3000,
+                        style: {
+                            background: '#363636',
+                            color: '#fff',
+                        },
+                        success: {
+                            duration: 3000,
+                            theme: {
+                                primary: '#4aed88',
+                            },
+                        },
+                    }}
+                />
             <QueryClientProvider client={queryClient}>
                 <Navbar />
                 <div style={{ display: 'flex' }}>
@@ -197,6 +215,10 @@ function App() {
                         {
                             path: "feereceipt",
                             element: <FeeReceiptPage />,
+                        },
+                        {
+                            path: "othersform",
+                            element: <OthersForm />,
                         }
                     ]
                 },

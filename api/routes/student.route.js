@@ -1,8 +1,19 @@
 import express from "express";
-import { getStudent } from "../controllers/student.controller.js";
+import { 
+    getStudent, 
+    getStudentBonafideDetails, 
+    createBonafideApplication,
+    getBonafideApplications 
+} from "../controllers/student.controller.js";
 
-const router=express.Router();
+const router = express.Router();
 
-router.get("/:id",getStudent);
+// Basic student routes
+router.get("/:id", getStudent);
+
+// Bonafide routes
+router.get("/:id/bonafide", getStudentBonafideDetails);
+router.post("/:id/bonafide/apply", createBonafideApplication);
+router.get("/:id/bonafide/applications", getBonafideApplications);
 
 export default router;
