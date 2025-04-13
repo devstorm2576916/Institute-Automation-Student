@@ -3,12 +3,7 @@ import { useState, useEffect } from "react";
 import newRequest from "../../utils/newRequest";
 
 const HostelLeaveAdmin = () => {
-const [requests, setRequests] = useState([
-    { id: 1, name: "John Doe", studentId: "2023123456", startDate: "05-04-2025", endDate: "10-04-2025", reason: "Attached Washroom Lorem ipsum dolor, sit amet consectetur adipisicing elit. Odit quod iure natus assumenda. Consequuntur, enim ducimus. Minima a vero, modi eligendi odit odio consequatur ex natus. Amet nihil accusantium eveniet!", status: "Pending" },
-    { id: 2, name: "Jane Smith", studentId: "2023789012", startDate: "08-04-2025", endDate: "12-04-2025", reason: "Medical Reason", status: "Pending" },
-    { id: 3, name: "Mike Johnson", studentId: "2023345678", startDate: "15-04-2025", endDate: "20-04-2025", reason: "Personal Reason", status: "Pending" },
-    { id: 4, name: "Sarah Wilson", studentId: "2023901234", startDate: "12-04-2025", endDate: "18-04-2025", reason: "Noise Disturbance", status: "Pending" },
-]);
+const [requests, setRequests] = useState([]);
 
 const { isLoading, error, data } = useQuery({
     queryKey: ["leaves"],
@@ -34,6 +29,15 @@ useEffect(() => {
 
   const handleAction = (id, newStatus) => {
     setRequests(requests.map(req => req.id === id ? { ...req, status: newStatus } : req));
+    newRequest.put(`/hostel/leaves/${id}`, { status: newStatus })
+        .then(response => {
+            console.log('Status updated successfully');
+        })
+        .catch(error => {
+            console.error('Error updating status:', error);
+            // Revert the local state change if the API call fails
+            setRequests(requests.map(req => req.id === id ? { ...req, status: req.status } : req));
+        });
   };
 
 const [selectedReason, setSelectedReason] = useState(null);
