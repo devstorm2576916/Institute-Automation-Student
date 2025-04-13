@@ -104,3 +104,41 @@ export const getStudentCourses = async (req, res) => {
         res.status(500).json({ message: "Failed to fetch courses" });
     }
 };
+
+
+// Drop a course for a student
+export const dropCourse = async (req, res, next) => {
+    try {
+      const { studentId, courseId } = req.params;
+      // Find the student
+      const student = await Student.findById(studentId);
+      console.log("studentId isne database se nikali hai so good hai", studentId);
+      if (!student) {
+        return res.status(404).json({ message: "Student not found" });
+      }
+      
+      // Check if the student is enrolled in the course
+      const courseIndex = student.courses.findIndex(course => course.toString() === courseId);
+      if (courseIndex === -1) {
+        return res.status(404).json({ message: "Course not found in student's enrolled courses" });
+      }
+      
+      // Remove the course from the student's courses array
+      student.courses.splice(courseIndex, 1);
+      await student.save();
+      
+      // Find the course and update its enrolled students
+      const course = await Course.findById(courseId);
+      if (course) {
+        const studentIndex = course.enrolledStudents.findIndex(id => id.toString() === studentId);
+        if (studentIndex !== -1) {
+          course.enrolledStudents.splice(studentIndex, 1);
+          await course.save();
+        }
+      }
+      
+      res.status(200).json({ message: "Course dropped successfully" });
+    } catch (error) {
+      next(error);
+    }
+  };
