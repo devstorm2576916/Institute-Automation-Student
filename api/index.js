@@ -7,7 +7,7 @@ import mongoose from "mongoose";
 import authRoute from "../api/routes/auth.route.js";
 import hostelRoute from "../api/routes/hostel.route.js";
 import studentRoute from "../api/routes/student.route.js";
-
+import createCourseRoute from "../api/routes/createCourse.route.js";
 import Razorpay from "razorpay";
 import crypto from "crypto"; // Needed for signature verification (production)
 
@@ -24,6 +24,8 @@ app.use(cookieParser());
 app.use("/api/auth",authRoute);
 app.use("/api/hostel",hostelRoute);
 app.use("/api/student",studentRoute);
+app.use("/api/course",createCourseRoute);
+
 
 const port = process.env.PORT || 8000;
 
