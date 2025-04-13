@@ -1,8 +1,9 @@
-
 import React, { useState } from 'react';
 import DocumentLayout from '../../components/documentSection/DocumentLayout';
+import { useQuery } from "@tanstack/react-query";
+import newRequest from "../../utils/newRequest";
 import {
-  FaUser, FaIdBadge, FaUserTie, FaCalendarAlt, FaGraduationCap, FaBook, FaHome, FaDoorOpen, FaBirthdayCake, FaChartLine, FaFileAlt, FaInfoCircle, FaListAlt, FaPlus
+  FaUser, FaIdBadge, FaUserTie, FaCalendarAlt, FaGraduationCap, FaBook, FaHome, FaDoorOpen, FaBirthdayCake, FaChartLine, FaFileAlt, FaInfoCircle, FaListAlt, FaPlus, FaExclamationCircle
 } from "react-icons/fa";
 
 const BonafidePage = () => {
@@ -13,28 +14,7 @@ const BonafidePage = () => {
 
   const [formData, setFormData] = useState(initialFormData);
   const [activeTab, setActiveTab] = useState('application');
-
-  const studentInfo = [
-    { label: "Name", value: "JOHN SMITH DOE", icon: FaUser },
-    { label: "Roll No", value: "220103045", icon: FaIdBadge },
-    { label: "Son of / Daughter of", value: "ROBERT JAMES DOE", icon: FaUserTie },
-    { label: "Enrolled Year", value: "2022", icon: FaCalendarAlt },
-    { label: "Programme", value: "BTech", icon: FaGraduationCap },
-    { label: "Department", value: "Dept. of Mechanical Engineering", icon: FaBook },
-    { label: "Hostel", value: "Kameng", icon: FaHome },
-    { label: "Room No", value: "A-123", icon: FaDoorOpen },
-    { label: "Date of Birth", value: "2003-08-25", icon: FaBirthdayCake },
-  ];
-
-  const certificateReasons = [
-    'Bank Account Opening',
-    'Passport Application',
-    'Visa Application',
-    'Education Loan',
-    'Scholarship Application',
-    'Other'
-  ];
-
+  
   const [statusData] = useState([
     {
       applicationDate: '2025-03-05',
@@ -49,6 +29,72 @@ const BonafidePage = () => {
       currentStatus: 'Approved'
     }
   ]);
+  // Get user data from localStorage
+  const {data:userData} = JSON.parse(localStorage.getItem("currentUser"));
+  const { userId} = userData.user;
+  console.log(userId);
+
+  // Fetch student data
+  const { isLoading, error, data: studentData } = useQuery({
+    queryKey: [`bonafide-${userId}`],
+    queryFn: () =>
+      newRequest.get(`/student/${userId}/bonafide`).then((res) => res.data),
+  });
+
+  // Show loading or error states
+  if (isLoading) {
+    return (
+      <DocumentLayout title="Bonafide Certificate">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading student information...</p>
+          </div>
+        </div>
+      </DocumentLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DocumentLayout title="Bonafide Certificate">
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <FaExclamationCircle className="h-5 w-5 text-red-500" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-red-700">
+                Error loading student information. Please try again later.
+              </p>
+            </div>
+          </div>
+        </div>
+      </DocumentLayout>
+    );
+  }
+
+  const studentInfo = [
+    { label: "Name", value: studentData?.name || "Loading...", icon: FaUser },
+    { label: "Roll No", value: studentData?.rollNo || "Loading...", icon: FaIdBadge },
+    { label: "Son of / Daughter of", value: studentData?.fatherName || "Loading...", icon: FaUserTie },
+    { label: "Enrolled Year", value: studentData?.enrolledYear || "Loading...", icon: FaCalendarAlt },
+    { label: "Programme", value: studentData?.program || "Loading...", icon: FaGraduationCap },
+    { label: "Department", value: studentData?.department || "Loading...", icon: FaBook },
+    { label: "Hostel", value: studentData?.hostel || "Loading...", icon: FaHome },
+    { label: "Room No", value: studentData?.roomNo || "Loading...", icon: FaDoorOpen },
+    { label: "Date of Birth", value: studentData?.dateOfBirth ? new Date(studentData.dateOfBirth).toLocaleDateString() : "Loading...", icon: FaBirthdayCake },
+  ];
+
+  const certificateReasons = [
+    'Bank Account Opening',
+    'Passport Application',
+    'Visa Application',
+    'Education Loan',
+    'Scholarship Application',
+    'Other'
+  ];
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
