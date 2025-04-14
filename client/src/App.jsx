@@ -51,6 +51,7 @@ import HostelTransfer from './components/HostelTransfer/HostelTransfer.jsx';
 import { Toaster } from 'react-hot-toast';
 
 import AdminRegistration from './components/registration/admin_reg.jsx';
+import AdminDropCourseApproval from './components/dropCourse/dropCourseAdmin.jsx';
 
 const queryClient = new QueryClient()
 function App() {
@@ -175,6 +176,10 @@ function App() {
                 {
                     path:"/dropcourse",
                     element: <DropCourse/>
+                },
+                {
+                    path:"/dropcourseApprovals",
+                    element: <AdminDropCourseApproval/>
                 },
                 {
                     path:"/course/:courseId/announcements",
