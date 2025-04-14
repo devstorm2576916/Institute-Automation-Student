@@ -1,5 +1,6 @@
 // import { mongoose } from "../database/mongoDb.js";
-import { User, Complaint, Admin } from "../models/user.model.js";
+import { HostelAdmin as Admin } from "../models/hostelAdmin.model.js";
+import { Complaint, SupportStaff } from "../models/complaint.model.js";
 import { validateAccessToken } from "../middleware/auth.middleware.js";
 
 
@@ -28,18 +29,35 @@ export const getUserComplaints = [
     async (req, res) => {
         const userId = req.user._id;
         try {
-            const complaints = await Complaint.find();
+            const page = parseInt(req.body.page) || 1;
+            const limit = parseInt(req.body.limit) || 10;
+            const skip = (page - 1) * limit;
+
+            const totalComplaints = await Complaint.countDocuments({ userId });
+            const totalPages = Math.ceil(totalComplaints / limit);
+
+            const complaints = await Complaint.find({ userId })
+                .skip(skip)
+                .limit(limit)
+                .sort({ createdAt: -1 });
+
             res.send({
-                data : complaints
+                data: complaints,
+                pagination: {
+                    currentPage: page,
+                    totalPages: totalPages,
+                    pageSize: limit,
+                    totalItems: totalComplaints,
+                },
             });
         } catch (e) {
             console.log(`ERROR: Fetching user complaints : ${userId}`);
             console.log(e);
             res.status(500).json({
-                message : "Something went wrong!"
+                message: "Something went wrong!",
             });
         }
-    }
+    },
 ];
 
 export const getAllComplaints = [
@@ -87,9 +105,6 @@ export const getAllComplaints = [
 export const deleteComplaint = 
     async (req, res) => {
         const complaintId = req.body.complaintId;
-        // const userId = req.user._id;
-        // clg(`UserId : ${userId}`);
-        console.log(req.body);
         if(!complaintId){
             res.status(400).json({
                 message : "Missing required attribute 'complaintId'"
@@ -171,6 +186,65 @@ export const updateStatus = [
             return res.status(500).json({
                 message : "Something went wrong!"
             });
+        }
+    }
+];
+
+// create support staff
+export const createSupportStaff = [
+    validateAccessToken,
+    async (req, res) => {
+        try {
+            const admin = await Admin.findOne({ email : req.user.email});
+            if(!admin){
+                console.log(`ERROR: Unauthorised access to update complaint status`);
+                return res.status(403).json({
+                    error : "User is not authorised for this action",
+                    message : "You are not authorised to update status"
+                });
+            }
+            const supportStaff = new SupportStaff(req.body);
+            await supportStaff.save();
+            return res.status(201).json({
+                message : "Successfully created the support staff",
+                supportStaff : supportStaff
+            });
+        } catch (e) {
+            return res.status(500).json({
+                message : "Something went wrong!",
+                error : e
+            });
+        }
+    }
+];
+
+// delete support staff
+const deleteSupportStaff = [
+    validateAccessToken,
+    async (req, res) => {
+        try {
+            const admin = await Admin.findOne({ email : req.user.email});
+            if(!admin){
+                console.log(`ERROR: Unauthorised access to update complaint status`);
+                return res.status(403).json({
+                    error : "User is not authorised for this action",
+                    message : "You are not authorised to update status"
+                });
+            }
+            const response = await SupportStaff.findByIdAndDelete(req.body.supportStaffId);
+            if(response){
+                console.log(`Support staff deleted successfully!: ${req.body.supportStaffId}`);
+                return res.status(200).json({
+                    message : "Support staff deleted successfully!"
+                });
+            }
+            console.log(`Error: No support staff found with ID ${req.body.supportStaffId}`);
+            return res.status(404).json({
+                message : "Support staff not found!",
+                error : `No support staff found with ID ${req.body.supportStaffId}`
+            });
+        } catch (e) {
+            
         }
     }
 ];
