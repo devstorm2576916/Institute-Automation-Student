@@ -57,7 +57,7 @@ export const getStudentLeave = async (req, res) => {
       const student = await Student.findOne({userId: req.params.id});
   
       if (!student) {
-        console.error("Student not found:", id);
+        console.error("Student not found:", req.params.id);
         return res.status(404).json({ message: "Student not found" });
       }
   
