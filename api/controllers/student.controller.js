@@ -1,13 +1,13 @@
 import { Student } from '../models/student.model.js';
 import { Course, StudentCourse, FacultyCourse } from '../models/course.model.js';
 import { ApplicationDocument, Bonafide, Passport } from '../models/documents.models.js';
-
+import { Faculty } from '../models/faculty.model.js';
 
 // Get basic student info
 export const getStudent = async (req, res) => {
     try {
         const studentId = req.params.id;
-        console.log(studentId);
+        // console.log(studentId);
         const user = await Student.findOne({ userId: studentId })
             .populate('userId');
         if (!user) {
@@ -31,7 +31,7 @@ export const getStudentCourses = async (req, res) => {
         // First get the student record to get the roll number
         const student = await Student.findOne({ userId: studentId });
 
-        if (!student) {
+         if (!student) {
             console.log("Student not found for ID:", studentId);
             return res.status(404).json({ message: "Student not found" });
         }
@@ -52,13 +52,13 @@ export const getStudentCourses = async (req, res) => {
         }
         
         const semester = `${session} ${year}`;
-        console.log("Current academic session:", semester);
-        console.log(student.rollNo);
+        // console.log("Current academic session:", semester);
+        // console.log(student.rollNo);
         
         // Find approved courses for this student
-        const studentCourses = await Course.find({});
+        const studentCourses = await StudentCourse.find({rollNo: student.rollNo, status: 'Approved'})
         
-        console.log(`Found ${studentCourses.length} enrolled courses for student`);
+        // console.log(`Found ${studentCourses.length} enrolled courses for student`);
         
         if (!studentCourses || studentCourses.length === 0) {
             return res.status(200).json({ 
@@ -66,6 +66,8 @@ export const getStudentCourses = async (req, res) => {
                 feedbackOpen: false
             });
         }
+
+        // console.log(`Courses enrolled by student:`, studentCourses);
         
         // Get course details and faculty information
         const courses = await Promise.all(
@@ -88,11 +90,14 @@ export const getStudentCourses = async (req, res) => {
                     instructor: facultyCourse?.facultyId?.name || 'TBA',
                     credits: course.credits,
                     assignments: 8, // Placeholder
-                    announcements: 3, // Placeholder
+                    announcements: course.announcements.length,
                     attendance: 85 // Placeholder
                 };
             })
         );
+
+        // console.log(`Fetched course details for ${courses.length} courses`);
+        // console.log(courses);
         
         // Filter out null values (courses that weren't found)
         const validCourses = courses.filter(course => course !== null);
@@ -111,6 +116,96 @@ export const getStudentCourses = async (req, res) => {
         res.status(500).json({ message: "Failed to fetch courses" });
     }
 };
+
+export const getCourseAnnouncements = async (req, res) => {
+    try {
+        
+        const { courseId } = req.params;
+      
+      // Find course with announcements
+      const course = await Course.findOne({ courseCode: courseId });
+      
+      if (!course) {
+        return res.status(404).json({ success: false, message: 'Course not found' });
+      }
+      
+      // If no announcements or empty array, return course with empty announcements
+      if (!course.announcements || course.announcements.length === 0) {
+        return res.status(200).json(course);
+      }
+      
+      // Get all faculty IDs from announcements
+      const facultyIds = [...new Set(course.announcements.map(announcement => announcement.postedBy))];
+      
+      // Find all faculty members who posted announcements
+      const facultyMembers = await Faculty.find({ facultyId: { $in: facultyIds } });
+      
+      // Create a lookup object for faculty
+      const facultyLookup = {};
+      facultyMembers.forEach(faculty => {
+        facultyLookup[faculty.facultyId] = {
+          name: faculty.name,
+          email: faculty.email,
+          department: faculty.department,
+          designation: faculty.designation
+        };
+      });
+      
+      // Add faculty details to each announcement
+      const announcementsWithFaculty = course.announcements.map(announcement => {
+        const faculty = facultyLookup[announcement.postedBy] || null;
+        
+        return {
+          ...announcement.toObject(),
+          faculty: faculty
+        };
+      });
+      
+      // Sort announcements by date (most recent first)
+      announcementsWithFaculty.sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      // Return course with enhanced announcements
+      const result = {
+        ...course.toObject(),
+        announcements: announcementsWithFaculty
+      };
+      
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error('Error fetching course announcements:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Failed to fetch course announcements',
+        error: error.message 
+      });
+    }
+  };
+  
+  // Get faculty by IDs
+  export const getFacultyByIds = async (req, res) => {
+    try {
+      const facultyIds = req.query.ids.split(',');
+      
+      // Find faculty members by IDs
+      const facultyMembers = await Faculty.find({ facultyId: { $in: facultyIds } });
+      
+      if (!facultyMembers || facultyMembers.length === 0) {
+        return res.status(404).json({ success: false, message: 'No faculty members found' });
+      }
+      
+      return res.status(200).json(facultyMembers);
+    } catch (error) {
+      console.error('Error fetching faculty members:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Failed to fetch faculty members',
+        error: error.message 
+      });
+    }
+  };
+  
+
+
 
 // Drop a course for a student
 export const dropCourse = async (req, res, next) => {
@@ -283,7 +378,7 @@ export const getStudentPassportDetails = async (req, res) => {
             fathersName: student.fatherName,
             mothersName: student.motherName
         };
-        console.log('fetched student info for passport',studentDetails)
+        // console.log('fetched student info for passport',studentDetails)
         res.status(200).json(studentDetails);
     } catch (error) {
         console.error('Error fetching student passport details:', error);
