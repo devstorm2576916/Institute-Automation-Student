@@ -38,6 +38,9 @@ const AcadAdmin = () => {
                                 Attendance
                                 </Link>
                             <li>
+                                <Link to="/dropcourseApprovals" className="text-gray-700 hover:text-gray-900">Drop Course</Link>
+                            </li>
+                            <li>
                                 <Link to="/feedbackConfiguration" className="text-gray-700 hover:text-gray-900">Feedback</Link>
                             </li>
                             <li>Announcements</li>
