@@ -14,8 +14,7 @@ import FeedbackReports from './components/courseFeedback/feedbackReports.jsx';
 import Mess from './components/HostelMess/Mess.jsx';
 import StudentSubscriptionForm from './components/HostelMess/StudentSubscriptionForm.jsx';
 import AdminSubscriptionRequests from './components/HostelMess/AdminSubscriptionRequests.jsx';
-import { Navigate, useLocation } from "react-router-dom";
-import { useContext } from 'react';
+import { Navigate } from "react-router-dom";
 import CourseRegistrationFaculty from './components/registration/faculty_reg_dashboard.jsx';
 
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
@@ -28,6 +27,7 @@ import IDCardPage from "./pages/Documents/IDCard.jsx";
 import PassportPage from "./pages/Documents/Passport.jsx";
 import BonafidePage from "./pages/Documents/Bonafide.jsx";
 import FeeReceiptPage from "./pages/Documents/FeeReceipt.jsx";
+import OthersForm from "./pages/Documents/OthersForm.jsx";
 import AssignmentLanding from "./components/Assignment/AssignmentLanding.jsx";
 import AssignmentList from "./components/Assignment/AssignmentList.jsx";
 import AssignmentDetail from "./components/Assignment/AssignmentDetails.jsx";
@@ -45,22 +45,36 @@ import FeePayment from "./pages/FeePayment.jsx";
 import { RoleProvider } from './context/Rolecontext.jsx';
 import StudentProfile from './pages/ProfilePage.jsx';
 import TimeTable from './components/TimeTable/timetable.jsx';
-import { RoleContext } from './context/Rolecontext.jsx';
 import FacultyDashboard from "./components/registration/faculty_registration_page.jsx";  // New Course Selection Page
 import HostelTransfer from './components/HostelTransfer/HostelTransfer.jsx';
 //import CourseRegistration from "./pages/CourseRegistration";  // New Registration Page
+import { Toaster } from 'react-hot-toast';
 
 import AdminRegistration from './components/registration/admin_reg.jsx';
+import AdminDropCourseApproval from './components/dropCourse/dropCourseAdmin.jsx';
 
 const queryClient = new QueryClient()
 function App() {
-    //const {role}=useContext(RoleContext)
     const Layout = () => {
-        // const location = useLocation();
-        // const role = location.state?.role;
         return (
             <>
             <div className="app">
+                <Toaster
+                    position="top-right"
+                    toastOptions={{
+                        duration: 3000,
+                        style: {
+                            background: '#363636',
+                            color: '#fff',
+                        },
+                        success: {
+                            duration: 3000,
+                            theme: {
+                                primary: '#4aed88',
+                            },
+                        },
+                    }}
+                />
             <QueryClientProvider client={queryClient}>
                 <Navbar />
                 <div style={{ display: 'flex' }}>
@@ -164,6 +178,10 @@ function App() {
                     element: <DropCourse/>
                 },
                 {
+                    path:"/dropcourseApprovals",
+                    element: <AdminDropCourseApproval/>
+                },
+                {
                     path:"/course/:courseId/announcements",
                     element: <CourseAnnouncements/>
                 },
@@ -202,6 +220,10 @@ function App() {
                         {
                             path: "feereceipt",
                             element: <FeeReceiptPage />,
+                        },
+                        {
+                            path: "othersform",
+                            element: <OthersForm />,
                         }
                     ]
                 },

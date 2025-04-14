@@ -1,4 +1,4 @@
-import { HostelLeave } from "../models/hostel.model.js";
+import { HostelLeave, HostelTransfer } from "../models/hostel.model.js";
 import { Student } from '../models/student.model.js';
 
 export const studentLeave = async (req, res) => {
@@ -57,7 +57,7 @@ export const getStudentLeave = async (req, res) => {
       const student = await Student.findOne({userId: req.params.id});
   
       if (!student) {
-        console.error("Student not found:", id);
+        console.error("Student not found:", req.params.id);
         return res.status(404).json({ message: "Student not found" });
       }
   
@@ -87,4 +87,118 @@ export const getAllLeaves = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 }
-  
+
+export const updateAnyLeave = async (req, res) => {
+    try {
+        const { status } = req.body;
+        const leaveId = req.params.id;
+
+        const leave = await HostelLeave.findByIdAndUpdate(leaveId, { status }, { new: true });
+
+        if (!leave) {
+            return res.status(404).json({ message: "Leave request not found" });
+        }
+
+        res.status(200).json({ message: "Leave request updated successfully", leave });
+    } catch (error) {
+        console.error("Error in updateAnyLeave:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+export const hostelTransfer = async (req, res) => {
+  try {
+    const { status, studentId, currentHostel, requestedHostel, reason } = req.body;
+    console.log(req);
+
+    // Validate input
+    if (!studentId || !currentHostel || !requestedHostel || !reason) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const student = await Student.findOne({ rollNo: studentId });
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    // Create transfer request object
+    const transferRequest = {
+      rollNo: student.rollNo,
+      currentHostel,
+      requestedHostel,
+      reason,
+      status
+    };
+
+    // Save to database
+    await HostelTransfer.create(transferRequest);
+
+    res.status(200).json({ message: "Transfer request submitted successfully" });
+  } catch (error) {
+    console.error("Error in createTransferRequest:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getStudentTransfer = async (req, res) => {
+  try {
+    const student = await Student.findOne({userId: req.params.id});
+    
+
+    if (!student) {
+      console.error("Student not found:", id);
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    const requests = await HostelTransfer.find({ rollNo: student.rollNo });
+    if (!requests) {
+      return res.status(404).json({ message: "No requests found for this student" });
+    }
+
+    res.status(200).json(requests);
+  } catch (error) {
+    console.error("Error in getStudentTransfer:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Get all transfer requests
+export const getAllTransferRequests = async (req, res) => {
+  try {
+    const requests = await HostelTransfer.find({});
+    res.status(200).json(requests);
+  } catch (error) {
+    console.error("Error in getAllTransferRequests:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Approve or reject a transfer request
+export const updateTransferRequest = async (req, res) => {
+  try {
+    const { status, reason } = req.body;
+    const requestId = req.params.id;
+    // console.log(status, reason, requestId);
+    
+    if (!['Approved', 'Rejected'].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+    
+    const request = await HostelTransfer.findByIdAndUpdate(
+      requestId,
+      { status, reason },
+      { new: true }
+    );
+    // console.log(request);
+    
+
+    if (!request) {
+      return res.status(404).json({ message: "Transfer request not found" });
+    }
+
+    res.status(200).json({ message: "Transfer request updated successfully", request });
+  } catch (error) {
+    console.error("Error in updateTransferRequest:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
