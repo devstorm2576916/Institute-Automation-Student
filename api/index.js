@@ -27,6 +27,9 @@ app.use(cookieParser());
 app.use("/api/auth",authRoute);
 app.use("/api/hostel",hostelRoute);
 app.use("/api/student",studentRoute);
+app.use("/api/course",createCourseRoute);
+
+app.use("/api/acadadmin", acadAdminRoute);
 
 const port = process.env.PORT || 8000;
 
