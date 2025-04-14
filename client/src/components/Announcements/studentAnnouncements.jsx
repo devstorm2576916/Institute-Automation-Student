@@ -104,7 +104,7 @@ export default function CourseAnnouncements() {
             {error.response?.data?.message || "The course you're looking for doesn't exist or you don't have access to it."}
           </p>
           <Link
-            to="/my-courses"
+            to="/courses"
             className="inline-flex items-center justify-center gap-2 bg-pink-500 text-white py-2 px-6 rounded-md font-medium hover:bg-pink-600 transition duration-300"
           >
             <FaArrowLeft className="text-sm" />
@@ -120,7 +120,7 @@ export default function CourseAnnouncements() {
     <div className="p-6 max-w-4xl mx-auto">
       {/* Header with Back Button */}
       <div className="flex items-center mb-6">
-        <Link to="/my-courses" className="mr-4 text-pink-500 hover:text-pink-600">
+        <Link to="/courses" className="mr-4 text-pink-500 hover:text-pink-600">
           <FaArrowLeft className="text-xl" />
         </Link>
         <h1 className="text-3xl font-bold text-gray-800">{course?.courseName} Announcements</h1>

@@ -8,8 +8,10 @@ export const getStudent = async (req, res) => {
     try {
         const studentId = req.params.id;
         // console.log(studentId);
+        console.log(studentId);
         const user = await Student.findOne({ userId: studentId })
             .populate('userId');
+
         if (!user) {
             return res.status(404).json({ message: 'Student not found' });
         }
@@ -57,7 +59,6 @@ export const getStudentCourses = async (req, res) => {
         
         // Find approved courses for this student
         const studentCourses = await StudentCourse.find({rollNo: student.rollNo, status: 'Approved'})
-        
         // console.log(`Found ${studentCourses.length} enrolled courses for student`);
         
         if (!studentCourses || studentCourses.length === 0) {
@@ -73,7 +74,7 @@ export const getStudentCourses = async (req, res) => {
         const courses = await Promise.all(
             studentCourses.map(async (sc) => {
                 const course = await Course.findOne({ courseCode: sc.courseId });
-                
+                console.log("Course details fetched:", course);
                 if (!course) {
                     console.log(`Course not found for ID: ${sc.courseId}`);
                     return null;
@@ -81,13 +82,15 @@ export const getStudentCourses = async (req, res) => {
                 
                 const facultyCourse = await FacultyCourse.findOne({
                     courseCode: sc.courseId
-                }).populate('facultyId', 'name');
+                });
+                console.log("Faculty course details fetched:", facultyCourse);
+                // .populate('facultyId', 'name');
                 
                 // Use placeholder values for some fields
                 return {
                     id: course.courseCode,
                     name: course.courseName,
-                    instructor: facultyCourse?.facultyId?.name || 'TBA',
+                    // instructor: facultyCourse?.facultyId?.name || 'TBA',
                     credits: course.credits,
                     assignments: 8, // Placeholder
                     announcements: course.announcements.length,
@@ -95,10 +98,9 @@ export const getStudentCourses = async (req, res) => {
                 };
             })
         );
-
+        console.log("Hehehhe", courses);
         // console.log(`Fetched course details for ${courses.length} courses`);
         // console.log(courses);
-        
         // Filter out null values (courses that weren't found)
         const validCourses = courses.filter(course => course !== null);
         console.log(`Returning ${validCourses.length} valid courses`);
