@@ -5,7 +5,9 @@ const studentSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     email: { type: String, required: true, unique: true },
     rollNo: { type: String, unique: true, required: true },
-    department: { type: String, required: true }, // enum?
+    fatherName: { type: String, required: true },
+    motherName: { type: String, required: true },
+    department: { type: String, required: true },
     semester: { type: Number, required: true, default: 1 },
     batch: { type: String, required: true },
     program: { type: String, enum: ['BTech', 'MTech', 'PhD', 'BDes', 'MDes'], required: true },
