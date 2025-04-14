@@ -4,8 +4,10 @@ import {
     getApplicationById,
     updateApplicationStatus,
     filterApplications,
-    addComment
-} from '../controllers/acadadmin.controller.js';
+    addComment,
+    addFeeStructure,
+    getFeeBreakdown
+} from '../controllers/acadAdmin.controller.js';
 
 const router = express.Router();
 
@@ -15,5 +17,7 @@ router.get('/documents/applications/filter', filterApplications);
 router.get('/documents/applications/:id', getApplicationById);
 router.patch('/documents/applications/:id/status', updateApplicationStatus);
 router.post('/documents/applications/:id/comment', addComment);
+router.post("/feeControl/addFee", addFeeStructure);
+router.get("/feeControl/getFeeBreakdown", getFeeBreakdown);
 
 export default router;
