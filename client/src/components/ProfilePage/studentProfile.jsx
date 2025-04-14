@@ -21,7 +21,7 @@ const StudentProfile = () =>{
         name: data?.userId?.name || "Priyanshu Pratyay",
         photo: "/student.jpg", // Place a student image in `public/` folder
         signphoto: "/sign.jpg",
-        hostel: "Brahmaputra Hostel",
+        hostel: data?.hostel,
         email: data?.email || "tanush@iitg.ac.in",
         Bloodgr: "B+",
         contactno: "9032145678",
