@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlane } from '@fortawesome/free-solid-svg-icons';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import React from 'react';
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import { faPlane } from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom';
 import iitglogo from '../assets/iitglogo.jpg';
-import newRequest from '../utils/newRequest';
+// import newRequest from '../utils/newRequest';
 import axios from 'axios';
 
 const Navbar = () => {
