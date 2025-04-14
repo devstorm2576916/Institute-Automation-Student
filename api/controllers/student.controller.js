@@ -5,16 +5,21 @@ import { ApplicationDocument, Bonafide, Passport } from '../models/documents.mod
 
 // Get basic student info
 export const getStudent = async (req, res) => {
-    const studentId = req.params.id;
-    console.log(studentId);
-    const user = await Student.findOne({ userId: studentId })
-        .populate('userId');
-    if (!user) {
-        return res.status(404).json({ message: 'Student not found' });
+    try {
+        const studentId = req.params.id;
+        console.log(studentId);
+        const user = await Student.findOne({ userId: studentId })
+            .populate('userId');
+        if (!user) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+        
+        res.status(200).json(user);
+        console.log("Student details fetched successfully", user);
+    } catch (error) {
+        console.error('Error fetching student details:', error);
+        res.status(500).json({ message: 'Error fetching student details' });
     }
-    
-    res.status(200).json(user);
-    console.log("Student details fetched successfully", user);
 };
 
 // Add this new function for student courses
