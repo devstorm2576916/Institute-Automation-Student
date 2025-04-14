@@ -5,7 +5,7 @@ import {
     updateApplicationStatus,
     filterApplications,
     addComment
-} from '../controllers/acadadmin.controller.js';
+} from '../controllers/acadAdmin.controller.js';
 
 const router = express.Router();
 
