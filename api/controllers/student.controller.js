@@ -2,6 +2,7 @@ import { Student } from '../models/student.model.js';
 import { Course, StudentCourse, FacultyCourse } from '../models/course.model.js';
 import { ApplicationDocument, Bonafide, Passport } from '../models/documents.models.js';
 import { Faculty } from '../models/faculty.model.js';
+import { CourseDropRequest } from '../models/courseDropRequest.model.js';
 
 // Get basic student info
 export const getStudent = async (req, res) => {
@@ -206,9 +207,7 @@ export const getCourseAnnouncements = async (req, res) => {
     }
   };
   
-
-
-
+  
 // Drop a course for a student
 export const dropCourse = async (req, res, next) => {
     try {
@@ -245,6 +244,149 @@ export const dropCourse = async (req, res, next) => {
       next(error);
     }
   };
+
+
+  export const createCourseDropRequest = async (req, res) => {
+    try {
+        const studentId = req.params.id;
+        const { courseId } = req.body;
+        
+        // Find the student to get the roll number
+        const student = await Student.findOne({ userId: studentId });
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+        
+        // Check if the student is enrolled in the course
+        const studentCourse = await StudentCourse.findOne({ 
+            rollNo: student.rollNo, 
+            courseId: courseId,
+            status: 'Approved'
+        });
+        
+        if (!studentCourse) {
+            return res.status(404).json({ message: 'Student is not enrolled in this course' });
+        }
+        
+        // Check if there's already a pending drop request for this course
+        const existingRequest = await CourseDropRequest.findOne({
+            rollNo: student.rollNo,
+            courseId: courseId,
+            status: 'Pending'
+        });
+        
+        if (existingRequest) {
+            return res.status(400).json({ message: 'A drop request for this course is already pending' });
+        }
+        
+        // Get course details
+        const course = await Course.findOne({ courseCode: courseId });
+        if (!course) {
+            return res.status(404).json({ message: 'Course not found' });
+        }
+        
+        // Get current academic session
+        const now = new Date();
+        const year = now.getFullYear();
+        let session;
+        
+        if (now.getMonth() >= 0 && now.getMonth() <= 4) {
+            session = 'Spring Semester';
+        } else if (now.getMonth() >= 5 && now.getMonth() <= 7) {
+            session = 'Summer Course';
+        } else {
+            session = 'Winter Semester';
+        }
+        
+        const semester = `${session} ${year}`;
+        
+        // Create a new drop request
+        const dropRequest = new CourseDropRequest({
+            studentId: studentId,
+            rollNo: student.rollNo,
+            courseId: courseId,
+            courseName: course.courseName,
+            semester: semester,
+            status: 'Pending'
+        });
+        
+        await dropRequest.save();
+        
+        res.status(201).json({ 
+            message: 'Course drop request submitted successfully',
+            requestId: dropRequest._id
+        });
+        
+    } catch (error) {
+        console.error('Error creating course drop request:', error);
+        res.status(500).json({ message: 'Failed to submit course drop request' });
+    }
+};
+
+// Get all course drop requests for a student
+export const getStudentDropRequests = async (req, res) => {
+    try {
+        const studentId = req.params.id;
+        
+        // Find the student to get the roll number
+        const student = await Student.findOne({ userId: studentId });
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+        
+        // Get all drop requests for this student
+        const dropRequests = await CourseDropRequest.find({ 
+            rollNo: student.rollNo 
+        }).sort({ createdAt: -1 });
+        
+        res.status(200).json(dropRequests);
+        
+    } catch (error) {
+        console.error('Error fetching course drop requests:', error);
+        res.status(500).json({ message: 'Failed to fetch course drop requests' });
+    }
+};
+
+// Cancel a pending course drop request
+export const cancelDropRequest = async (req, res) => {
+    try {
+        const studentId = req.params.id;
+        const requestId = req.params.requestId;
+        
+        // Find the student to get the roll number
+        const student = await Student.findOne({ userId: studentId });
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+        
+        // Find the drop request
+        const dropRequest = await CourseDropRequest.findById(requestId);
+        
+        if (!dropRequest) {
+            return res.status(404).json({ message: 'Drop request not found' });
+        }
+        
+        // Check if the request belongs to this student
+        if (dropRequest.rollNo !== student.rollNo) {
+            return res.status(403).json({ message: 'Unauthorized to cancel this request' });
+        }
+        
+        // Check if the request is still pending
+        if (dropRequest.status !== 'Pending') {
+            return res.status(400).json({ message: `Cannot cancel a request that is already ${dropRequest.status.toLowerCase()}` });
+        }
+        
+        // Delete the request
+        await CourseDropRequest.findByIdAndDelete(requestId);
+        
+        res.status(200).json({ message: 'Course drop request cancelled successfully' });
+        
+    } catch (error) {
+        console.error('Error cancelling course drop request:', error);
+        res.status(500).json({ message: 'Failed to cancel course drop request' });
+    }
+};
+
 
 // Get student details for bonafide
 export const getStudentBonafideDetails = async (req, res) => {

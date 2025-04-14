@@ -51,7 +51,7 @@ import HostelTransfer from './components/HostelTransfer/HostelTransfer.jsx';
 import { Toaster } from 'react-hot-toast';
 
 import AdminRegistration from './components/registration/admin_reg.jsx';
-import AdminDropCourseApproval from './components/dropCourse/dropCourseAdmin.jsx';
+import AdminDropRequests from './components/dropCourse/dropCourseAdmin.jsx';
 import CourseWrapper from './components/mycourses/courseWrapper.jsx';
 import FacultyCourseAnnouncements from './components/Announcements/facultyAnnouncements.jsx';
 import AnnouncementWrapper from './components/Announcements/announcementWrapper.jsx';
@@ -182,7 +182,7 @@ function App() {
                 },
                 {
                     path:"/dropcourseApprovals",
-                    element: <AdminDropCourseApproval/>
+                    element: <AdminDropRequests/>
                 },
                 {
                     path:"/course/:courseId/announcements",
