@@ -1,118 +1,73 @@
-import React, { useState, useEffect } from 'react';
+import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import newRequest from "../../../utils/newRequest";
 import PendingRequests from './PendingRequests';
 import ApprovedRequests from './ApprovedRequests';
 import RejectedRequests from './RejectedRequests';
 
 const HostelTransferAdmin = () => {
-  const [activeTab, setActiveTab] = useState('pending');
-  // const [pendingRequests, setPendingRequests] = useState([]);
-  const [pendingRequests, setPendingRequests] = useState([
-    // Example pending requests
-    {
-      id: 1,
-      studentId: '220101038',
-      studentName: 'Dipesh',
-      currentHostel: 'Lohit',
-      requestedHostel: 'Kapili',
-      reason: 'Better Mess Food in Kapili',
-    },
-    {
-      id: 2,
-      studentId: '220101033',
-      studentName: 'Daksh',
-      currentHostel: 'Kapili',
-      requestedHostel: 'Siang',
-      reason: 'Better Vending Machine',
-    },
-    {
-      id: 3,
-      studentId: '220101042',
-      studentName: 'Gagandeep',
-      currentHostel: 'Manas',
-      requestedHostel: 'Lohit',
-      reason: 'Better rooms',
-    },
-  ]);
+  const [requests, setRequests] = useState([]);
+  const [pendingRequests, setPendingRequests] = useState([]);
   const [approvedRequests, setApprovedRequests] = useState([]);
   const [rejectedRequests, setRejectedRequests] = useState([]);
-  const [rejectionReasons, setRejectionReasons] = useState({});
+  const [activeTab, setActiveTab] = useState('pending');
+
+  const { isLoading, error, data } = useQuery({
+    queryKey: ["transfer-requests"],
+    queryFn: () =>
+      newRequest.get(`/hostel/transfer-requests`).then((res) => {
+        return res.data;
+      }),
+    });
+      
+  useEffect(() => {
+    if (!isLoading && !error && data) {
+      // console.log(data);
+      setRequests(data.map(item => ({
+        id: item._id,
+        rollNo: item.rollNo,
+        requestedHostel: item.requestedHostel,
+        currentHostel: item.currentHostel,
+        reason: item.reason,
+        status: item.status
+      })));
+    }
+  }, [data, isLoading, error]);
+  
+  // console.log(res.data);
 
   useEffect(() => {
-    const fetchPendingRequests = async () => {
-        try {
-          const response = await fetch('http://localhost:5000/api/hostel-transfer-requests');
-          const text = await response.text();
-          console.log('Raw response:', text); // Log raw response
-          const data = JSON.parse(text);
-          setPendingRequests(data.pending);
-        } catch (error) {
-          console.error('Error fetching pending requests:', error);
+    if (requests) {
+      setPendingRequests(requests.filter(req => req.status === 'Pending'));
+      setApprovedRequests(requests.filter(req => req.status === 'Approved'));
+      setRejectedRequests(requests.filter(req => req.status === 'Rejected'));
+    }
+  }, [requests]);
+
+
+  const handleAction = (id, newStatus, newReason) => {
+    // console.log(id,newStatus,newReason);
+    newRequest.put(`/hostel/transfer-requests/${id}`, { status: newStatus, reason: newReason })
+      .then(response => {
+        console.log('Status updated successfully');
+        // Update local state based on new status
+        setPendingRequests(prev => prev.filter(req => req.id !== id));
+        if (newStatus === 'Approved') {
+          setApprovedRequests(prev => [...prev, { ...response.data, status: newStatus }]);
+        } else if (newStatus === 'Rejected') {
+          setRejectedRequests(prev => [...prev, { ...response.data, status: newStatus }]);
         }
-      };
-      fetchPendingRequests();
-  }, []);
-
-  const handleApprove = async (request) => {
-    try {
-        // comment below 3 lines when backend works
-        setPendingRequests(pendingRequests.filter(r => r.id !== request.id));
-        const approvalTimestamp = new Date().toLocaleString();
-        setApprovedRequests([...approvedRequests, { ...request, approvalTimestamp }]);
-
-        const response = await fetch(`http://localhost:5000/api/hostel-transfer/${request.id}/approve`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      })
+      .catch(error => {
+        console.error('Error updating status:', error);
       });
-
-      if (response.ok) {
-        // uncomment below 3 lines when backend works
-        // setPendingRequests(pendingRequests.filter(r => r.id !== request.id));
-        // const approvalTimestamp = new Date().toLocaleString();
-        // setApprovedRequests([...approvedRequests, { ...request, approvalTimestamp }]);
-        console.log(`Notified student ${request.studentId}: Your hostel has been changed to ${request.requestedHostel}.`);
-      }
-    } catch (error) {
-      console.error('Error approving request:', error);
-    }
   };
+  
+  
 
-  const handleReject = async (request) => {
-    const reason = rejectionReasons[request.id];
-    if (!reason) return;
+  if (isLoading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error.message}</p>;
 
-    try {
-        // comment below 4 lines when backend works
-        const rejectionTimestamp = new Date().toLocaleString();
-        setRejectedRequests([...rejectedRequests, { ...request, reason, rejectionTimestamp }]);
-        setPendingRequests(pendingRequests.filter(r => r.id !== request.id));
-        setRejectionReasons(prev => ({ ...prev, [request.id]: '' }));
-
-        const response = await fetch(`http://localhost:5000/api/hostel-transfer/${request.id}/reject`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ reason }),
-        });
-
-      if (response.ok) {
-        // uncomment below 4 lines when backend works
-        // const rejectionTimestamp = new Date().toLocaleString();
-        // setRejectedRequests([...rejectedRequests, { ...request, reason, rejectionTimestamp }]);
-        // setPendingRequests(pendingRequests.filter(r => r.id !== request.id));
-        // setRejectionReasons(prev => ({ ...prev, [request.id]: '' }));
-        console.log(`Notified student ${request.studentId}: Your hostel transfer request was rejected: ${reason}`);
-      }
-    } catch (error) {
-      console.error('Error rejecting request:', error);
-    }
-  };
-
-  const handleReasonChange = (id, value) => {
-    setRejectionReasons(prev => ({ ...prev, [id]: value }));
-  };
 
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
@@ -140,10 +95,7 @@ const HostelTransferAdmin = () => {
       {activeTab === 'pending' && (
         <PendingRequests
           requests={pendingRequests}
-          onApprove={handleApprove}
-          onReject={handleReject}
-          rejectionReasons={rejectionReasons}
-          handleReasonChange={handleReasonChange}
+          handleAction={handleAction}
         />
       )}
 
