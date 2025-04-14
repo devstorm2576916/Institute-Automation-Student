@@ -70,6 +70,21 @@ const AcadAdmin = () => {
           )}
                 </li>
                 <li className="mt-2">
+                <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('feecontrol')}>
+                    {expandedSections.feecontrol ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Fees Management
+                </span>
+                {expandedSections.feecontrol && (
+                    <ul className="pl-5">
+                        <li>
+                          <Link to="/acadAdmin/feeManagement" className="text-gray-700 hover:text-gray-900">
+                                Fee Control
+                          </Link>
+                        </li>
+                    </ul>
+                )}
+                </li>
+
+                <li className="mt-2">
                 <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('complaint')}>
                     {expandedSections.complaint ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Complaint
                 </span>
