@@ -36,7 +36,7 @@ import EditAssignment from "./components/Assignment/EditAssignment.jsx";
 import FacultyAssignmentSubmissions from "./components/Assignment/FacultyAssignmentSubmissions.jsx";
 import LoginPage from "./components/LoginPage/Login.jsx";
 import DropCourse from "./components/dropCourse/drop.jsx";
-import CourseAnnouncements from "./components/Announcements/CourseAnnouncements.jsx";
+import CourseAnnouncements from "./components/Announcements/studentAnnouncements.jsx";
 import MyCourses from "./components/mycourses/myCourse.jsx";
 import DocumentManager from "./pages/Documents/admin/DocumentManager.jsx";
 import DocumentAccessControl from "./pages/Documents/admin/DocumentAccessControl.jsx";
@@ -52,6 +52,9 @@ import { Toaster } from 'react-hot-toast';
 
 import AdminRegistration from './components/registration/admin_reg.jsx';
 import AdminDropCourseApproval from './components/dropCourse/dropCourseAdmin.jsx';
+import CourseWrapper from './components/mycourses/courseWrapper.jsx';
+import FacultyCourseAnnouncements from './components/Announcements/facultyAnnouncements.jsx';
+import AnnouncementWrapper from './components/Announcements/announcementWrapper.jsx';
 
 const queryClient = new QueryClient()
 function App() {
@@ -183,11 +186,11 @@ function App() {
                 },
                 {
                     path:"/course/:courseId/announcements",
-                    element: <CourseAnnouncements/>
+                    element: <AnnouncementWrapper/>
                 },
                 {
-                    path:"/my-courses",
-                    element: <MyCourses/>
+                    path:"/courses",
+                    element: <CourseWrapper/>
                 },
                 {
                     path:"/attendance/:id",

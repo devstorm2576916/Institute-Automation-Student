@@ -6,6 +6,15 @@ const courseSchema = new mongoose.Schema({
     courseName: { type: String, required: true },
     department: { type: String, required: true }, // enum?
     slot: { type: String },
+    announcements: [{
+        id: { type: mongoose.Schema.Types.ObjectId, auto: true },
+        title: { type: String, required: true },
+        content: { type: String, required: true },
+        importance: { type: String, enum: ['Low', 'Medium', 'High', 'Critical'], default: 'Medium' },
+        date: { type: Date, default: Date.now },
+        postedBy: { type: String, ref: 'Faculty' },
+        attachments: [{ name: String, url: String }]
+    }],
     credits: { type: Number, required: true, default: 6 },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }

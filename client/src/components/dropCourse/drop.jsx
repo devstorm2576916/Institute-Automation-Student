@@ -15,7 +15,7 @@ export default function DropCourse() {
       status: "enrolled"
     },
     {
-      id: "ENG105",
+      id: "ENG105", 
       name: "Academic Writing",
       status: "pending" // example of a course with pending drop request
     }
