@@ -28,15 +28,6 @@ export default function LoginPage() {
         withCredentials: true,
       });
 
-      // const response = await fetch("http://localhost:8000/api/auth/login", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({ email, password, role }),
-      //   withCredentials: true,
-      // });
-
       const data = response.data;
 
       console.log(data);
@@ -45,13 +36,13 @@ export default function LoginPage() {
         localStorage.setItem("currentUser", JSON.stringify({ data, role }));
         setRole(role);
         navigate("/profile", { role });
+      }else {
+        alert(`Login failed: ${data.message || "Unknown error"}`);
       }
     } catch (error) {
       console.error("Error logging in:", error);
       alert("Failed to connect to the server.");
     }
-
-    // navigate("/profile", { state: {role}});
   };
 
   return (
