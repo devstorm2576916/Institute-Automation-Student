@@ -1,110 +1,226 @@
-import Course from "./Course"
-import { useEffect, useState} from "react";
+import Course from "./Course";
+import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { RoleContext } from "../../../context/Rolecontext";
-import { useContext } from "react";
 import SearchableStudentDropdown from "./SearchableStudentDropdown";
 import AttendanceApprovalDashboard from "./AttendanceApprovalDashboard";
+import SiteAlert from "./siteAlert";
+import { useQuery } from "@tanstack/react-query";
+import newRequest from "../../../utils/newRequest";
 
-function MyCourses(){
-    const navigateTo = useNavigate()
+function MyCourses() {
+    const {data:userData} = JSON.parse(localStorage.getItem("currentUser"));
+    const {email, userId} = userData.user;
+    console.log(email);
+    console.log(userData);
+
+    const { isLoading, error, data } = useQuery({
+        queryKey: [`${userId}`],
+        queryFn: () =>
+            newRequest.get(`/student/${userId}`).then((res) => {
+                return res.data;
+            }),
+    });
+    const navigateTo = useNavigate();
     const { role } = useContext(RoleContext);
-    //const [courses, setCourses] = useState([])
-    /*
-    useEffect(() =>{
-        const fetchCourses = async () => {
-            try {
-
-                const response = await fetch('http://localhost:3000/')
-                const json = await response.json()
-                if (response.ok) {
-                    setCourses(json.courses)
-
-                }
-            } catch (error) {
-                console.log(error)
-            }
-        }
-        fetchCourses()
-    },[])
-    */
+    
+    const [courses, setCourses] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [overall, setOverall] = useState(true); // true means safe, false means alert
 
     const [selectedStudent, setSelectedStudent] = useState("");
     const [showStats, setShowStats] = useState(false);
-    const [studentAttendanceData, setStudentAttendanceData] = useState({});
 
-    // Handle student selection
-  const handleStudentChange = (e) => {
-    const rollNumber = e.target.value;
-    setSelectedStudent(rollNumber);
-    
-    if (rollNumber) {
-      setShowStats(true);
-      // Update stats based on selected student
-      const studentData = studentAttendanceData[rollNumber];
-    //   setClassesMissed(studentData.classesMissed);
-    //   setClassesAttended(studentData.classesAttended);
-    //   setClassesRequired(studentData.reqClasses);
-    //   setPercentage(studentData.percentage);
-    } else {
-      setShowStats(false);
-    }
-  };
-    
-     const courses = [
-         {courseId : "ME 101", courseName: "Engineering Mechanics", attendance: "7%"},
-         {courseId : "CS 101", courseName: "Introduction to Computing", attendance: "10%"},
-         {courseId : "BT 101", courseName: "Introduction to Biology", attendance: "50%"},
-         {courseId : "CS 201", courseName: "Discrete Mathematics", attendance: "7%"},
-         {courseId : "CS 201", courseName: "Discrete Mathematics", attendance: "7%"},
-         {courseId : "BT 101", courseName: "Introduction to Biology", attendance: "50%"},
-         {courseId : "BT 101", courseName: "Introduction to Biology", attendance: "50%"},
-         {courseId : "CS 201", courseName: "Discrete Mathematics", attendance: "7%"},
-         {courseId : "HS 125", courseName: "Macroeconomics", attendance: "7%"}
-     ]
-    
-    const facultycourses = [
-        { courseId: "EE 101", courseName: "Basic Electrical Engineering", averageAttendance: "85%" },
-        { courseId: "ME 201", courseName: "Thermodynamics", averageAttendance: "78%" },
-        { courseId: "CS 301", courseName: "Algorithms", averageAttendance: "92%" },
-        { courseId: "HS 101", courseName: "Psychology", averageAttendance: "88%" }
-    ];
+    const showStudentStats = (rollNo) => {
+        console.log("#$#$")
+        console.log(rollNo)
+        setSelectedStudent(rollNo);
+        fetchStudentCourses(rollNo); // Use the parameter directly
+        setShowStats(true);
+    };
 
-    const studentList = [
-        { rollNumber: "S101", name: "Alice Johnson" },
-        { rollNumber: "S102", name: "Bob Smith" },
-        { rollNumber: "S103", name: "Charlie Brown" },
-        { rollNumber: "S104", name: "Diana Prince" },
-        { rollNumber: "S105", name: "Ethan Hunt" },
-        { rollNumber: "S106", name: "Fiona Gallagher" },
-        { rollNumber: "S107", name: "George Miller" },
-        { rollNumber: "S108", name: "Hannah Davis" },
-        { rollNumber: "S109", name: "Ian Wright" },
-        { rollNumber: "S110", name: "Julia Roberts" },
-    ];
+    const fetchStudentCourses = async (rollNo) => {
+
+        try {
+            const response = await fetch("http://localhost:8000/api/attendancelanding/student", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "rollno": rollNo
+                }
+            });
+    
+            if (!response.ok) {
+                throw new Error(`Server responded with status: ${response.status}`);
+            }
+            const dataReceived = await response.json();
+    
+            const formattedCourses = dataReceived.attendance.map(course => ({
+                courseId: course.courseCode,
+                courseName: course.courseName,
+                attendance: `${course.percentage}%`,
+                percentage: course.percentage
+            }));
+            setCourses(formattedCourses);
+            //turn formattedCourses;
+        } catch (error) {
+            console.error("Error fetching student courses:", error);
+            throw error; // Re-throw for caller to handle
+        }
+    };
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                setLoading(true);
+
+                if (role === "student") {
+                    const rollNo =  data?.rollNo;
+                    console.log("Roll no." + rollNo);
+                    if (!rollNo) {
+                        throw new Error("Roll number not found in localStorage.");
+                    }
+
+                    const response = await fetch("http://localhost:8000/api/attendancelanding/student", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "rollno": rollNo
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Server responded with status: ${response.status}`);
+                    }
+
+                    const dataReceived = await response.json();
+
+                    const formattedCourses = dataReceived.attendance.map(course => ({
+                        courseId: course.courseCode,
+                        courseName: course.courseName,
+                        attendance: `${course.percentage}%`,
+                        percentage: course.percentage
+                    }));
+
+                    // Check for any course with attendance below 75%
+                    const hasLowAttendance = formattedCourses.some(course => course.percentage < 75);
+                    setOverall(!hasLowAttendance);
+                    console.log("Savar");
+                    console.log(formattedCourses);
+                    setCourses(formattedCourses);
+                } else if (role === "faculty") {
+                    // Fetch faculty courses from the backend
+                    // const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+        
+                    console.log("Savar");
+                    //console.log(currentUser);
+                    console.log(userId);
+                    if (!userId) {
+                        throw new Error("Faculty ID not found in localStorage.");
+                    }
+
+                    const response = await fetch("http://localhost:8000/api/attendancelanding/faculty", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "userid": userId
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Server responded with status: ${response.status}`);
+                    }
+
+                    const dataReceived = await response.json();
+
+                    if (!dataReceived.success) {
+                        throw new Error(dataReceived.message || "Failed to fetch faculty courses");
+                    }
+
+                    // Format the courses for display
+                    const formattedCourses = dataReceived.data.map(course => ({
+                        courseId: course.courseCode,
+                        courseName: course.courseName || `Course ${course.courseCode}`,
+                        averageAttendance: `${course.attendancePercentage}%`,
+                        totalStudents: course.totalStudents
+                    }));
+                    console.log(formattedCourses);
+                    setCourses(formattedCourses);
+                }
+            } catch (error) {
+                console.error("Error fetching courses:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCourses();
+    }, [role]);
+
+    const handleStudentChange = async (e) => {
+        const rollNumber = e.target.value;
+        setSelectedStudent(rollNumber);
+
+        if (rollNumber) {
+            setLoading(true);
+            try {
+                const response = await fetch(`http://localhost:8000/api/attendancelanding/${rollNumber}`);
+
+                if (!response.ok) {
+                    throw new Error(`Server responded with status: ${response.status}`);
+                }
+
+                const dataReceived = await response.json();
+
+                const formattedCourses = dataReceived.attendance.map(course => ({
+                    courseId: course.courseCode,
+                    courseName: course.courseName,
+                    attendance: `${course.percentage}%`,
+                    percentage: course.percentage
+                }));
+
+                const hasLowAttendance = formattedCourses.some(course => course.percentage < 75);
+                setOverall(!hasLowAttendance);
+
+                setCourses(formattedCourses);
+                setShowStats(true);
+            } catch (error) {
+                console.error("Error fetching student data:", error);
+            } finally {
+                setLoading(false);
+            }
+        } else {
+            setShowStats(false);
+        }
+    };
 
     return (
         <div className="courses" id="my_courses">
             {role === "student" && <div className="text-wrapper-2">My Courses</div>}
+            {role === "student" && !overall && <SiteAlert />}
             {role === "faculty" && <div className="text-wrapper-2">My Courses</div>}
-            {role == "acadAdmin" && <AttendanceApprovalDashboard/>}
-            {role == "acadAdmin" && <h1 className="text-2xl font-bold text-gray-800 ml-5">Search Student Attendance:</h1>}
-            {role == "acadAdmin" && <SearchableStudentDropdown setShowStats={setShowStats} />}
-            {courses.length > 0 ? (
-                role.includes("student") ? (
+            {role === "acadAdmin" && <AttendanceApprovalDashboard />}
+            {role === "acadAdmin" && <h1 className="text-2xl font-bold text-gray-800 ml-5">Search Student Attendance:</h1>}
+            {role === "acadAdmin" && (
+                <SearchableStudentDropdown 
+                onStudentSelect={showStudentStats}  // Add this prop
+              />
+            )}
+
+            {loading ? (
+                <p>Loading courses...</p>
+            ) : courses.length > 0 ? (
+                role === "student" || (role === "acadAdmin" && showStats) ? (
                     <Course courses={courses} />
-                ) : role.includes("faculty") ? (
-                    <Course courses={facultycourses} />
-                ) : role.includes("acadAdmin") ? (
-                    (showStats && <Course courses={courses} />)
+                ) : role === "faculty" ? (
+                    <Course courses={courses} />
                 ) : (
                     <p>No courses available for your role.</p>
                 )
             ) : (
-                <p>Loading courses...</p>
+                <p>No courses found.</p>
             )}
         </div>
-    )
-};
+    );
+}
 
-export default MyCourses
+export default MyCourses;
