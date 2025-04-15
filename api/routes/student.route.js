@@ -12,14 +12,18 @@ import {
     getCourseAnnouncements,
     createCourseDropRequest,
     getStudentDropRequests,
-    cancelDropRequest
+    cancelDropRequest,
+    getCompletedCourses
 } from "../controllers/student.controller.js";
 
+//courses routes
 const router = express.Router();
 router.get("/:id", getStudent);
 router.get("/:id/courses", getStudentCourses);
 router.delete("/:id/courses/:courseId", dropCourse);
 router.get('/courses/:courseId', getCourseAnnouncements);
+router.get("/:id/completed-courses", getCompletedCourses); 
+
 
 // Course drop request routes
 router.post("/:id/drop-requests", createCourseDropRequest);
