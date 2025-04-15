@@ -10,6 +10,8 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
     const [showAssignModal, setShowAssignModal] = useState(false);
     const queryClient = useQueryClient();
 
+    console.log(complaint)
+
     // DELETE
     const deleteMutation = useMutation({
         mutationFn: async () => {

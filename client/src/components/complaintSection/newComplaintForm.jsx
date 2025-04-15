@@ -23,6 +23,7 @@ const NewComplaintForm = ({ category, subCategory }) => {
                 authorization: `${accessToken}`,
             },
             body: JSON.stringify(formData),
+            credentials: 'include',
         });
 
         const data = await res.json();

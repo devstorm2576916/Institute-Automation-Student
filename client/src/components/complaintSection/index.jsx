@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from "react";
 import { useQuery } from '@tanstack/react-query';
 import NewComplaintForm from "./newComplaintForm.jsx";
 import ComplaintDetails from "./ComplaintDetails";
-// import complaintHistory from "./complaintHistory.json";
 import { RoleContext } from "../../context/Rolecontext.jsx";
 
 const ComplaintSection = () => {
@@ -12,14 +11,39 @@ const ComplaintSection = () => {
     const [showNewComplaintForm, setShowNewComplaintForm] = useState(false);
     const [selectedComplaint, setSelectedComplaint] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
-    const [complaintHistory, setComplaintHistory] = useState([]);
 
-    // Determine if the user is a student or faculty (similar UI)
+    // Determine if the user is a student or faculty
     const isStudentOrFaculty = role === "student" || role === "faculty";
 
     // Default active page based on role
     const defaultActivePage = isStudentOrFaculty ? "My Complaints" : "Pending";
     const [activePage, setActivePage] = useState(defaultActivePage);
+
+    // Fetch complaint history
+    const {
+        data: complaintData = [],
+        isLoading,
+        isError,
+        refetch
+    } = useQuery({
+        queryKey: ["complaints", role],
+        queryFn: async () => {
+            const response = await fetch("http://localhost:8000/api/complaints/", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+                },
+                credentials: "include",
+            });
+
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.message || "Failed to fetch complaints");
+            }
+            return result.data || [];
+        },
+    });
 
     // Categories for complaints
     const categories = {
@@ -29,7 +53,10 @@ const ComplaintSection = () => {
     };
 
     // Filter complaints based on search query and active page
-    const filteredComplaints = complaintHistory.filter((complaint) => complaint.title.toLowerCase().includes(searchQuery.toLowerCase()) && ((isStudentOrFaculty && activePage) === "My Complaints" || complaint.status === activePage));
+    const filteredComplaints = complaintData.filter((complaint) =>
+        complaint.title?.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        (isStudentOrFaculty ? activePage === "My Complaints" : complaint.status === activePage)
+    );
 
     // Handle GO button click to show the NewComplaintForm
     const handleGoClick = () => {
@@ -40,8 +67,7 @@ const ComplaintSection = () => {
     const handleBackClick = (wasNewAdded) => {
         setShowNewComplaintForm(false);
         if (wasNewAdded) {
-            // Fetch the complaint history again if a new complaint was added
-            fetchComplaintHistory();
+            refetch();
         }
     };
 
@@ -50,41 +76,17 @@ const ComplaintSection = () => {
         setSelectedComplaint(complaint);
     };
 
-    // Handle Back button from ComplaintDetails to return to the list
+    // Handle Back button from ComplaintDetails
     const handleBackFromDetails = (wasDeleted) => {
         setSelectedComplaint(null);
         if (wasDeleted) {
-            // Fetch the complaint history again if a complaint was deleted
-            fetchComplaintHistory();
+            refetch();
         }
     };
 
     useEffect(() => {
-        // Reset the selected complaint when the active page changes
         setSelectedComplaint(null);
     }, [activePage]);
-
-    // Fetch complaint history from the server (mocked here for demonstration)
-    const fetchComplaintHistory = async () => {
-      const response = await fetch("http://localhost:8000/api/complaints/", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: localStorage.getItem("accessToken"), // Or however you store it
-        },
-      });
-    
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to fetch complaints");
-      }
-      return data.data;
-    };
-
-    useEffect(() => {
-        console.log("first");
-        fetchComplaintHistory();
-    }, [role]);
 
     // If the role is Academic Admin, don't show the complaint section
     if (role === "acadAdmin") {
@@ -121,7 +123,11 @@ const ComplaintSection = () => {
 
             {/* Main Content */}
             <div className="bg-gray-50 p-6 rounded-lg drop-shadow-md w-[98%] min-h-full mb-4 m-auto">
-                {/* New Complaint Form Selection (only for students/faculty) */}
+                {/* Loading and Error States */}
+                {isLoading && <p className="text-gray-600">Loading complaints...</p>}
+                {isError && <p className="text-red-600">Error fetching complaints.</p>}
+
+                {/* New Complaint Form Selection */}
                 {isStudentOrFaculty && activePage === "New Complaint" && !showNewComplaintForm && (
                     <div className="max-w-md mx-auto p-6 bg-white shadow-md rounded-lg">
                         <label className="block font-semibold mb-2">Register to:</label>
@@ -133,9 +139,9 @@ const ComplaintSection = () => {
                                 setSubCategory("");
                             }}
                         >
-                            <option>Computer & Comm. Centre</option>
-                            <option>Hostel/Resident Complaints</option>
-                            <option>Infrastructure Complaints</option>
+                            {Object.keys(categories).map((cat) => (
+                                <option key={cat} value={cat}>{cat}</option>
+                            ))}
                         </select>
 
                         <label className="block font-semibold mt-4 mb-2">Select Category</label>
@@ -145,39 +151,34 @@ const ComplaintSection = () => {
                             onChange={(e) => setSubCategory(e.target.value)}
                         >
                             <option value="">--Select Category--</option>
-                            {categories[category]?.map((cat, index) => (
-                                <option
-                                    key={index}
-                                    value={cat}
-                                >
-                                    {cat}
-                                </option>
+                            {categories[category]?.map((cat) => (
+                                <option key={cat} value={cat}>{cat}</option>
                             ))}
                         </select>
 
                         <button
                             className="bg-[#28a745] text-white px-4 py-2 rounded-md mt-3"
                             onClick={handleGoClick}
+                            disabled={!subCategory}
                         >
                             GO
                         </button>
                     </div>
                 )}
 
-                {/* New Complaint Form (only for students/faculty) */}
+                {/* New Complaint Form */}
                 {isStudentOrFaculty && activePage === "New Complaint" && showNewComplaintForm && (
                     <div className="relative">
-                        {/* Back Button */}
                         <button
                             className="absolute top-4 left-4 bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700"
                             onClick={() => handleBackClick(false)}
                         >
                             Back
                         </button>
-                        {/* Render the NewComplaintForm */}
                         <NewComplaintForm
                             subCategory={subCategory}
                             category={category}
+                            onSubmit={() => handleBackClick(true)}
                         />
                     </div>
                 )}
@@ -196,15 +197,15 @@ const ComplaintSection = () => {
                         </div>
 
                         {/* Complaint List */}
-                        {filteredComplaints.length > 0 ? (
-                            filteredComplaints.map((complaint, index) => (
+                        {!isLoading && filteredComplaints.length > 0 ? (
+                            filteredComplaints.map((complaint) => (
                                 <div
-                                    key={index}
+                                    key={complaint.id}
                                     className="flex justify-between items-center p-4 mb-2 border rounded-md"
                                 >
                                     <div>
                                         <h3 className="font-semibold">{complaint.title}</h3>
-                                        <p className="text-sm text-gray-600">Date: {complaint.date}</p>
+                                        <p className="text-sm text-gray-600">Date: {new Date(complaint.date).toLocaleDateString()}</p>
                                         <p className="text-sm text-gray-600">Status: {complaint.status}</p>
                                     </div>
                                     <button
@@ -216,12 +217,12 @@ const ComplaintSection = () => {
                                 </div>
                             ))
                         ) : (
-                            <p className="text-gray-600">No complaints found.</p>
+                            !isLoading && <p className="text-gray-600">No complaints found.</p>
                         )}
                     </div>
                 )}
 
-                {/* Show Complaint Details if a complaint is selected */}
+                {/* Complaint Details */}
                 {((isStudentOrFaculty && (activePage === "My Complaints" || activePage === "Delete Complaint")) || (!isStudentOrFaculty && (activePage === "Pending" || activePage === "In Progress" || activePage === "Resolved"))) && selectedComplaint && (
                     <ComplaintDetails
                         complaint={selectedComplaint}
