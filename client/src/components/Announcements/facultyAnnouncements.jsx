@@ -48,7 +48,7 @@ export default function FacultyCourseAnnouncements() {
   } = useQuery({
     queryKey: ["facultyCourseAnnouncements", courseId],
     queryFn: () => 
-      newRequest.get(`/faculty/courses/${courseId}`).then((res) => {
+      newRequest.get(`/faculty/courses/${courseId}/announcements`).then((res) => {
         setCourse(res.data);
         return res.data;
       }),
@@ -58,7 +58,7 @@ export default function FacultyCourseAnnouncements() {
   // Add new announcement mutation
   const addAnnouncementMutation = useMutation({
     mutationFn: (announcementData) => {
-      return newRequest.post(`/faculty/courses/${courseId}/announcements`, announcementData);
+      return newRequest.post(`/faculty/courses/${courseId}/announcements/add`, announcementData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["facultyCourseAnnouncements", courseId]);

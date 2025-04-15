@@ -26,30 +26,103 @@ export const getStudent = async (req, res) => {
 };
 
 //get completed courses for display on the completed courses page
+// export const getCompletedCourses = async (req, res) => {
+//     try {
+//       console.log("Fetching completed courses for student ID:", req.params.id);
+//       const user = await Student.findOne({ userId: req.params.id })
+//         .populate('userId');
+          
+//       if (!user) {
+//         return res.status(404).json({ message: 'Student not found' });
+//       }
+      
+//       console.log("User: ", user);
+//       const courses = await StudentCourse.find({
+//         rollNo: user.rollNo,
+//         isCompleted: true
+//       })
+//       .populate({
+//         path: 'courseId',
+//         model: 'Course',
+//         select: 'courseCode courseName credits department'
+//       })
+//       .lean();
+          
+//       console.log("Completed courses fetched:", courses);
+      
+//       const formatted = courses.map(course => ({
+//         courseCode: course.courseId.courseCode,
+//         courseName: course.courseId.courseName,
+//         credits: course.courseId.credits,
+//         department: course.courseId.department,
+//         semester: course.semester,
+//         grade: course.grade,
+//         creditOrAudit: course.creditOrAudit,
+//         completedAt: course.updatedAt
+//       }));
+      
+//       res.status(200).json({ courses: formatted });
+//     } catch (error) {
+//       console.error("Error fetching completed courses:", error);
+//       res.status(500).json({ message: error.message });
+//     }
+//   };
+  
 export const getCompletedCourses = async (req, res) => {
     try {
-      const courses = await StudentCourse.find({
-        rollNo: req.params.id,
+      console.log("Fetching completed courses for student ID:", req.params.id);
+      const user = await Student.findOne({ userId: req.params.id })
+        .populate('userId');
+          
+      if (!user) {
+        return res.status(404).json({ message: 'Student not found' });
+      }
+      
+      console.log("User: ", user);
+      
+      // First, get all completed student courses
+      const studentCourses = await StudentCourse.find({
+        rollNo: user.rollNo,
         isCompleted: true
-      })
-      .populate('courseId', 'courseCode courseName credits department')
-      .lean();
-  
-      const formatted = courses.map(c => ({
-        ...c.courseId,
-        semester: c.semester,
-        grade: c.grade,
-        creditOrAudit: c.creditOrAudit,
-        completedAt: c.updatedAt
-      }));
-  
+      }).lean();
+      
+      // Get the courseIds to fetch course details
+      const courseIds = studentCourses.map(sc => sc.courseId);
+      
+      // Fetch all relevant courses
+      const courseDetails = await Course.find({
+        courseCode: { $in: courseIds }
+      }).lean();
+      
+      // Create a map for quick lookup
+      const courseMap = {};
+      courseDetails.forEach(course => {
+        courseMap[course.courseCode] = course;
+      });
+      
+      // Now combine the data
+      const formatted = studentCourses.map(sc => {
+        const course = courseMap[sc.courseId] || {};
+        return {
+          courseCode: course.courseCode || sc.courseId,
+          courseName: course.courseName || 'Unknown Course',
+          credits: course.credits || 0,
+          department: course.department || 'Unknown',
+          semester: sc.semester,
+          grade: sc.grade,
+          creditOrAudit: sc.creditOrAudit,
+          completedAt: sc.updatedAt
+        };
+      });
+      
+      console.log("Formatted courses:", formatted);
       res.status(200).json({ courses: formatted });
     } catch (error) {
+      console.error("Error fetching completed courses:", error);
       res.status(500).json({ message: error.message });
     }
   };
   
-
 // Add this new function for student courses
 export const getStudentCourses = async (req, res) => {
     try {

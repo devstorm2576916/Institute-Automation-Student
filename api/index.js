@@ -130,8 +130,8 @@ startServer();
 // const runSeeds = async () => {
 //   try {
 //     // await seedDatabase();
-//     // await seedStudentCourses();
-//     await seedCourses();
+//     await seedStudentCourses();
+//     // await seedCourses();
 //     // seedFacultyCourses();
 //     console.log("All seeding completed successfully!");
 //   } catch (error) {

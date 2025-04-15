@@ -61,31 +61,35 @@ const studentCoursesData = [
       creditOrAudit: "Credit",
       semester: "3",
       status: "Approved",
-      grade: "A"
-  },
-  {
+      grade: "A",
+      isCompleted: true
+    },
+    {
       rollNo: "220101039",
       courseId: "MA102",
       creditOrAudit: "Credit",
       semester: "3",
       status: "Approved",
-      grade: "B+"
-  },
-  {
+      grade: "B+",
+      isCompleted: false
+    },
+    {
       rollNo: "220101039",
       courseId: "EE204",
       creditOrAudit: "Credit",
       semester: "3",
       status: "Approved",
-      grade: "A-"
-  },
-  {
+      grade: "A-",
+      isCompleted: false
+    },
+    {
       rollNo: "220101039",
       courseId: "HS103",
       creditOrAudit: "Audit",
       semester: "3",
       status: "Pending",
-      grade: null
+      grade: null,
+      isCompleted: false
   }
 ];
 

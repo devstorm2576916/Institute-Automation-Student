@@ -6,7 +6,9 @@ import {
   FaCheckCircle,
   FaCalendarAlt,
   FaRegChartBar,
-  FaUniversity
+  FaUniversity,
+  FaBuilding,
+  FaClock
 } from "react-icons/fa";
 
 function CompletedCourses() {
@@ -20,6 +22,11 @@ function CompletedCourses() {
         return res.data.courses || [];
       }),
   });
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString();
+  };
 
   return (
     <div className="p-6">
@@ -48,58 +55,72 @@ function CompletedCourses() {
               key={course._id}
               className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden"
             >
-              {/* Course Header */}
-              <div className="p-6 border-b border-gray-200">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-green-100 p-3 rounded-full">
-                      <FaCheckCircle className="text-green-500 text-xl" />
-                    </div>
-                    <div>
-                      <h2 className="text-xl font-semibold text-gray-900">
-                        {course.courseName}
-                      </h2>
-                      <p className="text-gray-600 text-sm">{course.courseCode}</p>
-                    </div>
+              {/* Course Header with Grade */}
+              <div className="p-5 border-b border-gray-200 flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <div className="bg-green-100 p-2 rounded-full">
+                    <FaCheckCircle className="text-green-500 text-lg" />
                   </div>
-                  <span className="bg-gray-100 text-gray-700 text-sm py-1 px-3 rounded-full font-medium">
-                    {course.grade || 'N/A'}
-                  </span>
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900">
+                      {course.courseName}
+                    </h2>
+                    <p className="text-gray-600 text-sm">{course.courseCode}</p>
+                  </div>
+                </div>
+                <span className="bg-gray-100 text-gray-700 text-sm py-1 px-3 rounded-full font-medium">
+                  {course.grade || 'N/A'}
+                </span>
+              </div>
+
+              {/* Course Details - Top Row */}
+              <div className="p-4 grid grid-cols-2 gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="bg-green-50 rounded-full p-2">
+                    <FaRegChartBar className="text-green-500" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase">Credits</p>
+                    <p className="text-lg font-semibold text-green-600">{course.credits}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <div className="bg-green-50 rounded-full p-2">
+                    <FaCalendarAlt className="text-green-500" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase">Semester</p>
+                    <p className="text-lg font-semibold text-green-600">{course.semester}</p>
+                  </div>
                 </div>
               </div>
 
-              {/* Course Details */}
-              <div className="grid grid-cols-3 border-b border-gray-200">
-                <div className="p-4 text-center border-r border-gray-200">
-                  <p className="text-2xl font-semibold text-green-500">
-                    {course.credits}
-                  </p>
-                  <p className="text-xs text-gray-600 font-medium uppercase">Credits</p>
-                </div>
-                <div className="p-4 text-center border-r border-gray-200">
-                  <p className="text-2xl font-semibold text-green-500">
-                    {course.semester}
-                  </p>
-                  <p className="text-xs text-gray-600 font-medium uppercase">Semester</p>
-                </div>
-                <div className="p-4 text-center">
-                  <p className="text-2xl font-semibold text-green-500">
-                    {course.department}
-                  </p>
-                  <p className="text-xs text-gray-600 font-medium uppercase">Department</p>
+              {/* Department Row */}
+              <div className="px-4 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="bg-green-50 rounded-full p-2">
+                    <FaBuilding className="text-green-500" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase">Department</p>
+                    <p className="text-lg font-semibold text-green-600">{course.department}</p>
+                  </div>
                 </div>
               </div>
 
               {/* Additional Info */}
-              <div className="p-6">
-                <div className="flex items-center gap-4 text-sm text-gray-600">
+              <div className="p-4 bg-gray-50 border-t border-gray-200">
+                <div className="flex flex-wrap justify-between items-center gap-2 text-sm text-gray-600">
                   <div className="flex items-center gap-2">
                     <FaUniversity className="text-green-400" />
                     <span>{course.creditOrAudit}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaCalendarAlt className="text-green-400" />
-                    <span>Completed: {new Date(course.updatedAt).toLocaleDateString()}</span>
+                    <FaClock className="text-green-400" />
+                    <span>
+                      Completed: {formatDate(course.completedAt)}
+                    </span>
                   </div>
                 </div>
               </div>
