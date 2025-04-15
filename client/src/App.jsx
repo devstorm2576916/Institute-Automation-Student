@@ -55,6 +55,7 @@ import AdminDropRequests from './components/dropCourse/dropCourseAdmin.jsx';
 import CourseWrapper from './components/mycourses/courseWrapper.jsx';
 import FacultyCourseAnnouncements from './components/Announcements/facultyAnnouncements.jsx';
 import AnnouncementWrapper from './components/Announcements/announcementWrapper.jsx';
+import CompletedCourses from './components/mycourses/CompletedCourses.jsx';
 
 const queryClient = new QueryClient()
 function App() {
@@ -170,6 +171,10 @@ function App() {
                 {
                     path:"/course/:courseId/assignment/:assignmentId/submissions",
                     element: <FacultyAssignmentSubmissions/>
+                },
+                {   
+                    path:"/:id/completed-courses",
+                    element: <CompletedCourses/>
                 },
 
                 {

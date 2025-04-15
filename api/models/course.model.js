@@ -29,7 +29,8 @@ const studentCourseSchema = new mongoose.Schema({
     status: { type: String, enum: ['Approved', 'Pending'], default: 'Pending' },
     grade: { type: String, default: null },
     createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now }
+    updatedAt: { type: Date, default: Date.now },
+    isCompleted: { type: Boolean, default: false },
 });
 
 // Faculty Courses Model
