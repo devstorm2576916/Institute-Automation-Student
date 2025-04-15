@@ -1,5 +1,8 @@
 import { Course} from '../models/course.model.js';
 import { Faculty } from '../models/faculty.model.js';
+import { Student } from '../models/student.model.js';
+import { StudentCourse } from '../models/course.model.js';
+import { User } from '../models/user.model.js';
 
 export const getCourseAnnouncements = async (req, res) => {
     try {
@@ -127,7 +130,7 @@ try {
     // );
 
     const activeCourses = facultyCourses.filter(course => course.status === 'Ongoing');
-
+    console.log("Active courses:", activeCourses);
     // console.log("Active courses:", activeCourses);
     
     // Get course details for each active course
@@ -148,8 +151,8 @@ try {
         }
         
         // Get student count (dummy data for now)
-        const studentCount = Math.floor(Math.random() * 60) + 20; // Random between 20-80
-        
+        // const studentCount = Math.floor(Math.random() * 60) + 20; // Random between 20-80
+        const studentCount = courseDetails.students ? courseDetails.students.length : 0;
         // Get assignment count
         const assignmentCount = Math.floor(Math.random() * 5) + 1; // Random between 1-5
         
@@ -330,6 +333,136 @@ export const deleteCourseAnnouncement = async (req, res) => {
       success: false,
       message: 'Failed to delete announcement',
       error: error.message
+    });
+  }
+};
+
+export const getCourseStudents = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    console.log("Fetching students for course ID:", courseId);
+
+    // Find the course
+    const course = await Course.findOne({ courseCode: courseId });
+    console.log("Course found:", course);
+    if (!course) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Course not found' 
+      });
+    }
+
+    // Find all student registrations for this course
+    // const students = await StudentCourse.find({ 
+    //   courseId: courseId 
+    // });
+
+    const students = course.students || [];
+
+    console.log("Student registrations found:", students);
+    if (!students || students.length === 0) {
+      return res.status(200).json({
+        success: true,
+        course: {
+          courseCode: course.courseCode,
+          courseName: course.courseName,
+          department: course.department,
+          credits: course.credits
+        },
+        students: []
+      });
+    }
+
+    // Get roll numbers for all registered students
+    // Find student details
+    const studentDetails = await Student.find({
+      // rollNo: { $in: studentRollNumbers }
+      userId : { $in: students }
+    });
+    console.log("Student details found:", studentDetails);
+    // Get user IDs for all students to retrieve names and emails
+    // const userIds = studentDetails.map(student => student.userId);
+    
+    // Find user information
+    const userInfo = await User.find({
+      _id: { $in: students }
+    }, 'name email profilePicture');
+
+    // Create a lookup map for user info
+    const userLookup = {};
+    userInfo.forEach(user => {
+      userLookup[user._id.toString()] = {
+        name: user.name,
+        email: user.email,
+        profilePicture: user.profilePicture
+      };
+    });
+
+    console.log("User information found:", userInfo);
+
+    // Create a lookup map for student details
+    const studentLookup = {};
+    studentDetails.forEach(student => {
+      studentLookup[student.userId.toString()] = {
+        userId: student.userId.toString(),
+        rollNo: student.rollNo,
+        department: student.department,
+        semester: student.semester,
+        batch: student.batch,
+        program: student.program,
+        status: student.status,
+        hostel: student.hostel,
+        roomNo: student.roomNo
+      };
+    });
+
+    console.log("Student details lookup:", studentLookup);
+    // Combine all data
+    const studentsWithDetails = students.map(registration => {
+      console.log("Processing registration:", registration);
+      const studentInfo = studentLookup[registration] || {};
+      console.log("Student info found:", studentInfo);  
+      const user = userLookup[studentInfo.userId] || {};
+      
+      // Generate random attendance data for demonstration (in a real app, this would come from your database)
+      const attendance = Math.floor(Math.random() * 30) + 70; // Random attendance between 70-100%
+      
+      return {
+        rollNo: studentInfo.rollNo,
+        name: user.name || 'Unknown',
+        email: user.email || 'No email',
+        profilePicture: user.profilePicture || null,
+        department: studentInfo.department || 'Unknown',
+        semester: studentInfo.semester || 0,
+        batch: studentInfo.batch || 'Unknown',
+        program: studentInfo.program || 'Unknown',
+        status: studentInfo.status || 'active',
+        hostel: studentInfo.hostel || 'Unknown',
+        roomNo: studentInfo.roomNo || 'Unknown',
+        registrationStatus: registration.creditOrAudit || 'Credit',
+        grade: registration.grade || null,
+        attendance: attendance
+      };
+    });
+
+    // Return course info and student details
+    return res.status(200).json({
+      success: true,
+      course: {
+        courseCode: course.courseCode,
+        courseName: course.courseName,
+        department: course.department,
+        credits: course.credits
+      },
+      students: studentsWithDetails
+    });
+    
+  } catch (error) {
+    console.error('Error fetching course students:', error);
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch course students',
+      error: error.message 
     });
   }
 };

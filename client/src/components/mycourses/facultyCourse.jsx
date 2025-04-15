@@ -32,7 +32,7 @@ function FacultyCourses() {
   });
 
 
-  console.log("Faculty Courses============:", facultyCourses);
+  // console.log("Faculty Courses============:", facultyCourses);
 
   return (
     <div className="p-6">
@@ -134,7 +134,7 @@ function FacultyCourses() {
                   </Link>
                   
                   <Link
-                    to={`/faculty/course/${course.id}/students`}
+                    to={`/course/${course.id}/students`}
                     className="flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-md p-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition duration-200"
                   >
                     <FaUsers className="text-blue-400" />

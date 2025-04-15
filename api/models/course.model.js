@@ -15,6 +15,10 @@ const courseSchema = new mongoose.Schema({
         postedBy: { type: String, ref: 'Faculty' },
         attachments: [{ name: String, url: String }]
     }],
+    students: [{ 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Student' 
+    }],
     credits: { type: Number, required: true, default: 6 },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }

@@ -131,8 +131,8 @@ startServer();
 //   try {
 //     // await seedDatabase();
 //     // await seedStudentCourses();
-//     // await seedCourses();
-//     seedFacultyCourses();
+//     await seedCourses();
+//     // seedFacultyCourses();
 //     console.log("All seeding completed successfully!");
 //   } catch (error) {
 //     console.error("Error during seeding:", error);

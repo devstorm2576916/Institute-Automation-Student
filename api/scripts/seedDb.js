@@ -111,6 +111,9 @@ const coursesData = [
               date: new Date("2025-04-12"),
               postedBy: "FACULTY001"
           }
+      ],
+      students: [
+        "67fb82e1fd693835a24dd230", // Example student ID, replace with actual IDs
       ]
   },
   {
@@ -127,6 +130,9 @@ const coursesData = [
               date: new Date("2025-04-14"),
               postedBy: "FACULTY002"
           }
+      ],
+      students: [
+        "67fb82e1fd693835a24dd230", // Example student ID, replace with actual IDs
       ]
   },
   {
@@ -150,7 +156,10 @@ const coursesData = [
               date: new Date("2025-04-11"),
               postedBy: "FACULTY003"
           }
-      ]
+        ],
+        students: [
+          "67fb82e1fd693835a24dd230", // Example student ID, replace with actual IDs
+        ]
   },
   {
       courseCode: "HS103",
@@ -166,6 +175,9 @@ const coursesData = [
               date: new Date("2025-04-13"),
               postedBy: "FACULTY004"
           }
+      ],
+      students: [
+        "67fb82e1fd693835a24dd230", // Example student ID, replace with actual IDs
       ]
   },
   {
@@ -189,6 +201,9 @@ const coursesData = [
               date: new Date("2025-04-12"),
               postedBy: "FACULTY001"
           }
+      ],
+      students: [
+        "67fb82e1fd693835a24dd230", // Example student ID, replace with actual IDs
       ]
   },
   {
@@ -205,6 +220,9 @@ const coursesData = [
               date: new Date("2025-04-14"),
               postedBy: "FACULTY005"
           }
+      ],
+      students: [
+        "67fb82e1fd693835a24dd230", // Example student ID, replace with actual IDs
       ]
   },
   {
@@ -221,6 +239,9 @@ const coursesData = [
               date: new Date("2025-04-13"),
               postedBy: "FACULTY006"
           }
+      ],
+      students: [
+        "67fb82e1fd693835a24dd230", // Example student ID, replace with actual IDs
       ]
   }
 ];
