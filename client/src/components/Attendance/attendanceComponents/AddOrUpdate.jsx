@@ -3,7 +3,7 @@ import UpdateAttendance from "./UpdateAttendance";
 import { useState } from 'react';
 import React, { useRef } from 'react';
 
-function AddOrUpdate(){
+function AddOrUpdate({ selectedStudent }){
     const [AddOrUpdate, SetAddOrUpdate] = useState("Add"); 
 
     const handleRadioChange = (event) => {
@@ -20,8 +20,8 @@ function AddOrUpdate(){
                 <label className="btn btn-outline-primary" htmlFor="btnradio2"><strong>Update Attendance</strong></label>
             </div>
             <div className="addupdateform">
-                {(AddOrUpdate==="Add") && <AddAttendance/>}
-                {(AddOrUpdate==="Update") && <UpdateAttendance/>}
+                {(AddOrUpdate==="Add") && <AddAttendance selectedStudent={selectedStudent}/>}
+                {(AddOrUpdate==="Update") && <UpdateAttendance selectedStudent={selectedStudent}/>}
             </div>
         </div>
     );
