@@ -14,9 +14,11 @@ export const validateAccessToken = (req, res, next) => {
     // const accessToken = req.header('Authorization');
 
     const accessToken = req?.cookies?.accessToken;
+    
     const user = req?.cookies?.user;
 
     const parsedUser = JSON.parse(user);
+    console.log(parsedUser)
 
     jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
         if (err) {
