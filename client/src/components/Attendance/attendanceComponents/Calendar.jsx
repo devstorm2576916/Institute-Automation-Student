@@ -5,11 +5,25 @@ import { useEffect, useState } from 'react';
 import { useParams } from "react-router-dom";
 import { RoleContext } from "../../../context/Rolecontext";
 import { useContext } from "react";
+import { useQuery } from "@tanstack/react-query";
+import newRequest from "../../../utils/newRequest";
 
 
 
 const localizer = momentLocalizer(moment);
-function MyCalendar({ selectedStudent }) {  // Proper prop destructuring
+function MyCalendar({ selectedStudent }) { 
+    const {data:userData} = JSON.parse(localStorage.getItem("currentUser"));
+    const {email, userId} = userData.user;
+    console.log(email);
+    console.log(userData);
+    const { isLoading, error, data } = useQuery({
+        queryKey: [`${userId}`],
+        queryFn: () =>
+            newRequest.get(`/student/${userId}`).then((res) => {
+                return res.data;
+            }),
+    });
+    // Proper prop destructuring
     const { role } = useContext(RoleContext);
     const { id: courseId } = useParams();
     const [myEventsList, setMyEventsList] = useState([]);
@@ -21,8 +35,7 @@ function MyCalendar({ selectedStudent }) {  // Proper prop destructuring
             let rollNoToFetch;
             
             if (role === 'student') {
-                const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-                rollNoToFetch = currentUser?.user?.rollNo;
+                rollNoToFetch = data?.rollNo;
             } else if (selectedStudent) {
                 rollNoToFetch = selectedStudent;
             }
@@ -44,13 +57,13 @@ function MyCalendar({ selectedStudent }) {  // Proper prop destructuring
                 },
             });
 
-            const data = await response.json();
+            const dataRecieved = await response.json();
 
             if (response.ok) {
-                setMyEventsList(data.eventList || []);  // Ensure we always have an array
-                console.log('Updated events:', data.eventList);  // Debug log
+                setMyEventsList(dataRecieved.eventList || []);  // Ensure we always have an array
+                console.log('Updated events:', dataRecieved.eventList);  // Debug log
             } else {
-                console.error("Error fetching attendance data:", data.error);
+                console.error("Error fetching attendance data:", dataRecieved.error);
             }
         } catch (error) {
             console.error("Error fetching attendance data:", error);
