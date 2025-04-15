@@ -13,7 +13,7 @@ import {
     createCourseDropRequest,
     getStudentDropRequests,
     cancelDropRequest,
-    getCompletedCourses
+    getCompletedCourses,
     updateStudentProfile
 } from "../controllers/student.controller.js";
 
