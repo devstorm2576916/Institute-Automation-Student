@@ -3,8 +3,10 @@ import { HostelAdmin as Admin } from "../models/hostelAdmin.model.js";
 import { Complaint, SupportStaff } from "../models/complaint.model.js";
 import { validateAccessToken } from "../middleware/auth.middleware.js";
 
-export default ComplaintsController = {
+const ComplaintsController = {
   createComplaint: async (req, res) => {
+    console.log(req.body)
+    return ;
     const complaint = new Complaint(req.body);
     try {
       await complaint.save();
@@ -22,6 +24,7 @@ export default ComplaintsController = {
   },
   getUserComplaints: async (req, res) => {
     const userId = req.user._id;
+    console.log(userId);
     try {
       const page = parseInt(req.body.page) || 1;
       const limit = parseInt(req.body.limit) || 10;
@@ -291,3 +294,5 @@ export default ComplaintsController = {
     }
   },
 };
+
+export default ComplaintsController;

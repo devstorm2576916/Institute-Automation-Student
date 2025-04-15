@@ -14,13 +14,13 @@ const NewComplaintForm = ({ category, subCategory }) => {
     const queryClient = useQueryClient();
 
     const submitComplaint = async (formData) => {
-        const token = localStorage.getItem("accessToken");
+        const authToken = localStorage.getItem("authToken");
         const res = await fetch("http://localhost:8000/api/complaints/create",{
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 // authorization: `Bearer ${token}`,
-                authorization: `${token}`,
+                authorization: `${authToken}`,
             },
             body: JSON.stringify(formData),
         });

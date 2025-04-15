@@ -59,10 +59,10 @@ const complaintSchema = new mongoose.Schema({
   },
 });
 
-const SupportStaff = new mongoose.Schema({
+const SupportStaffSchema = new mongoose.Schema({
   name: { type: String, required: true },
   phone: { type: String, required: true }
 });
 
-exports.Complaint = mongoose.model("Complaint", complaintSchema);
-exports.SupportStaff = mongoose.model("SupportStaff", SupportStaff);
+export const Complaint = mongoose.model("Complaint", complaintSchema);
+export const SupportStaff = mongoose.model("SupportStaff", SupportStaffSchema);
