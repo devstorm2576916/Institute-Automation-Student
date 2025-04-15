@@ -185,7 +185,7 @@ function MyCourses() {
       {/* Completed Courses Link */}
     <div className="mt-4 text-center">
       <Link
-        to={`/${userId}/completed-courses`}
+        to={`/completed-courses`}
         className="inline-flex items-center text-pink-600 hover:text-pink-700"
       >
         Want to see your completed courses? Click here

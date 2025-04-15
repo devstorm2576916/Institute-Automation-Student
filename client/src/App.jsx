@@ -175,7 +175,7 @@ function App() {
                     element: <FacultyAssignmentSubmissions/>
                 },
                 {   
-                    path:"/:id/completed-courses",
+                    path:"/completed-courses",
                     element: <CompletedCourses/>
                 },
 
