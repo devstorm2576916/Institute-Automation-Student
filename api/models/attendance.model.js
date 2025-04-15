@@ -6,6 +6,7 @@ const attendanceSchema = new mongoose.Schema({
   rollNo: { type: String, required: true, ref: 'Student' },
   date: { type: Date, required: true, default: Date.now },
   isPresent: { type: Boolean, required: true, default: false },
+  isApproved: { type: Boolean, required: true, default: false },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

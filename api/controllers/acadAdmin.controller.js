@@ -1,9 +1,10 @@
+import mongoose from "mongoose";
 import { ApplicationDocument, Bonafide, Passport } from '../models/documents.models.js';
 import { Student } from '../models/student.model.js';
 import { User } from '../models/user.model.js';
 import { CourseDropRequest } from '../models/courseDropRequest.model.js';
 import { Course, StudentCourse} from '../models/course.model.js';
-
+import { FeeBreakdown } from "../models/fees.model.js";
 
 // Get all applications with pagination
 export const getAllApplications = async (req, res) => {
@@ -274,6 +275,7 @@ export const addComment = async (req, res) => {
     }
 };
 
+
 export const getDropRequests = async (req, res) => {
     try {
         // console.log('[1] Starting to fetch drop requests...');
@@ -390,3 +392,286 @@ export const updateDropRequestStatus = async (req, res) => {
 };
 
 
+
+export const addFeeStructure = async (req, res) => {
+    try {
+      const requiredFields = [
+        "year",
+        "program",
+        "semesterParity",
+        "tuitionFees",
+        "examinationFees",
+        "registrationFee",
+        "gymkhanaFee",
+        "medicalFee",
+        "hostelFund",
+        "hostelRent",
+        "elecAndWater",
+        "messAdvance",
+        "studentsBrotherhoodFund",
+        "acadFacilitiesFee",
+        "hostelMaintenance",
+        "studentsTravelAssistance",
+      ];
+  
+      // Check if all required fields are present
+      const missingFields = requiredFields.filter((field) => !req.body[field]);
+      if (missingFields.length > 0) {
+        return res.status(400).json({
+          message: `Missing required fields: ${missingFields.join(", ")}`,
+          success: false,
+        });
+      }
+  
+      // Validate numeric fields
+      const numericFields = [
+        "year",
+        "semesterParity",
+        "tuitionFees",
+        "examinationFees",
+        "registrationFee",
+        "gymkhanaFee",
+        "medicalFee",
+        "hostelFund",
+        "hostelRent",
+        "elecAndWater",
+        "messAdvance",
+        "studentsBrotherhoodFund",
+        "acadFacilitiesFee",
+        "hostelMaintenance",
+        "studentsTravelAssistance",
+      ];
+  
+      const invalidFields = numericFields.filter(
+        (field) => isNaN(req.body[field]) || req.body[field] < 0
+      );
+  
+      if (invalidFields.length > 0) {
+        return res.status(400).json({
+          message: `Invalid numeric values for fields: ${invalidFields.join(
+            ", "
+          )}`,
+          success: false,
+        });
+      }
+  
+      // Validate program
+      const validPrograms = ["BTech", "MTech", "PhD", "BDes", "MDes"];
+      if (!validPrograms.includes(req.body.program)) {
+        return res.status(400).json({
+          message: "Invalid program. Must be one of: " + validPrograms.join(", "),
+          success: false,
+        });
+      }
+  
+      const feeData = {
+        ...req.body,
+        breakdownId: new mongoose.Types.ObjectId(),
+      };
+  
+      const feeBreakdown = new FeeBreakdown(feeData);
+      await feeBreakdown.save();
+  
+      return res.status(201).json({
+        message: "Fee structure added successfully",
+        success: true,
+        data: feeBreakdown,
+      });
+    } catch (error) {
+      console.error("Error adding fee structure:", error);
+      return res.status(500).json({
+        message: "Failed to add fee structure",
+        success: false,
+        error: error.message,
+      });
+    }
+  };
+  
+  export const getFeeBreakdown = async (req, res) => {
+      try {
+          const { year, program, semesterParity } = req.query;
+          const query = {};
+  
+          if (year) query.year = year;
+          if (program) query.program = program;
+          if (semesterParity) query.semesterParity = semesterParity;
+  
+          const feeBreakdowns = await FeeBreakdown.find(query);
+  
+          if (!feeBreakdowns.length) {
+              return res.status(404).json({
+                  message: "No fee breakdown found for the given query",
+                  success: false,
+              });
+          }
+  
+          return res.status(200).json({
+              message: "Fee breakdown fetched successfully",
+              success: true,
+              data: feeBreakdowns,
+          });
+      } catch (error) {
+          console.error("Error fetching fee breakdown:", error);
+          return res.status(500).json({
+              message: "Failed to fetch fee breakdown",
+              success: false,
+              error: error.message,
+          });
+      }
+  };
+
+  
+
+
+
+// Get students with document access info
+export const getStudentsWithDocumentAccess = async (req, res) => {
+    try {
+        const { page = 1, limit = 10, branch, program, semester, search } = req.query;
+        
+        let query = {};
+        
+        if (branch) query.department = branch;
+        if (program) query.program = program;
+        if (semester) query.semester = semester;
+        if (search) {
+            query.$or = [
+                { rollNo: { $regex: search, $options: 'i' } },
+                { 'userId.name': { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        const students = await Student.find(query)
+            .populate('userId', 'name email contactNo')
+            .sort({ rollNo: 1 })
+            .limit(limit * 1)
+            .skip((page - 1) * limit)
+            .lean();
+
+        const count = await Student.countDocuments(query);
+
+        const enrichedStudents = students.map(student => ({
+            id: student._id,
+            userId: student.userId._id,
+            name: student.userId.name,
+            rollNo: student.rollNo,
+            email: student.userId.email,
+            contact: student.userId.contactNo,
+            branch: student.department,
+            program: student.program,
+            semester: student.semester,
+            hostel: student.hostel,
+            roomNo: student.roomNo,
+            cgpa: student.cgpa,
+            access: {
+                transcript: student.documentAccess?.transcript || false,
+                idCard: student.documentAccess?.idCard || false,
+                feeReceipt: student.documentAccess?.feeReceipt || false
+            }
+        }));
+
+        res.status(200).json({
+            students: enrichedStudents,
+            totalPages: Math.ceil(count / limit),
+            currentPage: parseInt(page),
+            total: count
+        });
+    } catch (error) {
+        console.error('Error fetching students:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Update individual student document access
+export const updateStudentDocumentAccess = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { access } = req.body;
+
+        if (!access || typeof access !== 'object') {
+            return res.status(400).json({ message: 'Invalid access configuration' });
+        }
+
+        const student = await Student.findByIdAndUpdate(
+            id,
+            { 
+                $set: { 
+                    'documentAccess.transcript': !!access.transcript,
+                    'documentAccess.idCard': !!access.idCard,
+                    'documentAccess.feeReceipt': !!access.feeReceipt,
+                    updatedAt: new Date()
+                }
+            },
+            { new: true }
+        ).populate('userId', 'name email contactNo');
+
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+        console.log(student)
+        const enrichedStudent = {
+            id: student._id,
+            name: student.userId.name,
+            email: student.userId.email,
+            contact: student.userId.contactNo,
+            rollNo: student.rollNo,
+            branch: student.department,
+            program: student.program,
+            semester: student.semester,
+            hostel: student.hostel,
+            roomNo: student.roomNo,
+            cgpa: student.cgpa,
+            access: {
+                transcript: student.documentAccess?.transcript || false,
+                idCard: student.documentAccess?.idCard || false,
+                feeReceipt: student.documentAccess?.feeReceipt || false
+            }
+        };
+
+        res.status(200).json(enrichedStudent);
+    } catch (error) {
+        console.error('Error updating document access:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Bulk update document access
+export const bulkUpdateDocumentAccess = async (req, res) => {
+    try {
+        const { studentIds, access } = req.body;
+        
+        if (!studentIds || !Array.isArray(studentIds) || studentIds.length === 0) {
+            return res.status(400).json({ message: 'No students specified for update' });
+        }
+
+        if (!access || typeof access !== 'object') {
+            return res.status(400).json({ message: 'Invalid access configuration' });
+        }
+
+        const updateDoc = {};
+        if (access.hasOwnProperty('transcript')) {
+            updateDoc['documentAccess.transcript'] = !!access.transcript;
+        }
+        if (access.hasOwnProperty('idCard')) {
+            updateDoc['documentAccess.idCard'] = !!access.idCard;
+        }
+        if (access.hasOwnProperty('feeReceipt')) {
+            updateDoc['documentAccess.feeReceipt'] = !!access.feeReceipt;
+        }
+        updateDoc['updatedAt'] = new Date();
+        
+        const result = await Student.updateMany(
+            { _id: { $in: studentIds } },
+            { $set: updateDoc }
+        );
+
+        res.status(200).json({ 
+            message: 'Document access updated successfully',
+            updatedCount: result.modifiedCount,
+            matchedCount: result.matchedCount
+        });
+    } catch (error) {
+        console.error('Error in bulk update:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
