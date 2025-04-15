@@ -143,7 +143,7 @@ function App() {
                   element:<FacultyDashboard/>  
                 },
                 {
-                    path:'facultyregistration/:id',
+                    path:'facultyregistration/:courseCode',
                     element:<CourseRegistrationFaculty/>
                 },
                 {
