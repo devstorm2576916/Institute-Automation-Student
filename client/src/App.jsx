@@ -190,7 +190,7 @@ function App() {
                     element: <MyCourses/>
                 },
                 {
-                    path:"/attendance/:id",
+                    path:"/attendancelanding/:id",
                     element: <AttendanceCoursePage/>
                 },
                   {
