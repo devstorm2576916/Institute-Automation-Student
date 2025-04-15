@@ -1,57 +1,78 @@
-import { Calendar, momentLocalizer } from 'react-big-calendar'
-import moment from 'moment'
+import { Calendar, momentLocalizer, Views } from 'react-big-calendar';
+import moment from 'moment';
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from "react-router-dom";
-import { Views } from 'react-big-calendar';
+import { RoleContext } from "../../../context/Rolecontext";
+import { useContext } from "react";
 
-const localizer = momentLocalizer(moment)
 
-function MyCalendar() {
-    const {id} = useParams();
+
+const localizer = momentLocalizer(moment);
+function MyCalendar({ selectedStudent }) {  // Proper prop destructuring
+    const { role } = useContext(RoleContext);
+    const { id: courseId } = useParams();
     const [myEventsList, setMyEventsList] = useState([]);
     const [view, setView] = useState(Views.WEEK);
     const [date, setDate] = useState(new Date());
-
-
+    
     useEffect(() => {
-        const fetchEventData = async () => {
-            try {
-                const response = await fetch(`http://localhost:3000/course/${id}`);
-                const data = await response.json()
-                if (response.ok) {
-                    setMyEventsList(data.eventList);
-                } else {
-                    console.error('Error fetching event data:', data.error);
-                }
-            } catch (error) {
-                console.error('Error fetching event data:', error);
+        const fetchData = async () => {
+            let rollNoToFetch;
+            
+            if (role === 'student') {
+                const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+                rollNoToFetch = currentUser?.user?.rollNo;
+            } else if (selectedStudent) {
+                rollNoToFetch = selectedStudent;
+            }
+            if (rollNoToFetch) {
+                await fetchEventData(rollNoToFetch);
             }
         };
 
-        fetchEventData();
-    }, []);
+        fetchData();
+    }, [selectedStudent, role, courseId]);  // Add all dependencies
 
-      
+    const fetchEventData = async (rollNo) => {
+        try {
+            const response = await fetch(`http://localhost:8000/api/attendancelanding/student/${courseId}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "rollno": rollNo,
+                },
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setMyEventsList(data.eventList || []);  // Ensure we always have an array
+                console.log('Updated events:', data.eventList);  // Debug log
+            } else {
+                console.error("Error fetching attendance data:", data.error);
+            }
+        } catch (error) {
+            console.error("Error fetching attendance data:", error);
+        }
+    };
+
     return (
         <div className='calendar-box'>
             <Calendar
-            views={[Views.MONTH, Views.WEEK, Views.DAY]}
-            defaultView={view}
-            view={view} // Include the view prop
-            date={date} // Include the date prop
-            onView={(view) => setView(view)}
-            onNavigate={(date) => {
-                setDate(new Date(date));
-            }}
-            localizer={localizer}
-            events={myEventsList}
-            startAccessor="start"
-            endAccessor="end"
-            style={{ height: 350 }}
+                views={[Views.MONTH, Views.WEEK, Views.DAY]}
+                defaultView={view}
+                view={view}
+                date={date}
+                onView={setView}
+                onNavigate={setDate}
+                localizer={localizer}
+                events={myEventsList}
+                startAccessor="start"
+                endAccessor="end"
+                style={{ height: 350 }}
             />
         </div>
     );
-};
-
-export default MyCalendar
+}
+export default MyCalendar;
