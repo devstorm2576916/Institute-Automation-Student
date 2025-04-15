@@ -6,7 +6,6 @@ import { validateAccessToken } from "../middleware/auth.middleware.js";
 const ComplaintsController = {
   createComplaint: async (req, res) => {
     console.log(req.body)
-    return ;
     const complaint = new Complaint(req.body);
     try {
       await complaint.save();
@@ -32,7 +31,6 @@ const ComplaintsController = {
 
       const totalComplaints = await Complaint.countDocuments({ userId });
       const totalPages = Math.ceil(totalComplaints / limit);
-
       const complaints = await Complaint.find({ userId }).skip(skip).limit(limit).sort({ createdAt: -1 });
 
       res.send({
