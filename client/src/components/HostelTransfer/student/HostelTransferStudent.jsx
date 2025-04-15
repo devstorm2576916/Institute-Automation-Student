@@ -7,6 +7,7 @@ import RejectedRequests from './RejectedRequests';
 const HostelTransferStudent = () => {
   const { data: userData } = JSON.parse(localStorage.getItem("currentUser"));
   const { email, userId } = userData.user;
+  // console.log(userId);
 
   const { isLoading, error, data } = useQuery({
     queryKey: [`${userId}`],
@@ -59,7 +60,7 @@ const HostelTransferStudent = () => {
 
   useEffect(() => {
     if (!isLoadingRequests && !errorRequests && transferRequests) {
-      console.log(transferRequests);
+      // console.log(transferRequests);
       setRequests(transferRequests.map(item => ({
         id: item._id,
         rollNo: item.rollNo,
