@@ -7,65 +7,66 @@ import {
   FaClipboardList, 
   FaBullhorn, 
   FaCalendarAlt,
-  FaComments,
+  FaUsers,
   FaExternalLinkAlt,
-  FaLock
+  FaChartBar
 } from "react-icons/fa";
 
-function MyCourses() {
-  // Get userId from localStorage just like in HostelLeaveStudent
+function FacultyCourses() {
+  // Get userId from localStorage
   const {data:userData} = JSON.parse(localStorage.getItem("currentUser"));
   const {userId} = userData.user;
   
   const [isFeedbackAvailable, setIsFeedbackAvailable] = useState(false);
 
-  // console.log("User ID:", userId);
+//   console.log("Faculty ID:", userId);
 
-  const { isLoading, error, data: studentCourses = [] } = useQuery({
-    queryKey: ["courses"],
+  const { isLoading, error, data: facultyCourses = [] } = useQuery({
+    queryKey: ["faculty-courses"],
     queryFn: () =>
-      newRequest.get(`/student/${userId}/courses`).then((res) => {
-        console.log("Course data received:", res.data);
+      newRequest.get(`/faculty/${userId}/courses`).then((res) => {
+        console.log("Faculty course data received:", res.data);
         setIsFeedbackAvailable(res.data.feedbackOpen || false);
         return res.data.courses || [];
       }),
   });
 
-  // console.log("+++++++++++++++++++++++++++++++++++", studentCourses);
+
+  // console.log("Faculty Courses============:", facultyCourses);
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-2 text-gray-800">My Courses</h1>
-      <p className="text-gray-600 mb-6">Current semester enrolled courses</p>
+      <h1 className="text-3xl font-bold mb-2 text-gray-800">My Teaching Courses</h1>
+      <p className="text-gray-600 mb-6">Current semester courses you are instructing</p>
       
       {isLoading ? (
         <div className="bg-gray-100 p-8 rounded-lg text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
           <p className="text-gray-700">Loading your courses...</p>
         </div>
       ) : error ? (
         <div className="bg-red-100 p-8 rounded-lg text-center">
           <p className="text-red-700 text-lg mb-4">{error.message || "Failed to fetch courses"}</p>
           <Link
-            to="/registration"
-            className="bg-pink-500 text-white py-2 px-6 rounded-md font-medium hover:bg-pink-600 transition duration-300"
+            to="/dashboard"
+            className="bg-blue-500 text-white py-2 px-6 rounded-md font-medium hover:bg-blue-600 transition duration-300"
           >
-            Go to Course Registration
+            Return to Dashboard
           </Link>
         </div>
-      ) : studentCourses.length === 0 ? (
+      ) : facultyCourses.length === 0 ? (
         <div className="bg-gray-100 p-8 rounded-lg text-center">
-          <p className="text-gray-700 text-lg mb-4">You are not enrolled in any courses.</p>
+          <p className="text-gray-700 text-lg mb-4">You are not assigned to any courses this semester.</p>
           <Link
-            to="/registration"
-            className="bg-pink-500 text-white py-2 px-6 rounded-md font-medium hover:bg-pink-600 transition duration-300"
+            to="/dashboard"
+            className="bg-blue-500 text-white py-2 px-6 rounded-md font-medium hover:bg-blue-600 transition duration-300"
           >
-            Course Registration
+            Return to Dashboard
           </Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {studentCourses.map((course) => (
+          {facultyCourses.map((course) => (
             <div
               key={course.id}
               className="bg-white rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition duration-300 overflow-hidden"
@@ -74,16 +75,16 @@ function MyCourses() {
               <div className="p-6 border-b border-gray-200">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="bg-pink-100 p-3 rounded-full">
-                      <FaBookOpen className="text-pink-500 text-xl" />
+                    <div className="bg-blue-100 p-3 rounded-full">
+                      <FaBookOpen className="text-blue-500 text-xl" />
                     </div>
                     <div>
                       <h2 className="text-xl font-semibold text-gray-900">{course.name}</h2>
-                      <p className="text-gray-600 text-sm">{course.instructor}</p>
+                      <p className="text-gray-600 text-sm">Course Code: {course.id}</p>
                     </div>
                   </div>
                   <span className="bg-gray-100 text-gray-700 text-sm py-1 px-3 rounded-full font-medium">
-                    {course.id}
+                    {course.credits} Credits
                   </span>
                 </div>
               </div>
@@ -91,75 +92,72 @@ function MyCourses() {
               {/* Course Stats */}
               <div className="grid grid-cols-3 border-b border-gray-200">
                 <div className="p-4 text-center border-r border-gray-200">
-                  <p className="text-2xl font-semibold text-pink-500">{course.credits}</p>
-                  <p className="text-xs text-gray-600 font-medium uppercase">Credits</p>
+                  <p className="text-2xl font-semibold text-blue-500">{course.students || 0}</p>
+                  <p className="text-xs text-gray-600 font-medium uppercase">Students</p>
                 </div>
                 <div className="p-4 text-center border-r border-gray-200">
-                  <p className="text-2xl font-semibold text-pink-500">{course.assignments}</p>
+                  <p className="text-2xl font-semibold text-blue-500">{course.assignments || 0}</p>
                   <p className="text-xs text-gray-600 font-medium uppercase">Assignments</p>
                 </div>
                 <div className="p-4 text-center">
-                  <p className="text-2xl font-semibold text-pink-500">{course.attendance}%</p>
-                  <p className="text-xs text-gray-600 font-medium uppercase">Attendance</p>
+                  <p className="text-2xl font-semibold text-blue-500">{course.avgAttendance || 0}%</p>
+                  <p className="text-xs text-gray-600 font-medium uppercase">Avg. Attendance</p>
                 </div>
               </div>
               
               {/* Course Actions */}
               <div className="p-6">
-                <p className="text-sm font-medium text-gray-700 mb-3">Quick Access</p>
+                <p className="text-sm font-medium text-gray-700 mb-3">Instructor Actions</p>
                 <div className="grid grid-cols-2 gap-3">
                   <Link
                     to={`/course/${course.id}/announcements`}
                     className="flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-md p-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition duration-200"
                   >
-                    <FaBullhorn className="text-pink-400" />
+                    <FaBullhorn className="text-blue-400" />
                     <span>Announcements</span>
-                    {course.announcements > 0 && (
-                      <span className="bg-pink-100 text-pink-600 text-xs rounded-full py-1 px-2 ml-1">
-                        {course.announcements}
-                      </span>
-                    )}
                   </Link>
                   
                   <Link
                     to={`/course/${course.id}/assignment`}
                     className="flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-md p-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition duration-200"
                   >
-                    <FaClipboardList className="text-pink-400" />
+                    <FaClipboardList className="text-blue-400" />
                     <span>Assignments</span>
                   </Link>
                   
                   <Link
-                    to="/attendancelanding"
+                    to={`/faculty/course/${course.id}/attendance`}
                     className="flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-md p-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition duration-200"
                   >
-                    <FaCalendarAlt className="text-pink-400" />
+                    <FaCalendarAlt className="text-blue-400" />
                     <span>Attendance</span>
                   </Link>
                   
-                  {isFeedbackAvailable ? (
-                    <Link
-                      to={`/courseFeedback`}
-                      className="flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-md p-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition duration-200"
-                    >
-                      <FaComments className="text-pink-400" />
-                      <span>Feedback</span>
-                    </Link>
-                  ) : (
-                    <div className="flex items-center justify-center gap-2 bg-gray-100 border border-gray-300 rounded-md p-3 text-sm font-medium text-gray-500 cursor-not-allowed">
-                      <FaLock className="text-gray-400" />
-                      <span>Feedback</span>
-                      <span className="bg-gray-200 text-gray-600 text-xs rounded-full py-1 px-2 ml-1">
-                        Closed
-                      </span>
-                    </div>
-                  )}
+                  <Link
+                    to={`/course/${course.id}/students`}
+                    className="flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-md p-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition duration-200"
+                  >
+                    <FaUsers className="text-blue-400" />
+                    <span>Students</span>
+                  </Link>
                 </div>
+                
+                {isFeedbackAvailable && (
+                  <div className="mt-4">
+                    <Link 
+                      to={`/faculty/course/${course.id}/feedback`}
+                      className="flex items-center justify-center gap-2 w-full bg-blue-50 text-blue-600 border border-blue-200 rounded-md p-2 text-sm font-medium hover:bg-blue-100 transition duration-200"
+                    >
+                      <FaChartBar className="text-blue-500" />
+                      <span>View Feedback Reports</span>
+                    </Link>
+                  </div>
+                )}
                 
                 <div className="mt-4">
                   <Link 
-                    to={`/course/${course.id}`}
-                    className="flex items-center justify-center gap-2 w-full bg-pink-50 text-pink-600 border border-pink-200 rounded-md p-2 text-sm font-medium hover:bg-pink-100 transition duration-200"
+                    to={`/faculty/course/${course.id}`}
+                    className="flex items-center justify-center gap-2 w-full bg-blue-50 text-blue-600 border border-blue-200 rounded-md p-2 text-sm font-medium hover:bg-blue-100 transition duration-200"
                   >
                     <span>View Course Details</span>
                     <FaExternalLinkAlt className="text-xs" />
@@ -171,37 +169,33 @@ function MyCourses() {
         </div>
       )}
       
-      {/* Registration Link */}
+      {/* Course management links */}
       <div className="mt-8 text-center">
         <Link
-          to="/dropcourse"
-          className="inline-flex items-center text-pink-600 hover:text-pink-700"
+          to="/faculty/course-requests"
+          className="inline-flex items-center text-blue-600 hover:text-blue-700 mr-6"
         >
-          Need to drop a course? Click here
+          Request new course
+          <FaExternalLinkAlt className="ml-1 text-xs" />
+        </Link>
+        
+        <Link
+          to="/faculty/course-schedule"
+          className="inline-flex items-center text-blue-600 hover:text-blue-700"
+        >
+          View teaching schedule
           <FaExternalLinkAlt className="ml-1 text-xs" />
         </Link>
       </div>
-
-      {/* Completed Courses Link */}
-    <div className="mt-4 text-center">
-      <Link
-        to={`/completed-courses`}
-        className="inline-flex items-center text-pink-600 hover:text-pink-700"
-      >
-        Want to see your completed courses? Click here
-        <FaExternalLinkAlt className="ml-1 text-xs" />
-      </Link>
-    </div>
-      
       
       {/* Feedback availability notice */}
-      {!isFeedbackAvailable && studentCourses.length > 0 && (
+      {!isFeedbackAvailable && facultyCourses.length > 0 && (
         <div className="mt-4 text-center text-sm text-gray-600">
-          Course feedback is currently closed. Check back during the feedback period.
+          Course feedback is currently closed. Reports will be available when the feedback period opens.
         </div>
       )}
     </div>
   );
 }
 
-export default MyCourses;
+export default FacultyCourses;
