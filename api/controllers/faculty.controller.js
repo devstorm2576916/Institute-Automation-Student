@@ -4,6 +4,25 @@ import { Student } from '../models/student.model.js';
 import { StudentCourse } from '../models/course.model.js';
 import { User } from '../models/user.model.js';
 
+
+// Get basic faculty info
+export const getFaculty = async (req, res) => {
+    try {
+        const facultyId = req.params.id;
+        const user = await Faculty.findOne({ userId: facultyId })
+            .populate('userId');
+
+        if (!user) {
+            return res.status(404).json({ message: 'Faculty not found' });
+        }
+        
+        res.status(200).json(user);
+        console.log("Faculty details fetched successfully", user);
+    } catch (error) {
+        console.error('Error fetching faculty details:', error);
+        res.status(500).json({ message: 'Error fetching faculty details' });
+    }
+};
   
   // Get faculty by IDs
 export const getFacultyByIds = async (req, res) => {
