@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-hot-toast";
 
 const NewComplaintForm = ({ category, subCategory }) => {
     const [title, setTitle] = useState("");
@@ -9,35 +11,60 @@ const NewComplaintForm = ({ category, subCategory }) => {
     const [detailedAddress, setDetailedAddress] = useState("");
     const [file, setFile] = useState(null);
 
-    const handleSubmit = async (e) => {
+    const queryClient = useQueryClient();
+
+    const submitComplaint = async (formData) => {
+        const token = localStorage.getItem("accessToken");
+        const res = await fetch("http://localhost:8000/api/complaints/create",{
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                // authorization: `Bearer ${token}`,
+                authorization: `${token}`,
+            },
+            body: JSON.stringify(formData),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+            throw new Error(data?.message || "Failed to submit complaint");
+        }
+
+        return data;
+    };
+
+    const mutation = useMutation({
+        mutationFn: submitComplaint,
+        onSuccess: () => {
+            toast.success("Complaint submitted successfully!");
+            handleClear();
+            // Optionally refetch complaints list
+            queryClient.invalidateQueries(["complaints"]);
+        },
+        onError: (err) => {
+            toast.error(`Error: ${err.message}`);
+        },
+    });
+
+    const handleSubmit = (e) => {
         e.preventDefault();
-    //     // Handle form submission logic here
-    //     console.log("Form submitted:",{ title, complaint, phoneNumber, locality, detailedAddress, file, category, subCategory });
-    //     if (!title || !complaint || !phoneNumber || !locality || !detailedAddress) {
-    //         alert("All fields are required!");
-    //         return;
-    //     }
-    //     try {
-    //         const response = await fetch("http://localhost:8000/api/complaints/create", {
-    //             method: "POST",
-    //             headers: {
-    //                 "Content-Type": "application/json",
-    //             },
-    //             body: JSON.stringify({ title, date: new Date(), description: complaint, phoneNumber, address: detailedAddress, locality, category, subCategory }),
-    //         });
+        if (!title || !complaint || !phoneNumber || !locality || !detailedAddress) {
+            toast.error("All fields are required!");
+            return;
+        }
 
-    //         const data = await response.json();
+        const formData = {
+            title,
+            date: new Date(),
+            description: complaint,
+            phoneNumber,
+            address: detailedAddress,
+            locality,
+            category,
+            subCategory,
+        };
 
-    //         if (response.status === 201) {
-    //             console.log("Complaint submitted successfully:", data);
-
-    //         } else {
-    //             alert(`Submission failed: ${data.message || "Unknown error"}`);
-    //         }
-    //     } catch (error) {
-    //         console.error("Error Submitting Error :", error);
-    //         alert("Failed to connect to the server.");
-    //     }
+        mutation.mutate(formData);
     };
 
     const handleClear = () => {
