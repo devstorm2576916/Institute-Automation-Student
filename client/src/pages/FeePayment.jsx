@@ -18,13 +18,23 @@ const loadRazorpayScript = (src) => {
 };
 const RAZORPAY_SCRIPT_URL = "https://checkout.razorpay.com/v1/checkout.js";
 
+// Helper function to get current academic year
+const getCurrentAcademicYear = () => {
+  const today = new Date();
+  const month = today.getMonth();
+  const year = today.getFullYear();
+  return month < 6 ? `${year - 1}-${year}` : `${year}-${year + 1}`;
+};
+
 const FeePayment = () => {
   // --- Get current user from localStorage ---
   const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     try {
-      const { data: userData } = JSON.parse(localStorage.getItem("currentUser"));
+      const { data: userData } = JSON.parse(
+        localStorage.getItem("currentUser")
+      );
       const { userId } = userData.user;
       setUserId(userId);
       console.log("User ID set:", userId); // Debug log
@@ -130,7 +140,11 @@ const FeePayment = () => {
   const adjustmentAmount = 0.0;
   // For production, use calculatedTotal - adjustmentAmount
   // For development, use a small amount for testing
-  const payableAmount = calculatedTotal - adjustmentAmount; // 2 INR for testing
+  // For development/testing, force the payable amount to 2 INR:
+  const payableAmount =
+    process.env.NODE_ENV === "development"
+      ? 2
+      : calculatedTotal - adjustmentAmount; // 2 INR for testing
 
   const feeSummary = feeData
     ? {
@@ -155,23 +169,32 @@ const FeePayment = () => {
 
   // --- Handlers ---
   const handlePayFee = async () => {
-    if (!feeData || feeData.feeStatus?.isPaid) return;
+    if (!feeData || feeData.feeStatus?.isPaid) {
+      toast.error("Payment already completed or invalid fee data");
+      return;
+    }
 
     console.log("Attempting to pay fee...");
     toast.loading("Initializing payment...", { id: "payment-init" });
 
-    const scriptLoaded = await loadRazorpayScript(RAZORPAY_SCRIPT_URL);
-    if (!scriptLoaded) {
-      toast.error(
-        "Failed to load payment gateway. Please check your connection and try again.",
-        { id: "payment-init" }
-      );
-      return;
-    }
-
     try {
-      const backendUrl =
-        process.env.REACT_APP_API_URL + "/api/payment/create-order";
+      // Verify payment status again before proceeding
+      const currentFeeStatus = await newRequest.get(`/student/${userId}/fees`);
+      if (currentFeeStatus.data.feeStatus?.isPaid) {
+        toast.error("Fee is already paid for this semester");
+        refetch();
+        return;
+      }
+
+      const scriptLoaded = await loadRazorpayScript(RAZORPAY_SCRIPT_URL);
+      if (!scriptLoaded) {
+        toast.error(
+          "Failed to load payment gateway. Please check your connection and try again."
+        );
+        return;
+      }
+
+      const backendUrl = "http://localhost:8000/api/payment/create-order";
       const orderPayload = { amount: payableAmount, currency: "INR" };
 
       console.log("Sending to backend:", orderPayload);
@@ -191,13 +214,13 @@ const FeePayment = () => {
         order_id: orderId,
         handler: function (response) {
           console.log("Razorpay Success Response:", response);
-          toast.success("Payment Successful!");
 
-          // Record payment details in our system
+          // Prepare payment data with all required fields
           const paymentData = {
             semester: feeData.student.nextSemester,
             feeBreakdownId: feeData.feeBreakdown._id,
             transactionId: response.razorpay_payment_id,
+            academicYear: getCurrentAcademicYear(),
             paymentDetails: {
               razorpayOrderId: response.razorpay_order_id,
               razorpayPaymentId: response.razorpay_payment_id,
@@ -205,22 +228,33 @@ const FeePayment = () => {
               amount: payableAmount,
               currency: currency,
             },
+            paidAt: new Date().toISOString(),
           };
 
-          // Update payment details for receipt
-          setPaymentDetails({
-            slNo: 1,
-            feeType: feeSummary.feeType,
-            feeAmount: payableAmount,
-            transactionId: response.razorpay_payment_id,
-            razorpayOrderId: response.razorpay_order_id,
-            razorpaySignature: response.razorpay_signature,
-            dateTime: new Date().toLocaleString("sv-SE"),
-            status: "Success",
+          // Record payment with proper error handling
+          recordPayment.mutate(paymentData, {
+            onSuccess: (response) => {
+              toast.success("Payment recorded successfully");
+              setPaymentDetails({
+                slNo: 1,
+                feeType: feeSummary.feeType,
+                feeAmount: payableAmount,
+                transactionId: response.razorpay_payment_id,
+                razorpayOrderId: response.razorpay_order_id,
+                razorpaySignature: response.razorpay_signature,
+                dateTime: new Date().toLocaleString("sv-SE"),
+                status: "Success",
+                viewableDocumentId: response.data.feeDetails.viewableDocumentId,
+              });
+              refetch();
+            },
+            onError: (error) => {
+              console.error("Payment recording failed:", error);
+              toast.error(
+                "Payment successful but failed to record. Please contact support."
+              );
+            },
           });
-
-          // Record the payment in our database
-          recordPayment.mutate(paymentData);
         },
         prefill: {
           name: feeData?.student?.name || "",
@@ -314,6 +348,19 @@ const FeePayment = () => {
       setIsDownloading(false);
     }
   };
+
+  // Add a useEffect to monitor feeData changes
+  useEffect(() => {
+    if (feeData?.feeStatus?.isPaid) {
+      // Update UI elements that show payment status
+      setPaymentDetails((prev) => ({
+        ...prev,
+        status: "Success",
+        feeAmount: payableAmount,
+        dateTime: new Date().toLocaleString("sv-SE"),
+      }));
+    }
+  }, [feeData?.feeStatus?.isPaid]);
 
   // --- Helper Function ---
   const formatCurrency = (amount) => {
@@ -454,17 +501,17 @@ const FeePayment = () => {
                   Fee Type
                 </th>
                 <th
-                  className={`${thBaseClasses} bg-blue-100 text-blue-800 text-right font-medium tracking-tight`}
+                  className={`${thBaseClasses} bg-blue-100 text-blue-800 text-right`}
                 >
                   Total Fee
                 </th>
                 <th
-                  className={`${thBaseClasses} bg-blue-100 text-blue-800 text-right font-medium tracking-tight`}
+                  className={`${thBaseClasses} bg-blue-100 text-blue-800 text-right`}
                 >
                   Fee Paid
                 </th>
                 <th
-                  className={`${thBaseClasses} bg-blue-100 text-blue-800 text-right font-medium tracking-tight`}
+                  className={`${thBaseClasses} bg-blue-100 text-blue-800 text-right`}
                 >
                   Amount Due
                 </th>
