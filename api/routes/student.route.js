@@ -6,13 +6,15 @@ import {
     getBonafideApplications,
     getStudentPassportDetails,
     submitPassportApplication,
-    getPassportApplications
+    getPassportApplications,
+    updateStudentProfile
 } from "../controllers/student.controller.js";
 
 const router = express.Router();
 
 // Basic student routes
 router.get("/:id", getStudent);
+router.put("/:id/profile", updateStudentProfile);
 
 // Bonafide routes
 router.get("/:id/bonafide", getStudentBonafideDetails);
