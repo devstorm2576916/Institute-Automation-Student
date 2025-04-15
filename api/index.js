@@ -7,6 +7,7 @@ import mongoose from "mongoose";
 import authRoute from "../api/routes/auth.route.js";
 import hostelRoute from "../api/routes/hostel.route.js";
 import studentRoute from "../api/routes/student.route.js";
+import complaintsRouter from "../api/routes/complaints.route.js";
 import createCourseRoute from "../api/routes/createCourse.route.js";
 import acadAdminRoute from "../api/routes/acadAdmin.route.js";
 import facultyRoute from "../api/routes/faculty.route.js";
@@ -49,6 +50,7 @@ const razorpay = new Razorpay({
 });
 
 // --- Routes ---
+app.use('/api/complaints', complaintsRouter);
 
 // Endpoint to create a Razorpay order
 app.post("/api/payment/create-order", async (req, res) => {

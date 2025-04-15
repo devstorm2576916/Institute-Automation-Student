@@ -8,9 +8,22 @@ import { RoleContext } from "../../../context/Rolecontext";
 import React, { useRef } from 'react';
 import SearchableStudentDropdown from "./SearchableStudentDropdown";
 import { FaFileUpload, FaCheckCircle, FaUndo } from "react-icons/fa";
+import { useQuery } from "@tanstack/react-query";
+import newRequest from "../../../utils/newRequest";
 
 
 export const CourseStats = () => {
+  const {data:userData} = JSON.parse(localStorage.getItem("currentUser"));
+    const {email, userId} = userData.user;
+    console.log(email);
+    console.log(userData);
+    const { isLoading, error, data } = useQuery({
+        queryKey: [`${userId}`],
+        queryFn: () =>
+            newRequest.get(`/student/${userId}`).then((res) => {
+                return res.data;
+            }),
+    });
   const { id } = useParams();
   const { role } = useContext(RoleContext);  
   const navigateTo = useNavigate();
@@ -163,14 +176,14 @@ export const CourseStats = () => {
         },
       });
 
-      const data = await response.json();
-      console.log(data);
-      if (data?.stats) {
-        setClassesMissed(data.stats.classesMissed || 0);
-        setClassesAttended(data.stats.classesAttended || 0);
-        setClassesRequired(data.stats.reqClasses || 0);
-        setPercentage(parseFloat(data.stats.percentage) || 0);
-        setCourseName(data.courseName);
+      const dataReceived = await response.json();
+      console.log(dataReceived);
+      if (dataReceived?.stats) {
+        setClassesMissed(dataReceived.stats.classesMissed || 0);
+        setClassesAttended(dataReceived.stats.classesAttended || 0);
+        setClassesRequired(dataReceived.stats.reqClasses || 0);
+        setPercentage(parseFloat(dataReceived.stats.percentage) || 0);
+        setCourseName(dataReceived.courseName);
       }
 
       setShowStats(true);
@@ -183,8 +196,7 @@ export const CourseStats = () => {
   useEffect(() => {
     
     if (role === "student") {
-      const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-      const rollNo = currentUser?.user?.rollNo;
+      const rollNo = data?.rollNo;
       fetchAttendance(rollNo);
     }
 
