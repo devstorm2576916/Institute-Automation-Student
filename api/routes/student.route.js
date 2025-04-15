@@ -9,15 +9,32 @@ import {
     getStudentPassportDetails,
     submitPassportApplication,
     getPassportApplications,
+    getCourseAnnouncements,
+    createCourseDropRequest,
+    getStudentDropRequests,
+    cancelDropRequest,
+    getCompletedCourses
     updateStudentProfile
 } from "../controllers/student.controller.js";
 
-
+//courses routes
 const router = express.Router();
 router.get("/:id", getStudent);
 router.get("/:id/courses", getStudentCourses);
+
+router.delete("/:id/courses/:courseId", dropCourse);
+router.get('/courses/:courseId', getCourseAnnouncements);
+router.get("/:id/completed-courses", getCompletedCourses); 
+
+
+// Course drop request routes
+router.post("/:id/drop-requests", createCourseDropRequest);
+router.get("/:id/drop-requests", getStudentDropRequests);
+router.delete("/:id/drop-requests/:requestId", cancelDropRequest);
+
 router.delete("/:id/courses/:courseId",dropCourse);
 router.put("/:id/profile", updateStudentProfile);
+
 
 // Bonafide routes
 router.get("/:id/bonafide", getStudentBonafideDetails);

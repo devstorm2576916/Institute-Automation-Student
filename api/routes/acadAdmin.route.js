@@ -5,6 +5,8 @@ import {
     updateApplicationStatus,
     filterApplications,
     addComment,
+    getDropRequests,
+    updateDropRequestStatus,
     addFeeStructure,
     getFeeBreakdown,
     getStudentsWithDocumentAccess,
@@ -21,6 +23,12 @@ router.get('/documents/applications/:id', getApplicationById);
 router.patch('/documents/applications/:id/status', updateApplicationStatus);
 router.post('/documents/applications/:id/comment', addComment);
 
+
+// Course drop request routes (ADMIN)
+router.get('/drop-requests', getDropRequests); // Get all drop requests (any status)
+router.get('/drop-requests/:requestId', updateDropRequestStatus); // Get a specific drop request
+router.patch('/drop-requests/:requestId', updateDropRequestStatus); // Update status/remarks
+
 // Fee management routes
 router.post("/feeControl/addFee", addFeeStructure);
 router.get("/feeControl/getFeeBreakdown", getFeeBreakdown);
@@ -29,5 +37,6 @@ router.get("/feeControl/getFeeBreakdown", getFeeBreakdown);
 router.get('/students/document-access', getStudentsWithDocumentAccess);
 router.patch('/students/:id/document-access', updateStudentDocumentAccess);
 router.post('/students/bulk-document-access', bulkUpdateDocumentAccess);
+
 
 export default router;
