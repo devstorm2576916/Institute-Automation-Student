@@ -36,8 +36,6 @@ function AttendanceLandingPage (){
   return (
     <div className="landing-page">
       <div className="div">
-        {overall<75 && role === "student" && <SiteAlert />}
-        <br />
         <div className="MyCourses"><MyCourses /></div>
         {/* <br/> */}
         {/* <Announcements /> */}
