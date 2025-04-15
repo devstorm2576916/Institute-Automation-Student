@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import newRequest from '../../utils/newRequest';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from "react-router-dom";
 import { 
   FaBookOpen, 
   FaClipboardList, 
@@ -14,6 +15,7 @@ import {
 
 function MyCourses() {
   // Get userId from localStorage just like in HostelLeaveStudent
+  const navigate = useNavigate();
   const {data:userData} = JSON.parse(localStorage.getItem("currentUser"));
   const {userId} = userData.user;
   
@@ -30,6 +32,16 @@ function MyCourses() {
         return res.data.courses || [];
       }),
   });
+
+  const handleFeedback = (course) => {
+    navigate('/student/feedback/submit', {
+      state: {
+        courseId: course.id,         // or course.courseCode if that's the field
+        courseName: course.name,     // or course.courseName
+        credits: course.credits,
+      }
+    });
+  };
 
   // console.log("+++++++++++++++++++++++++++++++++++", studentCourses);
 
@@ -137,23 +149,23 @@ function MyCourses() {
                     <span>Attendance</span>
                   </Link>
                   
-                  {isFeedbackAvailable ? (
-                    <Link
-                      to={`/courseFeedback`}
-                      className="flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-md p-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition duration-200"
-                    >
-                      <FaComments className="text-pink-400" />
-                      <span>Feedback</span>
-                    </Link>
-                  ) : (
-                    <div className="flex items-center justify-center gap-2 bg-gray-100 border border-gray-300 rounded-md p-3 text-sm font-medium text-gray-500 cursor-not-allowed">
-                      <FaLock className="text-gray-400" />
-                      <span>Feedback</span>
-                      <span className="bg-gray-200 text-gray-600 text-xs rounded-full py-1 px-2 ml-1">
-                        Closed
-                      </span>
-                    </div>
-                  )}
+              {1 ? (// isFeedbackAvailable will be used here
+                  <button
+                    onClick={() => handleFeedback(course)}
+                    className="flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-md p-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition duration-200"
+                  >
+                    <FaComments className="text-pink-400" />
+                    <span>Feedback</span>
+                  </button>
+                ) : (
+                  <div className="flex items-center justify-center gap-2 bg-gray-100 border border-gray-300 rounded-md p-3 text-sm font-medium text-gray-500 cursor-not-allowed">
+                    <FaLock className="text-gray-400" />
+                    <span>Feedback</span>
+                    <span className="bg-gray-200 text-gray-600 text-xs rounded-full py-1 px-2 ml-1">
+                      Closed
+                    </span>
+                  </div>
+                )}
                 </div>
                 
                 <div className="mt-4">

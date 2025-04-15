@@ -7,10 +7,12 @@ import Sidebar from './components/Sidebar/Sidebar';
 import CourseRegistration from './components/CourseRegistration';
 import AttendanceLandingPage from './components/Attendance/AttendanceLandingPage';
 import AttendanceCoursePage from './components/Attendance/AttendanceCoursePage';
-import CourseFeedbackSelection from './components/courseFeedback/courseFeedbackSelection.jsx';
-import CourseFeedbackForm from './components/courseFeedback/courseFeedbackForm.jsx';
-import FeedbackConfiguration from './components/courseFeedback/feedbackConfiguration.jsx';
-import FeedbackReports from './components/courseFeedback/feedbackReports.jsx';
+import FeedbackAdmin from './components/courseFeedback/feedbackadmin.jsx';
+import FeedbackFaculty from './components/courseFeedback/feedbackfaculty.jsx';
+import FeedbackStudent from './components/courseFeedback/feedbackstudent.jsx';
+import FeedbackAdminSelect from './components/courseFeedback/feedbackadminSelect.jsx';
+import FeedbackFacultySelect from './components/courseFeedback/feedbackfacultySelect.jsx';
+import FeedbackStudentSelect from './components/courseFeedback/feedbackstudentSelect.jsx';
 import Mess from './components/HostelMess/Mess.jsx';
 import StudentSubscriptionForm from './components/HostelMess/StudentSubscriptionForm.jsx';
 import AdminSubscriptionRequests from './components/HostelMess/AdminSubscriptionRequests.jsx';
@@ -242,20 +244,28 @@ function App() {
                     ]
                 },
                 {
-                    path: "/courseFeedback",
-                    element: <CourseFeedbackSelection/>
+                    path: "/student/feedback",
+                    element: <FeedbackStudentSelect/>
                 },
                 {
-                    path: "/courseFeedback/selectedCourse",
-                    element: <CourseFeedbackForm/>
+                    path: "/student/feedback/submit",
+                    element: <FeedbackStudent/>
                 },
                 {
-                    path: "/feedbackConfiguration",
-                    element: <FeedbackConfiguration/>
+                    path: "/acadAdmin/feedback",
+                    element: <FeedbackAdminSelect/>
                 },
                 {
-                    path: "/feedbackReports",
-                    element: <FeedbackReports/>
+                    path: "/acadAdmin/feedback/view",
+                    element: <FeedbackAdmin/>
+                },
+                {
+                    path: "/faculty/feedback",
+                    element: <FeedbackFacultySelect/>
+                },
+                {
+                    path: "/faculty/feedback/view",
+                    element: <FeedbackFaculty/>
                 },
                 {
                     path: "/profile",
