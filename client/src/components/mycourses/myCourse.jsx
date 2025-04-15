@@ -181,6 +181,18 @@ function MyCourses() {
           <FaExternalLinkAlt className="ml-1 text-xs" />
         </Link>
       </div>
+
+      {/* Completed Courses Link */}
+    <div className="mt-4 text-center">
+      <Link
+        to={`/${userId}/completed-courses`}
+        className="inline-flex items-center text-pink-600 hover:text-pink-700"
+      >
+        Want to see your completed courses? Click here
+        <FaExternalLinkAlt className="ml-1 text-xs" />
+      </Link>
+    </div>
+      
       
       {/* Feedback availability notice */}
       {!isFeedbackAvailable && studentCourses.length > 0 && (

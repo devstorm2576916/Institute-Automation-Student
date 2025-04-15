@@ -57,6 +57,7 @@ import FacultyCourseAnnouncements from './components/Announcements/facultyAnnoun
 import AnnouncementWrapper from './components/Announcements/announcementWrapper.jsx';
 import FacultyCourseStudents from './components/courseStudents/courseStudent.jsx';
 // import CourseStudents from './components/courseStudents/courseStudent.jsx';
+import CompletedCourses from './components/mycourses/CompletedCourses.jsx';
 
 const queryClient = new QueryClient()
 function App() {
@@ -172,6 +173,10 @@ function App() {
                 {
                     path:"/course/:courseId/assignment/:assignmentId/submissions",
                     element: <FacultyAssignmentSubmissions/>
+                },
+                {   
+                    path:"/:id/completed-courses",
+                    element: <CompletedCourses/>
                 },
 
                 {

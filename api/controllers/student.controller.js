@@ -25,6 +25,31 @@ export const getStudent = async (req, res) => {
     }
 };
 
+//get completed courses for display on the completed courses page
+export const getCompletedCourses = async (req, res) => {
+    try {
+      const courses = await StudentCourse.find({
+        rollNo: req.params.id,
+        isCompleted: true
+      })
+      .populate('courseId', 'courseCode courseName credits department')
+      .lean();
+  
+      const formatted = courses.map(c => ({
+        ...c.courseId,
+        semester: c.semester,
+        grade: c.grade,
+        creditOrAudit: c.creditOrAudit,
+        completedAt: c.updatedAt
+      }));
+  
+      res.status(200).json({ courses: formatted });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
+  
+
 // Add this new function for student courses
 export const getStudentCourses = async (req, res) => {
     try {
