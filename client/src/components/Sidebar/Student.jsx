@@ -70,7 +70,7 @@ const Student = () => {
                                         </Link>
                                     </li> */}
                                     <li>
-                                        <Link to="/courseFeedback" className="text-gray-700 hover:text-gray-900">Feedback</Link>
+                                        <Link to="/student/feedback" className="text-gray-700 hover:text-gray-900">Feedback</Link>
                                     </li>
                                 </ul>
                                 )}

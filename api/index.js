@@ -9,6 +9,7 @@ import hostelRoute from "../api/routes/hostel.route.js";
 import studentRoute from "../api/routes/student.route.js";
 import acadAdminRoute from "../api/routes/acadAdmin.route.js";
 import facultyRoute from "../api/routes/faculty.route.js";
+import feedbackRoute from "../api/routes/feedback.route.js";
 // import { seedDatabase, seedStudentCourses, seedCourses, seedFacultyCourses } from "../api/scripts/seedDb.js";
 
 import Razorpay from "razorpay";
@@ -30,6 +31,7 @@ app.use("/api/hostel",hostelRoute);
 app.use("/api/student",studentRoute);
 app.use("/api/faculty",facultyRoute);
 app.use("/api/acadadmin", acadAdminRoute);
+app.use("/api/feedback", feedbackRoute);
 
 const port = process.env.PORT || 8000;
 
