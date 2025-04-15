@@ -7,11 +7,14 @@ import mongoose from "mongoose";
 import authRoute from "../api/routes/auth.route.js";
 import hostelRoute from "../api/routes/hostel.route.js";
 import studentRoute from "../api/routes/student.route.js";
+import complaintsRouter from "../api/routes/complaints.route.js";
 import createCourseRoute from "../api/routes/createCourse.route.js";
 import acadAdminRoute from "../api/routes/acadAdmin.route.js";
 import facultyRoute from "../api/routes/faculty.route.js";
 // import { seedDatabase, seedStudentCourses, seedCourses, seedFacultyCourses } from "../api/scripts/seedDb.js";
 import attendanceRoute from "../api/routes/attendance.route.js"
+import facultyCourseRoute from "../api/routes/facultyCourse.route.js"
+
 
 import Razorpay from "razorpay";
 import crypto from "crypto"; // Needed for signature verification (production)
@@ -36,7 +39,9 @@ app.use("/api/course",createCourseRoute);
 
 app.use("/api/acadadmin", acadAdminRoute);
 app.use("/api/attendancelanding", attendanceRoute);
- 
+app.use('/api/facultyCourse', facultyCourseRoute);
+
+
 const port = process.env.PORT || 8000;
 
 // --- Middleware ---
@@ -49,6 +54,7 @@ const razorpay = new Razorpay({
 });
 
 // --- Routes ---
+app.use('/api/complaints', complaintsRouter);
 
 // Endpoint to create a Razorpay order
 app.post("/api/payment/create-order", async (req, res) => {

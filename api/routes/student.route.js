@@ -13,8 +13,9 @@ import {
     createCourseDropRequest,
     getStudentDropRequests,
     cancelDropRequest,
-    getCompletedCourses
-    updateStudentProfile
+    getCompletedCourses,
+    updateStudentProfile,
+    getStudentFromRollNumber
 } from "../controllers/student.controller.js";
 
 //courses routes
@@ -34,6 +35,7 @@ router.delete("/:id/drop-requests/:requestId", cancelDropRequest);
 
 router.delete("/:id/courses/:courseId",dropCourse);
 router.put("/:id/profile", updateStudentProfile);
+router.get("/:id/rollno",getStudentFromRollNumber);
 
 
 // Bonafide routes

@@ -1,3 +1,5 @@
+import newRequest from "../../client/src/utils/newRequest.js";
+import axios from "axios";
 import { HostelLeave, HostelTransfer } from "../models/hostel.model.js";
 import { Student } from '../models/student.model.js';
 
@@ -173,24 +175,58 @@ export const getAllTransferRequests = async (req, res) => {
   }
 };
 
+
 // Approve or reject a transfer request
 export const updateTransferRequest = async (req, res) => {
   try {
-    const { status, reason } = req.body;
+    const { status, reason, newHostel, rollNo } = req.body;
     const requestId = req.params.id;
-    // console.log(status, reason, requestId);
-    
+
+    // console.log(requestId, status, reason, newHostel, rollNo);
+
     if (!['Approved', 'Rejected'].includes(status)) {
       return res.status(400).json({ message: "Invalid status" });
     }
-    
+
+    // Make a GET request to fetch the userId using the rollNo
+    let userId;
+    try {
+      const response = await axios.get(`http://localhost:8000/api/student/${rollNo}/rollno`);
+      if (response.status === 200) {
+        userId = response.data.userId;
+      } else {
+        return res.status(404).json({ message: 'Student not found' });
+      }
+    } catch (error) {
+      console.error("Error fetching userId by rollNo:", error);
+      return res.status(500).json({ message: "Failed to fetch userId" });
+    }
+
+    // console.log(userId);
+
+    if (status === 'Approved') {
+      try {
+        // Make a PUT request to update the student's profile
+        const response = await axios.put(`http://localhost:8000/api/student/${userId}/profile`, {
+          hostel: newHostel
+        });
+
+        if (response.status !== 200) {
+          throw new Error('Failed to update student profile');
+        }
+      } catch (error) {
+        console.error("Error in updating hostel:", error);
+        return res.status(500).json({ message: "Failed to update hostel, transaction aborted" });
+      }
+    }
+    // console.log("Hostel changed");
+
+    // Update the transfer request status and reason
     const request = await HostelTransfer.findByIdAndUpdate(
       requestId,
       { status, reason },
       { new: true }
     );
-    // console.log(request);
-    
 
     if (!request) {
       return res.status(404).json({ message: "Transfer request not found" });
