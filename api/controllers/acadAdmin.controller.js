@@ -402,3 +402,157 @@ export const addFeeStructure = async (req, res) => {
   };
 
   
+
+
+
+// Get students with document access info
+export const getStudentsWithDocumentAccess = async (req, res) => {
+    try {
+        const { page = 1, limit = 10, branch, program, semester, search } = req.query;
+        
+        let query = {};
+        
+        if (branch) query.department = branch;
+        if (program) query.program = program;
+        if (semester) query.semester = semester;
+        if (search) {
+            query.$or = [
+                { rollNo: { $regex: search, $options: 'i' } },
+                { 'userId.name': { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        const students = await Student.find(query)
+            .populate('userId', 'name email contactNo')
+            .sort({ rollNo: 1 })
+            .limit(limit * 1)
+            .skip((page - 1) * limit)
+            .lean();
+
+        const count = await Student.countDocuments(query);
+
+        const enrichedStudents = students.map(student => ({
+            id: student._id,
+            userId: student.userId._id,
+            name: student.userId.name,
+            rollNo: student.rollNo,
+            email: student.userId.email,
+            contact: student.userId.contactNo,
+            branch: student.department,
+            program: student.program,
+            semester: student.semester,
+            hostel: student.hostel,
+            roomNo: student.roomNo,
+            cgpa: student.cgpa,
+            access: {
+                transcript: student.documentAccess?.transcript || false,
+                idCard: student.documentAccess?.idCard || false,
+                feeReceipt: student.documentAccess?.feeReceipt || false
+            }
+        }));
+
+        res.status(200).json({
+            students: enrichedStudents,
+            totalPages: Math.ceil(count / limit),
+            currentPage: parseInt(page),
+            total: count
+        });
+    } catch (error) {
+        console.error('Error fetching students:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Update individual student document access
+export const updateStudentDocumentAccess = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { access } = req.body;
+
+        if (!access || typeof access !== 'object') {
+            return res.status(400).json({ message: 'Invalid access configuration' });
+        }
+
+        const student = await Student.findByIdAndUpdate(
+            id,
+            { 
+                $set: { 
+                    'documentAccess.transcript': !!access.transcript,
+                    'documentAccess.idCard': !!access.idCard,
+                    'documentAccess.feeReceipt': !!access.feeReceipt,
+                    updatedAt: new Date()
+                }
+            },
+            { new: true }
+        ).populate('userId', 'name email contactNo');
+
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+        console.log(student)
+        const enrichedStudent = {
+            id: student._id,
+            name: student.userId.name,
+            email: student.userId.email,
+            contact: student.userId.contactNo,
+            rollNo: student.rollNo,
+            branch: student.department,
+            program: student.program,
+            semester: student.semester,
+            hostel: student.hostel,
+            roomNo: student.roomNo,
+            cgpa: student.cgpa,
+            access: {
+                transcript: student.documentAccess?.transcript || false,
+                idCard: student.documentAccess?.idCard || false,
+                feeReceipt: student.documentAccess?.feeReceipt || false
+            }
+        };
+
+        res.status(200).json(enrichedStudent);
+    } catch (error) {
+        console.error('Error updating document access:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Bulk update document access
+export const bulkUpdateDocumentAccess = async (req, res) => {
+    try {
+        const { studentIds, access } = req.body;
+        
+        if (!studentIds || !Array.isArray(studentIds) || studentIds.length === 0) {
+            return res.status(400).json({ message: 'No students specified for update' });
+        }
+
+        if (!access || typeof access !== 'object') {
+            return res.status(400).json({ message: 'Invalid access configuration' });
+        }
+
+        const updateDoc = {};
+        if (access.hasOwnProperty('transcript')) {
+            updateDoc['documentAccess.transcript'] = !!access.transcript;
+        }
+        if (access.hasOwnProperty('idCard')) {
+            updateDoc['documentAccess.idCard'] = !!access.idCard;
+        }
+        if (access.hasOwnProperty('feeReceipt')) {
+            updateDoc['documentAccess.feeReceipt'] = !!access.feeReceipt;
+        }
+        updateDoc['updatedAt'] = new Date();
+        
+        const result = await Student.updateMany(
+            { _id: { $in: studentIds } },
+            { $set: updateDoc }
+        );
+
+        res.status(200).json({ 
+            message: 'Document access updated successfully',
+            updatedCount: result.modifiedCount,
+            matchedCount: result.matchedCount
+        });
+    } catch (error) {
+        console.error('Error in bulk update:', error);
+        res.status(500).json({ message: error.message });
+    }
+};

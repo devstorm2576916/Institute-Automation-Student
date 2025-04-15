@@ -6,7 +6,10 @@ import {
     filterApplications,
     addComment,
     addFeeStructure,
-    getFeeBreakdown
+    getFeeBreakdown,
+    getStudentsWithDocumentAccess,
+    updateStudentDocumentAccess,
+    bulkUpdateDocumentAccess
 } from '../controllers/acadAdmin.controller.js';
 
 const router = express.Router();
@@ -17,7 +20,14 @@ router.get('/documents/applications/filter', filterApplications);
 router.get('/documents/applications/:id', getApplicationById);
 router.patch('/documents/applications/:id/status', updateApplicationStatus);
 router.post('/documents/applications/:id/comment', addComment);
+
+// Fee management routes
 router.post("/feeControl/addFee", addFeeStructure);
 router.get("/feeControl/getFeeBreakdown", getFeeBreakdown);
+
+// Document access control routes
+router.get('/students/document-access', getStudentsWithDocumentAccess);
+router.patch('/students/:id/document-access', updateStudentDocumentAccess);
+router.post('/students/bulk-document-access', bulkUpdateDocumentAccess);
 
 export default router;
