@@ -19,6 +19,7 @@ const ComplaintSection = () => {
     const defaultActivePage = isStudentOrFaculty ? "My Complaints" : "Pending";
     const [activePage, setActivePage] = useState(defaultActivePage);
 
+    const endpoint = (role==="student" || role === "faculty") ?"http://localhost:8000/api/complaints/":"http://localhost:8000/api/complaints/admin";
     // Fetch complaint history
     const {
         data: complaintData = [],
@@ -28,7 +29,7 @@ const ComplaintSection = () => {
     } = useQuery({
         queryKey: ["complaints", role],
         queryFn: async () => {
-            const response = await fetch("http://localhost:8000/api/complaints/", {
+            const response = await fetch(endpoint, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",

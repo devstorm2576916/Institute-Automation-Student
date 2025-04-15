@@ -2,11 +2,6 @@ import mongoose from "mongoose";
 
 // Complaint Model
 const complaintSchema = new mongoose.Schema({
-  complaintId: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: false,
-    unique: true
-  },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
@@ -19,8 +14,6 @@ const complaintSchema = new mongoose.Schema({
   date: {
     type: Date,
     required: true,
-    enum: ["Received", "Assigned", "Done"],
-    default: "Received"
   },
   status: {
     type: String,
