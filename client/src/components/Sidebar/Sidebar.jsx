@@ -12,29 +12,42 @@ const Sidebar = () => {
     // console.log(role)
     return (
         <>
-            {!isOpen && 
-                <>
-                    <div className="p-2 relative">
-                        <button onClick={() => setIsOpen(!isOpen)} className="bg-transparent border-none text-2xl cursor-pointer mr-2">
+            {/* Hamburger Menu */}
+            {!isOpen && (
+                <div className="relative p-2">
+                    <button
+                        onClick={() => setIsOpen(true)}
+                        className="text-3xl text-gray-700 hover:text-green-600 transition-colors duration-300"
+                    >
+                        <IoMenuOutline />
+                    </button>
+                </div>
+            )}
+
+            {/* Sidebar */}
+            {isOpen && (
+                <div className="relative top-0 left-0 w-[250px] min-h-screen bg-white shadow-2xl p-6 transition-transform duration-300 mr-2">
+                    {/* Close Menu */}
+                    <div className="flex justify-end mb-6">
+                        <button
+                            onClick={() => setIsOpen(false)}
+                            className="text-3xl text-gray-700 hover:text-green-600 transition-colors duration-300"
+                        >
                             <IoMenuOutline />
                         </button>
                     </div>
-                </>
-            }
-            {isOpen && 
-                <>
-                    <div className="w-[250px] relative top-0 left-0 min-h-screen bg-gray-100 border-r-2 border-gray-300 p-2 font-sans">
-                        <button onClick={() => setIsOpen(!isOpen)} className="bg-transparent border-none text-2xl cursor-pointer mr-2">
-                            <IoMenuOutline />
-                        </button>
-                    {role === "student" && <Student/>}
-                    {role === "faculty" && <Faculty/>}
-                    {role === "acadAdmin" && <AcadAdmin/>}
-                    {role === "nonAcadAdmin" && <HostelAdmin/>}
+
+                    {/* Sidebar Content */}
+                    <div className="space-y-6">
+                        {role === "student" && <Student />}
+                        {role === "faculty" && <Faculty />}
+                        {role === "acadAdmin" && <AcadAdmin />}
+                        {role === "nonAcadAdmin" && <HostelAdmin />}
                     </div>
-                </>
-            }
+                </div>
+            )}
         </>
+
     );
 };
 

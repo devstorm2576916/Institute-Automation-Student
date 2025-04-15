@@ -3,52 +3,59 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { useParams } from "react-router-dom";
 
-function AddAttendance(){
-    const {id} = useParams();
+function AddAttendance({ selectedStudent }) {
+    const { id } = useParams(); // get courseCode from URL params
+    const courseCode = id;
+    const  rollNo  = selectedStudent; // get rollNo from selected student
 
     const [date, setDate] = useState(new Date());
-    const [present, setPresent] = useState(false);
+    const [present, setPresent] = useState(null);
 
     const handlePresentChange = (event) => {
-        setPresent(event.target.value);
+        const value = event.target.value;
+        setPresent(value === "true"); // convert string to boolean
     };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-    
+
         const formData = {
-            date: date.toISOString().split('T')[0],
-            present
+            courseCode: courseCode,
+            date: date.toISOString(), // send full ISO date
+            isPresent: present,
+            isApproved: false
         };
-        console.log(formData);
-        
+
         try {
-            const response = await fetch(`http://localhost:3000/course/${id}`, {
+            console.log("COURSECODFE")
+            console.log(courseCode)
+            const response = await fetch('http://localhost:8000/api/attendancelanding/add', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    rollno: rollNo // set roll number in headers
                 },
                 body: JSON.stringify(formData)
             });
-    
+            console.log("RESPOPNSE")
+            console.log(response)
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.error);
             }
-    
-            setDate(null);
+
+            setDate(new Date());
             setPresent(null);
-    
+
             alert('Attendance added successfully!');
-            window.location.reload();
+            
         } catch (error) {
             console.error('Error adding attendance:', error.message);
             alert(error.message);
         }
     };
-    
 
-    return(
+    return (
         <div className="AddAttendance">
             <form className="add-attendance" onSubmit={handleSubmit}>
                 <div className="input">
@@ -57,26 +64,29 @@ function AddAttendance(){
                         <DatePicker
                             showIcon
                             selected={date}
-                            onChange={(date) => {
-                                setDate(date);
-                                console.log(date);
-                            }}
+                            onChange={(date) => setDate(date)}
                         />
-                        <br/>
+                        <br />
                     </div>
                     <div className="attendance-option">
                         <label htmlFor="attendance">Attendance</label><br />
-                        <select id="attendance" name="attendance" onChange={handlePresentChange} className="attendance">
-                            <option value={null}>None</option>
+                        <select
+                            id="attendance"
+                            name="attendance"
+                            onChange={handlePresentChange}
+                            className="attendance"
+                            value={present === null ? "" : present.toString()}
+                        >
+                            <option value="">None</option>
                             <option value="true">Present</option>
                             <option value="false">Absent</option>
                         </select>
                     </div>
                 </div>
-                <input type="submit" value="Add" className="AddButton"/>
+                <button type="submit" className="AddButton">Add</button>
             </form>
         </div>
     );
-};
+}
 
-export default AddAttendance
+export default AddAttendance;

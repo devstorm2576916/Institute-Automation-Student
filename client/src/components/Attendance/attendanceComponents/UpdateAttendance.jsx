@@ -2,55 +2,65 @@ import { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { useParams } from "react-router-dom";
-import React, { useRef } from 'react';
+import React from 'react';
 
-function UpdateAttendance(){
+function UpdateAttendance({ selectedStudent }) {
+    const { id } = useParams(); // courseCode from URL params
+    const courseCode = id;
+    const rollNo = selectedStudent; // roll number
+
     const [date, setDate] = useState(new Date());
-    const {id} = useParams();
-    const [present, setPresent] = useState(false);
+    const [present, setPresent] = useState(null);
 
     const handlePresentChange = (event) => {
-        setPresent(event.target.value);
+        const value = event.target.value;
+        setPresent(value === "true" ? true : value === "false" ? false : null);
     };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-    
+
+        if (present === null) {
+            alert("Please select Present or Absent.");
+            return;
+        }
+
         const formData = {
-            date: date.toISOString().split('T')[0],
-            present
+            courseCode,
+            date: date.toISOString(), // full ISO date
+            isPresent: present,
+            isApproved: false
         };
-        console.log(formData);
-        
+
         try {
-            const response = await fetch(`http://localhost:3000/course/${id}`, {
-                method: 'PATCH',
+            console.log("🔄 Updating attendance for:", courseCode, rollNo, date);
+            
+            const response = await fetch('http://localhost:8000/api/attendancelanding/update', {
+                method: 'PUT', 
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'rollno': rollNo
                 },
                 body: JSON.stringify(formData)
             });
-    
+
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to update attendance');
+                throw new Error(errorData.error || "Update failed");
             }
-    
-            setDate(null);
-            setPresent(null);
-    
+
             alert('Attendance updated successfully!');
-            window.location.reload();
+            setDate(new Date());
+            setPresent(null);
+            
+
         } catch (error) {
             console.error('Error updating attendance:', error.message);
-            alert(error.message || 'Failed to update attendance. Please try again.');
+            alert(error.message);
         }
     };
-    
 
-
-
-    return(
+    return (
         <div className="AddAttendance">
             <form className="add-attendance" onSubmit={handleSubmit}>
                 <div className="input">
@@ -59,26 +69,23 @@ function UpdateAttendance(){
                         <DatePicker
                             showIcon
                             selected={date}
-                            onChange={(date) => {
-                                setDate(date);
-                                console.log(date);
-                            }}
+                            onChange={(date) => setDate(date)}
                         />
-                        <br/>
+                        <br />
                     </div>
                     <div className="attendance-option">
                         <label htmlFor="attendance">Attendance</label><br />
-                        <select id="attendance" name="attendance" className="attendance" onChange={handlePresentChange}>
-                            <option value={null}>None</option>
+                        <select id="attendance" name="attendance" className="attendance" onChange={handlePresentChange} value={present !== null ? String(present) : ''}>
+                            <option value="">None</option>
                             <option value="true">Present</option>
                             <option value="false">Absent</option>
                         </select>
                     </div>
                 </div>
-                <input type="submit" value="Update" className="UpdateButton"/>
+                <input type="submit" value="Update" className="UpdateButton" />
             </form>
         </div>
     );
 };
 
-export default UpdateAttendance
+export default UpdateAttendance;

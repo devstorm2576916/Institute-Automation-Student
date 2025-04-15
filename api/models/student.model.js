@@ -21,6 +21,11 @@ const studentSchema = new mongoose.Schema({
       enum: ['Brahmaputra', 'Lohit', 'Disang', 'Subansiri', 'Dhansiri', 'Kapili', 'Manas', 'Dihing', 'Barak', 'Siang', 'Kameng', 'Umiam', 'Married Scholar'],
       required: true
     },
+    documentAccess: {
+      transcript: { type: Boolean, default: true },
+      idCard: { type: Boolean, default: true },
+      feeReceipt: { type: Boolean, default: true }
+    },
     roomNo: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
