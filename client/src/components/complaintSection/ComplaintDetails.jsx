@@ -1,82 +1,110 @@
+
 import React, { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-hot-toast";
 import AssignForm from "./AssignForm";
+
+const token = localStorage.getItem("token"); 
 
 const ComplaintDetails = ({ complaint, onBack, role }) => {
     const [showAssignModal, setShowAssignModal] = useState(false);
+    const queryClient = useQueryClient();
 
-    const handleDelete = async (e) => {
-        console.log(complaint._id);
+    // DELETE
+    const deleteMutation = useMutation({
+        mutationFn: async () => {
+            const res = await fetch("http://localhost:8000/api/complaints/delete", {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ complaintId: complaint._id })
+            });
+
+            if (!res.ok) throw new Error("Failed to delete complaint");
+        },
+        onSuccess: () => {
+            toast.success("Complaint deleted");
+            onBack(true);
+            queryClient.invalidateQueries(["complaints"]);
+        },
+        onError: (err) => {
+            toast.error(err.message);
+        }
+    });
+
+   // MARK AS DONE
+   const markAsDoneMutation = useMutation({
+    mutationFn: async () => {
+        const res = await fetch("http://localhost:8000/api/complaints/", {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ complaintId: complaint._id, status: "Resolved" })
+        });
+
+        if (!res.ok) throw new Error("Failed to mark as done");
+    },
+    onSuccess: () => {
+        toast.success("Marked as resolved");
+        onBack(true);
+        queryClient.invalidateQueries(["complaints"]);
+    },
+    onError: (err) => {
+        toast.error(err.message);
+    }
+});
+
+    // ASSIGN
+    const assignMutation = useMutation({
+        mutationFn: async ({ category, subTask, assignedPerson }) => {
+            const res = await fetch("http://localhost:8000/api/complaints/update", {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    complaintId: complaint._id,
+                    status: "In Progress",
+                    assignedPerson,
+                    category,
+                    subTask
+                })
+            });
+
+            if (!res.ok) throw new Error("Failed to assign complaint");
+        },
+        onSuccess: () => {
+            toast.success("Complaint assigned");
+            onBack(true);
+            queryClient.invalidateQueries(["complaints"]);
+        },
+        onError: (err) => {
+            toast.error(err.message);
+        }
+    });
+
+    // Event Handlers
+    const handleDelete = (e) => {
         e.preventDefault();
-        // try {
-        //     const response = await fetch(`http://localhost:8000/api/complaints/delete`, {
-        //         method: "DELETE",
-        //         headers: {
-        //             "Content-Type": "application/json",
-        //         },
-        //         body: JSON.stringify({ complaintId: complaint._id }),
-        //     });
-
-        //     if (response.ok) {
-        //         console.log("Complaint deleted successfully");
-        //         onBack(true); // Go back to the previous page with a refresh complaint list
-        //     } else {
-        //         console.error("Failed to delete complaint");
-        //     }
-        // }
-        // catch (error) {
-        //     console.error("Error deleting complaint:", error);
-        // }
+        deleteMutation.mutate();
     };
 
-    const handleMarkAsDone = async (e) => {
-        console.log("Complaint marked as done");
+    const handleMarkAsDone = (e) => {
         e.preventDefault();
-        // try {
-        //     const response = await fetch(`http://localhost:8000/api/complaints/delete`, {
-        //         method: "PATCH",
-        //         headers: {
-        //             "Content-Type": "application/json",
-        //         },
-        //         body: JSON.stringify({ complaintId: complaint._id , status : "Resolved"}),
-        //     });
-
-        //     if (response.ok) {
-        //         console.log("Complaint updated successfully");
-        //         onBack(true); // Go back to the previous page with a refresh complaint list
-        //     } else {
-        //         console.error("Failed to update complaint");
-        //     }
-        // }
-        // catch (error) {
-        //     console.error("Error updating complaint:", error);
-        // }
-
+        markAsDoneMutation.mutate();
     };
 
-    const handleAssign = async(e,category, subTask, assignedPerson) => {
-        console.log(`Complaint assigning to ${assignedPerson} under ${category} -> ${subTask} ....`);
+    const handleAssign = (e, category, subTask, assignedPerson) => {
         e.preventDefault();
-        // try {
-        //     const response = await fetch(`http://localhost:8000/api/complaints/update`, {
-        //         method: "PATCH",
-        //         headers: {
-        //             "Content-Type": "application/json",
-        //         },
-        //         body: JSON.stringify({ complaintId: complaint._id , status : "In Progress", assignedPerson :assignedPerson ,category: category, subTask: subTask}),
-        //     });
-
-        //     if (response.ok) {
-        //         console.log("Complaint updated successfully");
-        //         onBack(true); // Go back to the previous page with a refresh complaint list
-        //     } else {
-        //         console.error("Failed to update complaint");
-        //     }
-        // }
-        // catch (error) {
-        //     console.error("Error updating complaint:", error);
-        // }
+        assignMutation.mutate({ category, subTask, assignedPerson });
         setShowAssignModal(false);
     };
+
 
     return (
         <div className="max-w-2xl mx-auto p-6 bg-white shadow-md rounded-lg relative">
