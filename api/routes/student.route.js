@@ -8,7 +8,8 @@ import {
     getBonafideApplications,
     getStudentPassportDetails,
     submitPassportApplication,
-    getPassportApplications
+    getPassportApplications,
+    updateStudentProfile
 } from "../controllers/student.controller.js";
 
 
@@ -16,6 +17,7 @@ const router = express.Router();
 router.get("/:id", getStudent);
 router.get("/:id/courses", getStudentCourses);
 router.delete("/:id/courses/:courseId",dropCourse);
+router.put("/:id/profile", updateStudentProfile);
 
 // Bonafide routes
 router.get("/:id/bonafide", getStudentBonafideDetails);
