@@ -15,7 +15,7 @@ const hostelLeaveSchema = new mongoose.Schema({
 
 // Hostel Transfer Model
 const hostelTransferSchema = new mongoose.Schema({
-  applicationId: { type: mongoose.Schema.Types.ObjectId, required: true, unique: true },
+  // applicationId: { type: mongoose.Schema.Types.ObjectId, required: true, unique: true },
   rollNo: { type: String, required: true, ref: 'Student' },
   // availableHostels: { type: String } // from where will this come?
   currentHostel: {

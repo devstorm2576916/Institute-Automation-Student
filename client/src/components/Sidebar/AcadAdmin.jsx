@@ -20,38 +20,39 @@ const AcadAdmin = () => {
     }));
   };
 
-  return (
-    <>
-      <ul className="list-none pl-5 mt-5">
-        <li>
-          <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('course')}>
-            {expandedSections.course ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Course
-          </span>
-          {expandedSections.course && (
-            <ul className="pl-5">
-              <li>
-                <Link to="/adminregistration" className="text-gray-700 hover:text-gray-900">
-                  Create course
-                </Link>
-              </li>
-              <li>
-                <Link to="/attendancelanding" className="text-gray-700 hover:text-gray-900">
-                  Attendance
-                </Link>
-              </li>
-              <li>
-                <Link to="/feedbackConfiguration" className="text-gray-700 hover:text-gray-900">Feedback</Link>
-              </li>
-              <li>Announcements</li>
-            </ul>
-          )}
-        </li>
-
-        <li className="mt-2">
-          <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('documents')}>
-            {expandedSections.documents ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Documents
-          </span>
-          {expandedSections.documents && (
+    return (
+        <>
+            <ul className="list-none pl-5 mt-5">
+                <li>
+                    <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('course')}>
+                        {expandedSections.course ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Course
+                    </span>
+                    {expandedSections.course && (
+                        <ul className="pl-5">
+                            <li>Registration</li>
+                            <li>
+                                <Link to="/adminregistration" className="text-gray-700 hover:text-gray-900">
+                                  Create course
+                                </Link>
+                            </li>
+                            <Link to="/attendancelanding" className="text-gray-700 hover:text-gray-900">
+                                Attendance
+                                </Link>
+                            <li>
+                                <Link to="/dropcourseApprovals" className="text-gray-700 hover:text-gray-900">Drop Course</Link>
+                            </li>
+                            <li>
+                                <Link to="/feedbackConfiguration" className="text-gray-700 hover:text-gray-900">Feedback</Link>
+                            </li>
+                            <li>Announcements</li>
+                        </ul>
+                    )}
+                </li>
+                <li className="mt-2">
+                <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('documents')}>
+                    {expandedSections.documents ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Documents
+                </span>
+                {expandedSections.documents && (
             <ul className="pl-5">
               <li>
                 <Link to="/admin/documents" className="text-gray-700 hover:text-gray-900 flex items-center gap-2">
