@@ -49,24 +49,42 @@ const NewComplaintForm = ({ category, subCategory }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!title || !complaint || !phoneNumber || !locality || !detailedAddress) {
+    
+        // Basic validation for required fields
+        if (!title || !complaint || !phoneNumber || !timeAvailability || !locality || !detailedAddress) {
             toast.error("All fields are required!");
             return;
         }
-
+    
+        // Phone number validation
+        const phoneRegex = /^\+?\d{1,4}[\s-]?\d{10}$/;
+        if (!phoneRegex.test(phoneNumber)) {
+            toast.error("Please enter a valid phone number (e.g., +91 9876543210)");
+            return;
+        }
+    
+        // Since timeAvailability is now a dropdown, simple non-empty check is enough
+        if (!timeAvailability) {
+            toast.error("Please select a time slot for availability.");
+            return;
+        }
+    
         const formData = {
             title,
             date: new Date(),
             description: complaint,
             phoneNumber,
+            timeAvailability,
             address: detailedAddress,
             locality,
             category,
             subCategory,
         };
-
+    
         mutation.mutate(formData);
     };
+    
+    
 
     const handleClear = () => {
         setComplaint("");
@@ -110,12 +128,20 @@ const NewComplaintForm = ({ category, subCategory }) => {
                 />
 
                 <label className="block font-semibold mb-2">Time of availability:</label>
-                <input
-                    type="text"
+                <select
                     className="w-full p-2 border rounded-md mb-4"
                     value={timeAvailability}
                     onChange={(e) => setTimeAvailability(e.target.value)}
-                />
+                >
+                    <option value="">Select Time Slot</option>
+                    <option value="08:00 - 10:00 AM">08:00 - 10:00 AM</option>
+                    <option value="10:00 - 12:00 PM">10:00 - 12:00 PM</option>
+                    <option value="12:00 - 02:00 PM">12:00 - 02:00 PM</option>
+                    <option value="02:00 - 04:00 PM">02:00 - 04:00 PM</option>
+                    <option value="04:00 - 06:00 PM">04:00 - 06:00 PM</option>
+                    <option value="06:00 - 08:00 PM">06:00 - 08:00 PM</option>
+                </select>
+
 
                 <label className="block font-semibold mb-2">Locality:</label>
                 <select
