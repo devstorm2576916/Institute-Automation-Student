@@ -38,9 +38,24 @@ const CourseRegistrationFaculty = () => {
     );
   };
 
-  const handleApprove = () => {
-    alert(`Approved ${selectedStudents.length} students!`);
-    setSelectedStudents([]);
+  const handleApprove = async () => {
+    try {
+      const response = await axios.post("http://localhost:8000/api/facultyCourse/approve-registrations", {
+        courseCode,
+        students: selectedStudents,
+      });
+  
+      if (response.data.success) {
+        alert(`Approved ${selectedStudents.length} students!`);
+        setSelectedStudents([]);
+        fetchStudents(); // Refresh the list
+      } else {
+        alert("Some error occurred while approving.");
+      }
+    } catch (error) {
+      console.error("Error approving students:", error);
+      alert("An error occurred.");
+    }
   };
 
   return (
