@@ -138,154 +138,173 @@ const TimeTable = () => {
 
     return (
         <>
-        <div className="flex justify-center py-3">
-            <h3 className="text-2xl font-bold">Time-Table</h3>
-        </div>
+            <div className="flex justify-center py-6">
+                <h3 className="text-3xl font-bold text-gray-800">Time-Table</h3>
+            </div>
 
-        <div className="p-4">
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-black text-center">
-          <thead>
-            <tr className="bg-blue-600 text-white">
-              <th className="border border-black px-4 py-2">Day\Time</th>
-              {timings.map((timing, index) => (
-                <th key={index} className="border border-black py-2">
-                  {timing}
-                </th>
-              ))}
-            </tr>
-          </thead>
+            <div className="p-4">
+                <div className="overflow-x-auto rounded-lg shadow-md bg-white">
+                    <table className="min-w-full text-center">
+                        <thead className="bg-gradient-to-r from-blue-500 to-green-500 text-white">
+                            <tr>
+                                <th className="px-6 py-4 text-lg font-semibold border-b border-gray-200">Day / Time</th>
+                                {timings.map((timing, index) => (
+                                    <th key={index} className="px-6 py-4 text-md border-b border-gray-200">
+                                        {timing}
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
 
-          <tbody>
-          <tr key="monday" className={"bg-blue-100"}>
-            <td className="bg-blue-600 text-white font-bold border border-black">Monday</td>
-            <td key="0" className="border border-black px-4 py-2">{slotToCourseMap["A"]}</td>
-            {slotToCourseMap["ML1"] === undefined ? <>
-                <td key="1" className="border border-black px-4 py-2">{slotToCourseMap["B"]}</td>
-                <td key="2" className="border border-black px-4 py-2">{slotToCourseMap["C"]}</td>
-                <td key="3" className="border border-black px-4 py-2">{slotToCourseMap["D"]}</td>
-            </> : <>
-                <td key="10" colSpan="3" className="border border-black px-4 py-2">{slotToCourseMap["ML1"]}</td>
-            </>}
-            <td key="4" className="border border-black px-4 py-2">{slotToCourseMap["F"]}</td>
-            <td key="5" className="border border-black px-4 py-2">{slotToCourseMap["F1"]}</td>
-            {slotToCourseMap["AL1"] === undefined ? <>
-                <td key="6" className="border border-black px-4 py-2">{slotToCourseMap["D1"]}</td>
-                <td key="7" className="border border-black px-4 py-2">{slotToCourseMap["C1"]}</td>
-                <td key="8" className="border border-black px-4 py-2">{slotToCourseMap["B1"]}</td>
-            </> : <>
-                <td key="11" colSpan="3" className="border border-black px-4 py-2">{slotToCourseMap["AL1"]}</td>
-            </>}
-            <td key="9" className="border border-black px-4 py-2">{slotToCourseMap["A1"]}</td>
-            </tr>
+                        <tbody className="text-gray-700">
+                            {/* Monday */}
+                            <tr className="hover:bg-gray-100 transition-all">
+                                <td className="bg-gradient-to-r from-blue-500 to-green-500 text-white font-bold px-6 py-4 border-b">
+                                    Monday
+                                </td>
+                                <td className="px-6 py-4 border-b">{slotToCourseMap["A"]}</td>
+                                {slotToCourseMap["ML1"] === undefined ? (
+                                    <>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["B"]}</td>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["C"]}</td>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["D"]}</td>
+                                    </>
+                                ) : (
+                                    <td colSpan="3" className="px-6 py-4 border-b">{slotToCourseMap["ML1"]}</td>
+                                )}
+                                <td className="px-6 py-4 border-b">{slotToCourseMap["F"]}</td>
+                                <td className="px-6 py-4 border-b">{slotToCourseMap["F1"]}</td>
+                                {slotToCourseMap["AL1"] === undefined ? (
+                                    <>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["D1"]}</td>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["C1"]}</td>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["B1"]}</td>
+                                    </>
+                                ) : (
+                                    <td colSpan="3" className="px-6 py-4 border-b">{slotToCourseMap["AL1"]}</td>
+                                )}
+                                <td className="px-6 py-4 border-b">{slotToCourseMap["A1"]}</td>
+                            </tr>
 
-            <tr key="tuesday" className="bg-blue-50">
-                <td className="bg-blue-600 text-white font-bold border border-black">Tuesday</td>
-                <td key="0" className="border border-black px-4 py-2">{slotToCourseMap["E"]}</td>
-                {slotToCourseMap["ML2"] === undefined ? (
-                    <>
-                    <td key="1" className="border border-black px-4 py-2">{slotToCourseMap["A"]}</td>
-                    <td key="2" className="border border-black px-4 py-2">{slotToCourseMap["B"]}</td>
-                    <td key="3" className="border border-black px-4 py-2">{slotToCourseMap["C"]}</td>
-                    </>
-                ) : (
-                    <td key="10" colSpan="3" className="border border-black px-4 py-2">{slotToCourseMap["ML2"]}</td>
-                )}
-                <td key="4" className="border border-black px-4 py-2">{slotToCourseMap["F"]}</td>
-                <td key="5" className="border border-black px-4 py-2">{slotToCourseMap["F1"]}</td>
-                {slotToCourseMap["AL2"] === undefined ? (
-                    <>
-                    <td key="6" className="border border-black px-4 py-2">{slotToCourseMap["C1"]}</td>
-                    <td key="7" className="border border-black px-4 py-2">{slotToCourseMap["B1"]}</td>
-                    <td key="8" className="border border-black px-4 py-2">{slotToCourseMap["A1"]}</td>
-                    </>
-                ) : (
-                    <td key="11" colSpan="3" className="border border-black px-4 py-2">{slotToCourseMap["AL2"]}</td>
-                )}
-                <td key="9" className="border border-black px-4 py-2">{slotToCourseMap["E1"]}</td>
-                </tr>
+                            {/* Tuesday */}
+                            <tr className="hover:bg-gray-100 transition-all">
+                                <td className="bg-gradient-to-r from-blue-500 to-green-500 text-white font-bold px-6 py-4 border-b">
+                                    Tuesday
+                                </td>
+                                <td className="px-6 py-4 border-b">{slotToCourseMap["E"]}</td>
+                                {slotToCourseMap["ML2"] === undefined ? (
+                                    <>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["A"]}</td>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["B"]}</td>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["C"]}</td>
+                                    </>
+                                ) : (
+                                    <td colSpan="3" className="px-6 py-4 border-b">{slotToCourseMap["ML2"]}</td>
+                                )}
+                                <td className="px-6 py-4 border-b">{slotToCourseMap["F"]}</td>
+                                <td className="px-6 py-4 border-b">{slotToCourseMap["F1"]}</td>
+                                {slotToCourseMap["AL2"] === undefined ? (
+                                    <>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["C1"]}</td>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["B1"]}</td>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["A1"]}</td>
+                                    </>
+                                ) : (
+                                    <td colSpan="3" className="px-6 py-4 border-b">{slotToCourseMap["AL2"]}</td>
+                                )}
+                                <td className="px-6 py-4 border-b">{slotToCourseMap["E1"]}</td>
+                            </tr>
 
-                <tr key="wednesday" className="bg-blue-100">
-                <td className="bg-blue-600 text-white font-bold border border-black">Wednesday</td>
-                <td key="0" className="border border-black px-4 py-2">{slotToCourseMap["D"]}</td>
-                {slotToCourseMap["ML3"] === undefined ? (
-                    <>
-                    <td key="1" className="border border-black px-4 py-2">{slotToCourseMap["E"]}</td>
-                    <td key="2" className="border border-black px-4 py-2">{slotToCourseMap["A"]}</td>
-                    <td key="3" className="border border-black px-4 py-2">{slotToCourseMap["B"]}</td>
-                    </>
-                ) : (
-                    <td key="10" colSpan="3" className="border border-black px-4 py-2">{slotToCourseMap["ML3"]}</td>
-                )}
-                <td key="4" className="border border-black px-4 py-2">{slotToCourseMap["G"]}</td>
-                <td key="5" className="border border-black px-4 py-2">{slotToCourseMap["G1"]}</td>
-                {slotToCourseMap["AL3"] === undefined ? (
-                    <>
-                    <td key="6" className="border border-black px-4 py-2">{slotToCourseMap["B1"]}</td>
-                    <td key="7" className="border border-black px-4 py-2">{slotToCourseMap["A1"]}</td>
-                    <td key="8" className="border border-black px-4 py-2">{slotToCourseMap["E1"]}</td>
-                    </>
-                ) : (
-                    <td key="11" colSpan="3" className="border border-black px-4 py-2">{slotToCourseMap["AL3"]}</td>
-                )}
-                <td key="9" className="border border-black px-4 py-2">{slotToCourseMap["D1"]}</td>
-                </tr>
+                            {/* Wednesday */}
+                            <tr className="hover:bg-gray-100 transition-all">
+                                <td className="bg-gradient-to-r from-blue-500 to-green-500 text-white font-bold px-6 py-4 border-b">
+                                    Wednesday
+                                </td>
+                                <td className="px-6 py-4 border-b">{slotToCourseMap["D"]}</td>
+                                {slotToCourseMap["ML3"] === undefined ? (
+                                    <>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["E"]}</td>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["A"]}</td>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["B"]}</td>
+                                    </>
+                                ) : (
+                                    <td colSpan="3" className="px-6 py-4 border-b">{slotToCourseMap["ML3"]}</td>
+                                )}
+                                <td className="px-6 py-4 border-b">{slotToCourseMap["G"]}</td>
+                                <td className="px-6 py-4 border-b">{slotToCourseMap["G1"]}</td>
+                                {slotToCourseMap["AL3"] === undefined ? (
+                                    <>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["B1"]}</td>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["A1"]}</td>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["E1"]}</td>
+                                    </>
+                                ) : (
+                                    <td colSpan="3" className="px-6 py-4 border-b">{slotToCourseMap["AL3"]}</td>
+                                )}
+                                <td className="px-6 py-4 border-b">{slotToCourseMap["D1"]}</td>
+                            </tr>
 
-                <tr key="thursday" className="bg-blue-50">
-                <td className="bg-blue-600 text-white font-bold border border-black">Thursday</td>
-                <td key="0" className="border border-black px-4 py-2">{slotToCourseMap["C"]}</td>
-                {slotToCourseMap["ML4"] === undefined ? (
-                    <>
-                    <td key="1" className="border border-black px-4 py-2">{slotToCourseMap["D"]}</td>
-                    <td key="2" className="border border-black px-4 py-2">{slotToCourseMap["E"]}</td>
-                    <td key="3" className="border border-black px-4 py-2">{slotToCourseMap["A"]}</td>
-                    </>
-                ) : (
-                    <td key="10" colSpan="3" className="border border-black px-4 py-2">{slotToCourseMap["ML4"]}</td>
-                )}
-                <td key="4" className="border border-black px-4 py-2">{slotToCourseMap["G"]}</td>
-                <td key="5" className="border border-black px-4 py-2">{slotToCourseMap["G1"]}</td>
-                {slotToCourseMap["AL4"] === undefined ? (
-                    <>
-                    <td key="6" className="border border-black px-4 py-2">{slotToCourseMap["A1"]}</td>
-                    <td key="7" className="border border-black px-4 py-2">{slotToCourseMap["E1"]}</td>
-                    <td key="8" className="border border-black px-4 py-2">{slotToCourseMap["D1"]}</td>
-                    </>
-                ) : (
-                    <td key="11" colSpan="3" className="border border-black px-4 py-2">{slotToCourseMap["AL4"]}</td>
-                )}
-                <td key="9" className="border border-black px-4 py-2">{slotToCourseMap["C1"]}</td>
-                </tr>
+                            {/* Thursday */}
+                            <tr className="hover:bg-gray-100 transition-all">
+                                <td className="bg-gradient-to-r from-blue-500 to-green-500 text-white font-bold px-6 py-4 border-b">
+                                    Thursday
+                                </td>
+                                <td className="px-6 py-4 border-b">{slotToCourseMap["C"]}</td>
+                                {slotToCourseMap["ML4"] === undefined ? (
+                                    <>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["D"]}</td>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["E"]}</td>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["A"]}</td>
+                                    </>
+                                ) : (
+                                    <td colSpan="3" className="px-6 py-4 border-b">{slotToCourseMap["ML4"]}</td>
+                                )}
+                                <td className="px-6 py-4 border-b">{slotToCourseMap["G"]}</td>
+                                <td className="px-6 py-4 border-b">{slotToCourseMap["G1"]}</td>
+                                {slotToCourseMap["AL4"] === undefined ? (
+                                    <>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["A1"]}</td>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["E1"]}</td>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["D1"]}</td>
+                                    </>
+                                ) : (
+                                    <td colSpan="3" className="px-6 py-4 border-b">{slotToCourseMap["AL4"]}</td>
+                                )}
+                                <td className="px-6 py-4 border-b">{slotToCourseMap["C1"]}</td>
+                            </tr>
 
-                <tr key="friday" className="bg-blue-100">
-                <td className="bg-blue-600 text-white font-bold border border-black">Friday</td>
-                <td key="0" className="border border-black px-4 py-2">{slotToCourseMap["B"]}</td>
-                {slotToCourseMap["ML5"] === undefined ? (
-                    <>
-                    <td key="1" className="border border-black px-4 py-2">{slotToCourseMap["C"]}</td>
-                    <td key="2" className="border border-black px-4 py-2">{slotToCourseMap["D"]}</td>
-                    <td key="3" className="border border-black px-4 py-2">{slotToCourseMap["F"]}</td>
-                    </>
-                ) : (
-                    <td key="10" colSpan="3" className="border border-black px-4 py-2">{slotToCourseMap["ML5"]}</td>
-                )}
-                <td key="4" className="border border-black px-4 py-2">{slotToCourseMap["G"]}</td>
-                <td key="5" className="border border-black px-4 py-2">{slotToCourseMap["G1"]}</td>
-                {slotToCourseMap["AL5"] === undefined ? (
-                    <>
-                    <td key="6" className="border border-black px-4 py-2">{slotToCourseMap["F1"]}</td>
-                    <td key="7" className="border border-black px-4 py-2">{slotToCourseMap["D1"]}</td>
-                    <td key="8" className="border border-black px-4 py-2">{slotToCourseMap["C1"]}</td>
-                    </>
-                ) : (
-                    <td key="11" colSpan="3" className="border border-black px-4 py-2">{slotToCourseMap["AL5"]}</td>
-                )}
-                <td key="9" className="border border-black px-4 py-2">{slotToCourseMap["B1"]}</td>
-                </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+                            {/* Friday */}
+                            <tr className="hover:bg-gray-100 transition-all">
+                                <td className="bg-gradient-to-r from-blue-500 to-green-500 text-white font-bold px-6 py-4 border-b">
+                                    Friday
+                                </td>
+                                <td className="px-6 py-4 border-b">{slotToCourseMap["B"]}</td>
+                                {slotToCourseMap["ML5"] === undefined ? (
+                                    <>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["C"]}</td>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["D"]}</td>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["E"]}</td>
+                                    </>
+                                ) : (
+                                    <td colSpan="3" className="px-6 py-4 border-b">{slotToCourseMap["ML5"]}</td>
+                                )}
+                                <td className="px-6 py-4 border-b">{slotToCourseMap["G"]}</td>
+                                <td className="px-6 py-4 border-b">{slotToCourseMap["G1"]}</td>
+                                {slotToCourseMap["AL5"] === undefined ? (
+                                    <>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["F1"]}</td>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["D1"]}</td>
+                                        <td className="px-6 py-4 border-b">{slotToCourseMap["C1"]}</td>
+                                    </>
+                                ) : (
+                                    <td colSpan="3" className="px-6 py-4 border-b">{slotToCourseMap["AL5"]}</td>
+                                )}
+                                <td className="px-6 py-4 border-b">{slotToCourseMap["B1"]}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </>
     );
 };
