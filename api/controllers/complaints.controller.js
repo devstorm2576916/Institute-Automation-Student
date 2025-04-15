@@ -5,8 +5,19 @@ import { Complaint, SupportStaff } from "../models/complaint.model.js";
 import { validateAccessToken } from "../middleware/auth.middleware.js";
 
 const ComplaintsController = {
+  /**
+   * Create a new complaint.
+   * 
+   * Input:
+   * - Body: { title, date, description, imageUrl (optional), category, subCategory }
+   * - User: { userId } (from `req.user`)
+   * 
+   * Output:
+   * - Success: { message: "Successfully created the complaint", complaint }
+   * - Error: { message: "Something went wrong!" }
+   */
   createComplaint: async (req, res) => {
-    const complaint = new Complaint({...req.body,userId:req.user.userId});
+    const complaint = new Complaint({ ...req.body, userId: req.user.userId });
     try {
       await complaint.save();
       res.status(201).json({
@@ -22,6 +33,17 @@ const ComplaintsController = {
     }
   },
 
+  /**
+   * Get complaints of the logged-in user.
+   * 
+   * Input:
+   * - Body: { page (optional), limit (optional) }
+   * - User: { userId } (from `req.user`)
+   * 
+   * Output:
+   * - Success: { data: complaints, pagination: { currentPage, totalPages, pageSize, totalItems } }
+   * - Error: { message: "Something went wrong!" }
+   */
   getUserComplaints: async (req, res) => {
     const userId = req.user.userId;
     try {
@@ -51,6 +73,17 @@ const ComplaintsController = {
     }
   },
 
+  /**
+   * Get all complaints (Admin only).
+   * 
+   * Input:
+   * - Body: { page (optional), limit (optional) }
+   * - User: { email } (from `req.user`)
+   * 
+   * Output:
+   * - Success: { data: complaints, pagination: { currentPage, totalPages, pageSize, totalItems } }
+   * - Error: { message: "Something went wrong while fetching complaints." }
+   */
   getAllComplaints: async (req, res) => {
     try {
       const admin = await Admin.findOne({ email: req.user.email });
@@ -85,7 +118,17 @@ const ComplaintsController = {
     }
   },
 
-  // complaintId
+  /**
+   * Delete a complaint.
+   * 
+   * Input:
+   * - Body: { _id (complaintId) }
+   * - User: { userId } (from `req.user`)
+   * 
+   * Output:
+   * - Success: { message: "Complaint deleted successfully!" }
+   * - Error: { message: "Complaint not found!" } or { message: "Something went wrong!" }
+   */
   deleteComplaint: async (req, res) => {
     const complaintId = req.body._id;
     const userId = req.user.userId;
@@ -107,7 +150,7 @@ const ComplaintsController = {
         console.log(`ERROR : User don't have access to this complaint`);
         console.log(`UserId : ${userId}, ComplaintID: ${complaintId}`);
         return res.status(403).json({
-          message: "User don't h`ave access to this complaint",
+          message: "User don't have access to this complaint",
         });
       }
       const deletedComplaint = await Complaint.findByIdAndDelete(complaintId);
@@ -130,16 +173,25 @@ const ComplaintsController = {
       });
     }
   },
-  // complaintId
-  // updatedStatus
+
+  /**
+   * Update the status of a complaint (Admin only).
+   * 
+   * Input:
+   * - Body: { complaintId, updatedStatus }
+   * - User: { email } (from `req.user`)
+   * 
+   * Output:
+   * - Success: { message: "Complaint updated successfully!", complaint }
+   * - Error: { message: "Complaint not found!" } or { message: "Something went wrong!" }
+   */
   updateStatus: async (req, res) => {
-    console.log(req.body);
     const complaintId = req.body.complaintId;
     const updatedStatus = req.body.updatedStatus;
     if (!complaintId || !updatedStatus) {
       return res.status(400).json({
         error: "Missing attributes",
-        message: "Required attributes: `complaintId` and `udpatedStatus`",
+        message: "Required attributes: `complaintId` and `updatedStatus`",
       });
     }
     try {
@@ -174,12 +226,19 @@ const ComplaintsController = {
     }
   },
 
-  // assignedName
-  // assignedContact
-  // complaintId
+  /**
+   * Assign a complaint to a support staff (Admin only).
+   * 
+   * Input:
+   * - Body: { complaintId, assignedName, assignedContact }
+   * - User: { email } (from `req.user`)
+   * 
+   * Output:
+   * - Success: { message: "Complaint assigned successfully!", complaint }
+   * - Error: { message: "Complaint not found!" } or { message: "Something went wrong!" }
+   */
   assignComplaint: async (req, res) => {
     try {
-      console.log(req.body);
       const admin = await Admin.findOne({ email: req.user.email });
       if (!admin) {
         console.log(`ERROR: Unauthorised access to update complaint status`);
@@ -202,7 +261,6 @@ const ComplaintsController = {
         status: "In Progress",
         updatedAt: Date.now(),
       };
-      console.log(`Patch: ${patch}`);
       const complaint = await Complaint.findByIdAndUpdate(complaintId, patch, { new: true });
       if (complaint) {
         return res.send({
@@ -223,7 +281,17 @@ const ComplaintsController = {
     }
   },
 
-  // create support staff
+  /**
+   * Create a new support staff (Admin only).
+   * 
+   * Input:
+   * - Body: { name, phone }
+   * - User: { email } (from `req.user`)
+   * 
+   * Output:
+   * - Success: { message: "Successfully created the support staff", supportStaff }
+   * - Error: { message: "Something went wrong!" }
+   */
   createSupportStaff: async (req, res) => {
     try {
       const admin = await Admin.findOne({ email: req.user.email });
@@ -248,7 +316,17 @@ const ComplaintsController = {
     }
   },
 
-  // delete support staff
+  /**
+   * Delete a support staff (Admin only).
+   * 
+   * Input:
+   * - Body: { supportStaffId }
+   * - User: { email } (from `req.user`)
+   * 
+   * Output:
+   * - Success: { message: "Support staff deleted successfully!" }
+   * - Error: { message: "Support staff not found!" } or { message: "Something went wrong!" }
+   */
   deleteSupportStaff: async (req, res) => {
     try {
       const admin = await Admin.findOne({ email: req.user.email });
@@ -279,6 +357,16 @@ const ComplaintsController = {
     }
   },
 
+  /**
+   * Get all support staff (Admin only).
+   * 
+   * Input:
+   * - User: { email } (from `req.user`)
+   * 
+   * Output:
+   * - Success: { message: "Support staff fetched successfully!", supportStaff }
+   * - Error: { message: "Something went wrong!" }
+   */
   getAllSupportStaff: async (req, res) => {
     try {
       const admin = await Admin.findOne({ email: req.user.email });
