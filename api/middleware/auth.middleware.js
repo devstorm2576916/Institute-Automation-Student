@@ -21,6 +21,7 @@ export const validateAccessToken = (req, res, next) => {
             return res.status(403).json({ message: "invalid token" });
         }
         req.user = decoded.user; // Attach decoded user info to the request
+        console.log(req.user);
         next();
     });
 };
