@@ -9,6 +9,7 @@ import hostelRoute from "../api/routes/hostel.route.js";
 import studentRoute from "../api/routes/student.route.js";
 import createCourseRoute from "../api/routes/createCourse.route.js";
 import acadAdminRoute from "../api/routes/acadAdmin.route.js";
+import attendanceRoute from "../api/routes/attendance.route.js"
 
 import Razorpay from "razorpay";
 import crypto from "crypto"; // Needed for signature verification (production)
@@ -30,7 +31,8 @@ app.use("/api/student",studentRoute);
 app.use("/api/course",createCourseRoute);
 
 app.use("/api/acadadmin", acadAdminRoute);
-
+app.use("/api/attendancelanding", attendanceRoute);
+ 
 const port = process.env.PORT || 8000;
 
 // --- Middleware ---
