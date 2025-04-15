@@ -9,6 +9,8 @@ const AcadAdmin = () => {
     documents: false,
     complaint: false,
     profile: false,
+    feecontrol: false,
+    studentManagement: false
   });
 
   const toggleSection = (section) => {
@@ -17,7 +19,6 @@ const AcadAdmin = () => {
       [section]: !prev[section],
     }));
   };
-
 
     return (
         <>
@@ -53,62 +54,67 @@ const AcadAdmin = () => {
                 </span>
                 {expandedSections.documents && (
             <ul className="pl-5">
-              <li >
-                <Link
-                  to="/admin/documents"
-                  className="text-gray-700 hover:text-gray-900 flex items-center gap-2"
-                >
+              <li>
+                <Link to="/admin/documents" className="text-gray-700 hover:text-gray-900 flex items-center gap-2">
                   Manage Applications
-                </Link>
-              </li>
-              <li >
-                <Link
-                  to="/admin/documents/access"
-                  className="text-gray-700 hover:text-gray-900 flex items-center gap-2"
-                >
-                  Access Control
                 </Link>
               </li>
             </ul>
           )}
-                </li>
-                <li className="mt-2">
-                <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('feecontrol')}>
-                    {expandedSections.feecontrol ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Fees Management
-                </span>
-                {expandedSections.feecontrol && (
-                    <ul className="pl-5">
-                        <li>
-                          <Link to="/acadAdmin/feeManagement" className="text-gray-700 hover:text-gray-900">
-                                Fee Control
-                          </Link>
-                        </li>
-                    </ul>
-                )}
-                </li>
+        </li>
 
-                <li className="mt-2">
-                <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('complaint')}>
-                    {expandedSections.complaint ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Complaint
-                </span>
-                {expandedSections.complaint && (
-                    <ul className="pl-5">
-                        <li>View Complaints</li>
-                    </ul>
-                )}
-                </li>
-                <li className="mt-2">
-                <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('profile')}>
-                    {expandedSections.profile ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Profile
-                </span>
-                {expandedSections.profile && (
-                    <ul className="pl-5">
-                        <li>View Profile</li>
-                    </ul>
-                )}
-                </li>
+        <li className="mt-2">
+          <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('studentManagement')}>
+            {expandedSections.studentManagement ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Student Management
+          </span>
+          {expandedSections.studentManagement && (
+            <ul className="pl-5">
+              <li>
+                <Link to="/admin/documents/access" className="text-gray-700 hover:text-gray-900 flex items-center gap-2">
+                  Update Student 
+                </Link>
+              </li>
+            </ul>
+          )}
+        </li>
 
-        </ul>
+        <li className="mt-2">
+          <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('feecontrol')}>
+            {expandedSections.feecontrol ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Fees Management
+          </span>
+          {expandedSections.feecontrol && (
+            <ul className="pl-5">
+              <li>
+                <Link to="/acadAdmin/feeManagement" className="text-gray-700 hover:text-gray-900">
+                  Fee Control
+                </Link>
+              </li>
+            </ul>
+          )}
+        </li>
+
+        <li className="mt-2">
+          <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('complaint')}>
+            {expandedSections.complaint ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Complaint
+          </span>
+          {expandedSections.complaint && (
+            <ul className="pl-5">
+              <li>View Complaints</li>
+            </ul>
+          )}
+        </li>
+
+        <li className="mt-2">
+          <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('profile')}>
+            {expandedSections.profile ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Profile
+          </span>
+          {expandedSections.profile && (
+            <ul className="pl-5">
+              <li>View Profile</li>
+            </ul>
+          )}
+        </li>
+      </ul>
     </>
   );
 };

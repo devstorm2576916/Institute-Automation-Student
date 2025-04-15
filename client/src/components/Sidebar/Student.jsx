@@ -38,7 +38,7 @@ const Student = () => {
                             <li>
                                 <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('activeCourses')}>
                                     {expandedSections.activeCourses ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} 
-                                    <Link to = "/my-courses" className="text-gray-700 hover:text-gray-900">
+                                    <Link to = "/courses" className="text-gray-700 hover:text-gray-900">
                                         Active Courses
                                     </Link>
                                 </span>
