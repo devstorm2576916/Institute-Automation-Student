@@ -1,6 +1,7 @@
 // import { mongoose } from "../database/mongoDb.js";
 import { HostelAdmin as Admin } from "../models/hostelAdmin.model.js";
 import { Complaint, SupportStaff } from "../models/complaint.model.js";
+// import { Complaint } from "../models/complaint.model.js";
 import { validateAccessToken } from "../middleware/auth.middleware.js";
 
 const ComplaintsController = {
@@ -20,9 +21,9 @@ const ComplaintsController = {
       });
     }
   },
+
   getUserComplaints: async (req, res) => {
     const userId = req.user.userId;
-    console.log(userId);
     try {
       const page = parseInt(req.body.page) || 1;
       const limit = parseInt(req.body.limit) || 10;
@@ -31,7 +32,6 @@ const ComplaintsController = {
       const totalComplaints = await Complaint.countDocuments({ userId });
       const totalPages = Math.ceil(totalComplaints / limit);
       const complaints = await Complaint.find({ userId }).skip(skip).limit(limit).sort({ createdAt: -1 });
-      console.log(complaints)
 
       res.send({
         data: complaints,
@@ -70,7 +70,6 @@ const ComplaintsController = {
       const totalPages = Math.ceil(totalComplaints / limit);
 
       const complaints = await Complaint.find().skip(skip).limit(limit).sort({ createdAt: -1 });
-
       return res.send({
         data: complaints,
         pagination: {
@@ -88,7 +87,9 @@ const ComplaintsController = {
 
   // complaintId
   deleteComplaint: async (req, res) => {
-    const complaintId = req.body.complaintId;
+    const complaintId = req.body._id;
+    const userId = req.user.userId;
+  
     if (!complaintId) {
       res.status(400).json({
         message: "Missing required attribute 'complaintId'",
@@ -102,7 +103,7 @@ const ComplaintsController = {
           message: `Complaint not found : ${complaintId}`,
         });
       }
-      if (complaint.userId !== userId) {
+      if (complaint.userId.toString() !== userId) {
         console.log(`ERROR : User don't have access to this complaint`);
         console.log(`UserId : ${userId}, ComplaintID: ${complaintId}`);
         return res.status(403).json({
@@ -132,6 +133,7 @@ const ComplaintsController = {
   // complaintId
   // updatedStatus
   updateStatus: async (req, res) => {
+    console.log(req.body);
     const complaintId = req.body.complaintId;
     const updatedStatus = req.body.updatedStatus;
     if (!complaintId || !updatedStatus) {
@@ -151,9 +153,9 @@ const ComplaintsController = {
       }
       const patch = {
         status: updatedStatus,
-        updatedAt: Date.now,
+        updatedAt: Date.now(),
       };
-      const complaint = await Complaint.findByIdAndUpdate({ _id: complaintId }, patch, { new: true });
+      const complaint = await Complaint.findByIdAndUpdate(complaintId, patch, { new: true });
       if (complaint) {
         return res.send({
           message: "Complaint updated successfully!",
@@ -177,6 +179,7 @@ const ComplaintsController = {
   // complaintId
   assignComplaint: async (req, res) => {
     try {
+      console.log(req.body);
       const admin = await Admin.findOne({ email: req.user.email });
       if (!admin) {
         console.log(`ERROR: Unauthorised access to update complaint status`);
@@ -196,10 +199,11 @@ const ComplaintsController = {
       const patch = {
         assignedName,
         assignedContact,
+        status: "In Progress",
         updatedAt: Date.now(),
       };
-
-      const complaint = await Complaint.findByIdAndUpdate({ _id: complaintId }, patch, { new: true });
+      console.log(`Patch: ${patch}`);
+      const complaint = await Complaint.findByIdAndUpdate(complaintId, patch, { new: true });
       if (complaint) {
         return res.send({
           message: "Complaint assigned successfully!",
@@ -211,7 +215,8 @@ const ComplaintsController = {
         message: "Complaint not found!",
       });
     } catch (e) {
-      return res.status(500).json({
+      console.log(`ERROR: Assigning complaint : ${e}`);
+      return res.send({
         message: "Something went wrong!",
         error: e,
       });
@@ -266,7 +271,12 @@ const ComplaintsController = {
         message: "Support staff not found!",
         error: `No support staff found with ID ${req.body.supportStaffId}`,
       });
-    } catch (e) {}
+    } catch (e) {
+      return res.status(500).json({
+        message: "Something went wrong!",
+        error: e,
+      });
+    }
   },
 
   getAllSupportStaff: async (req, res) => {

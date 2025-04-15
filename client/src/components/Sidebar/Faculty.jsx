@@ -55,7 +55,11 @@ const Faculty = () => {
                 </span>
                 {expandedSections.complaint && (
                     <ul className="pl-5">
-                        <li>Complaint Form</li>
+                        <li>
+                            <Link to="/complaint" className="text-gray-700 hover:text-gray-900">
+                                Complaint Form
+                            </Link>
+                        </li>
                     </ul>
                 )}
                 </li>
