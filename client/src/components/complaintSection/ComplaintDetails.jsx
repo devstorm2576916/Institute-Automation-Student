@@ -150,6 +150,7 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
                     </button>
                 )}
             </div>
+            
             <div className="p-4">
                 <h2 className="text-xl font-semibold mb-2">{complaint.title}</h2>
                 <p className="text-sm text-gray-600 mb-1">Date: {complaint.date}</p>
@@ -163,17 +164,17 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
                 <p className="text-sm text-gray-600 mb-4">
                     <span className="font-semibold">Description:</span> {complaint.description || "No additional details provided."}
                 </p>
-                {role === "student" && complaint.status === "In Progress" && (
+                {complaint.assignedName!=null && (
                     <p className="text-sm text-gray-600 mb-4">
                         <div>
                             {" "}
                             <span className="font-semibold">Assigned Pesron : </span>
-                            {complaint.assignedPerson.name}
+                            {complaint.assignedName}
                         </div>
                         <div>
                             {" "}
                             <span className="font-semibold">Phone Number : </span>
-                            {complaint.assignedPerson.phoneNo}
+                            {complaint.assignedContact}
                         </div>
                     </p>
                 )}
