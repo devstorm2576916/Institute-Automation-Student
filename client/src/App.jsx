@@ -41,7 +41,7 @@ import MyCourses from "./components/mycourses/myCourse.jsx";
 import DocumentManager from "./pages/Documents/admin/DocumentManager.jsx";
 import DocumentAccessControl from "./pages/Documents/admin/DocumentAccessControl.jsx";
 import FeePayment from "./pages/FeePayment.jsx";
-
+import AdminFeeControl from "./pages/Documents/admin/AdminFeeControl.jsx";
 import { RoleProvider } from './context/Rolecontext.jsx';
 import StudentProfile from './pages/ProfilePage.jsx';
 import TimeTable from './components/TimeTable/timetable.jsx';
@@ -204,7 +204,7 @@ function App() {
                     element: <FacultyCourseStudents />
                 },
                 {
-                    path:"/attendance/:id",
+                    path:"/attendancelanding/:id",
                     element: <AttendanceCoursePage/>
                 },
                   {
@@ -277,6 +277,10 @@ function App() {
                   path: "/admin/documents/access",
                   element: <DocumentAccessControl />,
                 },
+                {
+                    path:"/acadAdmin/feeManagement",
+                    element : <AdminFeeControl/>,
+                }
             ],
         },
     ]);

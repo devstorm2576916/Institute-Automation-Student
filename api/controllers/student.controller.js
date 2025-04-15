@@ -3,6 +3,7 @@ import { Course, StudentCourse, FacultyCourse } from '../models/course.model.js'
 import { ApplicationDocument, Bonafide, Passport } from '../models/documents.models.js';
 import { Faculty } from '../models/faculty.model.js';
 import { CourseDropRequest } from '../models/courseDropRequest.model.js';
+import { User } from '../models/user.model.js';
 
 // Get basic student info
 export const getStudent = async (req, res) => {
@@ -724,6 +725,49 @@ export const getPassportApplications = async (req, res) => {
         res.status(200).json(validApplications);
     } catch (error) {
         console.error('Error fetching passport applications:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Update student profile
+export const updateStudentProfile = async (req, res) => {
+    try {
+        const studentId = req.params.id;
+        const updateData = req.body;
+
+        // Update user data
+        if (updateData.userData) {
+            await User.findByIdAndUpdate(
+                updateData.userData.userId,
+                {
+                    name: updateData.userData.name,
+                    email: updateData.userData.email,
+                    contactNo: updateData.userData.contact
+                }
+            );
+        }
+
+        // Update student data
+        const student = await Student.findOneAndUpdate(
+            { userId: studentId },
+            {
+                hostel: updateData.hostel,
+                roomNo: updateData.roomNo,
+                department: updateData.branch,
+                program: updateData.program,
+                semester: updateData.semester,
+                updatedAt: new Date()
+            },
+            { new: true }
+        ).populate('userId');
+
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+
+        res.status(200).json(student);
+    } catch (error) {
+        console.error('Error updating student profile:', error);
         res.status(500).json({ message: error.message });
     }
 };

@@ -7,7 +7,6 @@ import { AcadAdmin } from '../models/acadAdmin.model.js';
 import { HostelAdmin } from '../models/hostelAdmin.model.js';
 import { validateAccessToken, validateRefreshToken } from '../middleware/auth.middleware.js';
 import { findUserByEmail, verifyRefreshTokenInDB } from '../middleware/auth.middleware.js';
-import e from "express";
 
 export const login = async (req, res) => {
     try {

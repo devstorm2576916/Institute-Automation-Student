@@ -29,20 +29,28 @@ const Navbar = () => {
 
     return (
         <>
-            <nav className="bg-gray-100 py-1 shadow">
-                <div className="container mx-auto flex items-center justify-between pe-5">
-                    <img src={iitglogo} alt="Logo" className="h-[90px] inline-block align-text-top" />
-                    <h2 className="text-xl font-semibold">Institute Automation</h2>
-                    <button
-                        type="button"
-                        onClick={handleLogout}
-                        className="border border-green-600 text-green-600 hover:bg-green-600 hover:text-white px-4 py-2 rounded-md transition duration-200"
-                    >
-                        Logout
-                    </button>
+            <nav className="bg-white py-4 shadow-lg">
+                <div className="container mx-auto flex items-center justify-between px-8">
+                    {/* Logo + Title */}
+                    <div className="flex items-center space-x-4">
+                        <img src={iitglogo} alt="Logo" className="h-12 w-12 object-contain" />
+                        <h1 className="text-2xl font-bold text-gray-700 tracking-wide">Institute Automation</h1>
+                    </div>
+
+                    {/* Logout Button */}
+                    <div className="flex items-center space-x-4">
+                        <button
+                            type="button"
+                            onClick={handleLogout}
+                            className="bg-gradient-to-r from-green-400 to-green-600 text-white px-5 py-2 rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+                        >
+                            Logout
+                        </button>
+                    </div>
                 </div>
             </nav>
         </>
+
 
     );
 };

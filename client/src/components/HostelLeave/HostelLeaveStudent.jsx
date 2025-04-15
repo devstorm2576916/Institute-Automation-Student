@@ -9,8 +9,8 @@ function HostelLeaveStudent() {
     const [showForm, setShowForm] = useState(false);
 
     const [formData, setFormData] = useState({
-        name: '',
-        studentId: '',
+        // name: '',
+        // studentId: '',
         startDate: '',
         endDate: '',
         reason: '',
@@ -23,8 +23,8 @@ function HostelLeaveStudent() {
     const handleDiscard = () => {
         setShowForm(false);
         setFormData({
-            name: '',
-            studentId: '',
+            // name: '',
+            // studentId: '',
             startDate: '',
             endDate: '',
             reason: '',
@@ -111,7 +111,7 @@ function HostelLeaveStudent() {
                     <div className="mt-6 bg-gray-50 p-6 rounded-lg shadow-md w-[80%]">
                         <h3 className="text-xl font-semibold text-center mb-4">Leave Application</h3>
                         <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
+                            {/* <div>
                                 <label className="block text-gray-700 font-medium">Name</label>
                                 <input type="text" name="name" value={formData.name} onChange={handleChange} required className="w-full p-2 border rounded-lg" />
                             </div>
@@ -119,7 +119,7 @@ function HostelLeaveStudent() {
                             <div>
                                 <label className="block text-gray-700 font-medium">Student ID</label>
                                 <input type="text" name="studentId" value={formData.studentId} onChange={handleChange} required className="w-full p-2 border rounded-lg" />
-                            </div>
+                            </div> */}
 
                             <div>
                                 <label className="block text-gray-700 font-medium">Start Date</label>
