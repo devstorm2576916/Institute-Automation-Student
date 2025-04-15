@@ -1,109 +1,111 @@
-import { useState } from "react";
-import { FaCheck, FaTimes } from "react-icons/fa";
+import React from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import newRequest from '../../utils/newRequest';
+import { FaCheck, FaTimes, FaClock } from 'react-icons/fa';
 
-export default function AdminDropCourseApproval() {
-  // Example pending drop requests
-  // In a real application, this would come from an API or context
-  const [pendingRequests, setPendingRequests] = useState([
-    {
-      id: "req-1",
-      studentId: "ST12345",
-      studentName: "Jane Smith",
-      courseId: "CS101",
-      courseName: "Introduction to Computer Science",
-      requestDate: "2025-04-12"
+export default function AdminDropRequests() {
+  const queryClient = useQueryClient();
+  // Fetch all drop requests (no filter, all statuses)
+  const { isLoading, error, data: dropRequests = [] } = useQuery({
+    queryKey: ['adminDropRequests'],
+    queryFn: () =>
+      newRequest.get('/acadadmin/drop-requests').then((res) => res.data),
+  });
+
+  // Mutation for updating drop request status
+  const updateRequestStatus = useMutation({
+    mutationFn: ({ requestId, status, remarks }) =>
+      newRequest.patch(`/acadadmin/drop-requests/${requestId}`, { status, remarks }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['adminDropRequests']);
     },
-    {
-      id: "req-2",
-      studentId: "ST67890",
-      studentName: "John Doe",
-      courseId: "MATH202",
-      courseName: "Calculus II",
-      requestDate: "2025-04-13"
-    },
-    {
-      id: "req-3",
-      studentId: "ST54321",
-      studentName: "Alice Johnson",
-      courseId: "ENG105",
-      courseName: "Academic Writing",
-      requestDate: "2025-04-14"
+  });
+
+  const handleStatusUpdate = (requestId, newStatus) => {
+    const remarks = prompt("Enter remarks for this decision:");
+    if (remarks !== null) {
+      updateRequestStatus.mutate({ requestId, status: newStatus, remarks });
     }
-  ]);
-
-  // Function to handle approving a drop request
-  const handleApproveRequest = (requestId) => {
-    // In a real app, you would make an API call to approve the request
-    // and update the database
-    setPendingRequests(pendingRequests.filter(request => request.id !== requestId));
-    // Show success message
-    alert("Course drop request approved successfully");
   };
 
-  // Function to handle rejecting a drop request
-  const handleRejectRequest = (requestId) => {
-    if (window.confirm("Are you sure you want to reject this drop request?")) {
-      // In a real app, you would make an API call to reject the request
-      // and update the database
-      setPendingRequests(pendingRequests.filter(request => request.id !== requestId));
-      // Show rejection message
-      alert("Course drop request rejected");
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Pending': return 'text-yellow-500';
+      case 'Approved': return 'text-green-500';
+      case 'Rejected': return 'text-red-500';
+      default: return 'text-gray-500';
     }
   };
 
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Drop Course Approval Dashboard</h1>
-        <p className="text-gray-600">Review and manage student course drop requests</p>
-      </div>
-
-      {pendingRequests.length === 0 ? (
-        <div className="bg-gray-100 p-6 rounded-lg text-center">
-          <p className="text-gray-700">No pending drop requests to review.</p>
+      <h1 className="text-3xl font-bold mb-6">Course Drop Requests</h1>
+      {isLoading ? (
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-4">Loading requests...</p>
+        </div>
+      ) : error ? (
+        <div className="text-red-500 text-center">
+          Error loading requests: {error.message}
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white">
+            <thead className="bg-gray-100">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roll Number</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {pendingRequests.map((request) => (
-                <tr key={request.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{request.studentName}</div>
-                    <div className="text-sm text-gray-500">ID: {request.studentId}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{request.courseName}</div>
-                    <div className="text-sm text-pink-500 font-medium">{request.courseId}</div>
-                  </td>
+            <tbody className="divide-y divide-gray-200">
+              {dropRequests.map((request) => (
+                <tr key={request._id}>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">{request.studentName}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">{request.rollNo}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">{request.courseName}</div>
+                  <div className="text-sm text-gray-500">{request.courseId}</div>
+                </td>
+
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {request.requestDate}
+                    {new Date(request.requestDate).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(request.status)}`}>
+                      {request.status === 'Pending' ? <FaClock className="mr-1" /> : 
+                       request.status === 'Approved' ? <FaCheck className="mr-1" /> : 
+                       <FaTimes className="mr-1" />}
+                      {request.status}
+                    </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleApproveRequest(request.id)}
-                        className="flex items-center px-3 py-1 bg-green-50 text-green-700 rounded-md border border-green-300 hover:bg-green-100 transition duration-300"
-                      >
-                        <FaCheck className="mr-1" />
-                        Approve
-                      </button>
-                      <button
-                        onClick={() => handleRejectRequest(request.id)}
-                        className="flex items-center px-3 py-1 bg-red-50 text-red-700 rounded-md border border-red-300 hover:bg-red-100 transition duration-300"
-                      >
-                        <FaTimes className="mr-1" />
-                        Reject
-                      </button>
-                    </div>
+                    {request.status === 'Pending' ? (
+                      <>
+                        <button
+                          onClick={() => handleStatusUpdate(request._id, 'Approved')}
+                          className="text-green-600 hover:text-green-900 mr-4"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => handleStatusUpdate(request._id, 'Rejected')}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          Reject
+                        </button>
+                      </>
+                    ) : (
+                      <span className="text-gray-500">No actions available</span>
+                    )}
                   </td>
                 </tr>
               ))}
