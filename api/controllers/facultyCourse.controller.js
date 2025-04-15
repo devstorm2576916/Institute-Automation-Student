@@ -3,6 +3,8 @@ import { FacultyCourse } from '../models/course.model.js';
 import { Course } from '../models/course.model.js';
 import { CourseRegistration } from '../models/course.model.js';
 import { Student } from '../models/student.model.js';
+import { StudentCourse } from '../models/course.model.js';
+
 
 export const getFacultyCourses = async (req, res) => {
   try {
@@ -79,3 +81,42 @@ export const getStudentsByCourse = async (req, res) => {
       res.status(500).json({ success: false, message: err.message });
     }
   };
+
+
+  // Approve selected student registrations
+export const approveRegistrations = async (req, res) => {
+  const { courseCode, students } = req.body;
+
+  if (!courseCode || !Array.isArray(students)) {
+    return res.status(400).json({ success: false, message: 'Invalid request body' });
+  }
+
+  try {
+    for (const rollNo of students) {
+      const reg = await CourseRegistration.findOne({ courseCode, rollNo });
+      if (!reg) continue;
+
+      await StudentCourse.findOneAndUpdate(
+        { courseId: courseCode, rollNo },
+        {
+          $set: {
+            courseId: courseCode,
+            rollNo,
+            creditOrAudit: reg.creditOrAudit,
+            semester: reg.semester,
+            status: 'Approved',
+            updatedAt: new Date(),
+          },
+        },
+        { upsert: true, new: true }
+      );
+
+      await CourseRegistration.deleteOne({ courseCode, rollNo });
+    }
+
+    return res.json({ success: true, message: 'Students approved successfully' });
+  } catch (error) {
+    console.error('Error approving registrations:', error);
+    return res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
