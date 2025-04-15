@@ -7,9 +7,21 @@ const facultySchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   department: { type: String, required: true },
   designation: { type: String, required: true },
+  yearOfJoining: { type: Number },
   courses:  [facultyCourseSchema],
   specialization: { type: String },
   qualifications: [{ type: String }],
+  experience: [{ type: String }],
+  publications: [{ type: String }],
+  researchStudents:[{ type: String }],
+  achievements: [{ type: String }],
+  conferences: [
+    {
+      name: { type: String },
+      year: { type: String },
+      role: { type: String },
+    }
+  ],
   status: { 
     type: String, 
     enum: ['active', 'inactive', 'on-leave'], 

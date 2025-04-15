@@ -1,11 +1,12 @@
 import express from "express";
 import { getCourseAnnouncements, addCourseAnnouncement, deleteCourseAnnouncement, updateCourseAnnouncement } from "../controllers/announcements.controller.js";
-import { getCourseStudents, getFacultyCourses } from "../controllers/faculty.controller.js";
+import { getCourseStudents, getFaculty, getFacultyCourses } from "../controllers/faculty.controller.js";
 
 
 const router = express.Router();
 
 // router.get('/', getByIds);
+router.get('/:id', getFaculty);
 router.get('/:id/courses', getFacultyCourses);
 router.get('/courses/:courseId/announcements', getCourseAnnouncements);
 

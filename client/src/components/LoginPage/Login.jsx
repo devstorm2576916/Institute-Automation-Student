@@ -16,6 +16,11 @@ export default function LoginPage() {
       alert("All fields are required!");
       return;
     }
+    const emailRegex = /^[a-zA-Z.]+@iitg\.ac\.in$/;
+    if (!emailRegex.test(email)) {
+      alert("Please enter a valid email address!");
+      return;
+    }
     console.log({ email, role });
     try {
       const user = {
