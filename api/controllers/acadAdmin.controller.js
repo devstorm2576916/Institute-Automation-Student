@@ -1,6 +1,8 @@
+import mongoose from "mongoose";
 import { ApplicationDocument, Bonafide, Passport } from '../models/documents.models.js';
 import { Student } from '../models/student.model.js';
 import { User } from '../models/user.model.js';
+import { FeeBreakdown } from "../models/fees.model.js";
 
 // Get all applications with pagination
 export const getAllApplications = async (req, res) => {
@@ -270,3 +272,133 @@ export const addComment = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+
+export const addFeeStructure = async (req, res) => {
+    try {
+      const requiredFields = [
+        "year",
+        "program",
+        "semesterParity",
+        "tuitionFees",
+        "examinationFees",
+        "registrationFee",
+        "gymkhanaFee",
+        "medicalFee",
+        "hostelFund",
+        "hostelRent",
+        "elecAndWater",
+        "messAdvance",
+        "studentsBrotherhoodFund",
+        "acadFacilitiesFee",
+        "hostelMaintenance",
+        "studentsTravelAssistance",
+      ];
+  
+      // Check if all required fields are present
+      const missingFields = requiredFields.filter((field) => !req.body[field]);
+      if (missingFields.length > 0) {
+        return res.status(400).json({
+          message: `Missing required fields: ${missingFields.join(", ")}`,
+          success: false,
+        });
+      }
+  
+      // Validate numeric fields
+      const numericFields = [
+        "year",
+        "semesterParity",
+        "tuitionFees",
+        "examinationFees",
+        "registrationFee",
+        "gymkhanaFee",
+        "medicalFee",
+        "hostelFund",
+        "hostelRent",
+        "elecAndWater",
+        "messAdvance",
+        "studentsBrotherhoodFund",
+        "acadFacilitiesFee",
+        "hostelMaintenance",
+        "studentsTravelAssistance",
+      ];
+  
+      const invalidFields = numericFields.filter(
+        (field) => isNaN(req.body[field]) || req.body[field] < 0
+      );
+  
+      if (invalidFields.length > 0) {
+        return res.status(400).json({
+          message: `Invalid numeric values for fields: ${invalidFields.join(
+            ", "
+          )}`,
+          success: false,
+        });
+      }
+  
+      // Validate program
+      const validPrograms = ["BTech", "MTech", "PhD", "BDes", "MDes"];
+      if (!validPrograms.includes(req.body.program)) {
+        return res.status(400).json({
+          message: "Invalid program. Must be one of: " + validPrograms.join(", "),
+          success: false,
+        });
+      }
+  
+      const feeData = {
+        ...req.body,
+        breakdownId: new mongoose.Types.ObjectId(),
+      };
+  
+      const feeBreakdown = new FeeBreakdown(feeData);
+      await feeBreakdown.save();
+  
+      return res.status(201).json({
+        message: "Fee structure added successfully",
+        success: true,
+        data: feeBreakdown,
+      });
+    } catch (error) {
+      console.error("Error adding fee structure:", error);
+      return res.status(500).json({
+        message: "Failed to add fee structure",
+        success: false,
+        error: error.message,
+      });
+    }
+  };
+  
+  export const getFeeBreakdown = async (req, res) => {
+      try {
+          const { year, program, semesterParity } = req.query;
+          const query = {};
+  
+          if (year) query.year = year;
+          if (program) query.program = program;
+          if (semesterParity) query.semesterParity = semesterParity;
+  
+          const feeBreakdowns = await FeeBreakdown.find(query);
+  
+          if (!feeBreakdowns.length) {
+              return res.status(404).json({
+                  message: "No fee breakdown found for the given query",
+                  success: false,
+              });
+          }
+  
+          return res.status(200).json({
+              message: "Fee breakdown fetched successfully",
+              success: true,
+              data: feeBreakdowns,
+          });
+      } catch (error) {
+          console.error("Error fetching fee breakdown:", error);
+          return res.status(500).json({
+              message: "Failed to fetch fee breakdown",
+              success: false,
+              error: error.message,
+          });
+      }
+  };
+
+  
