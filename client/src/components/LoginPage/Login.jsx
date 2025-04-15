@@ -51,7 +51,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100" style={{ backgroundImage: "url('iit-g.jpg')" }}>
       <div className="w-96 bg-white p-6 rounded-lg shadow-lg">
         <h2 className="text-xl font-semibold text-center mb-4">Login</h2>
         <div className="mb-4">
