@@ -7,6 +7,7 @@ const courseSchema = new mongoose.Schema({
     department: { type: String, required: true }, // enum?
     slot: { type: String },
     credits: { type: Number, required: true, default: 6 },
+    maxIntake:{type:Number,required:true,default:100},
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 });
@@ -44,7 +45,20 @@ const courseRegistrationSchema = new mongoose.Schema({
     updatedAt: { type: Date, default: Date.now }
 });
 
+
+const programCourseMappingSchema = new mongoose.Schema({
+    courseCode: { type: String, required: true, ref: 'Course' },
+    program: { type: String, required: true },
+    department: { type: String, required: true },
+    year: { type: Number, required: true },
+    semester: { type: String, required: true },
+    type: { type: String, enum: ['Core', 'Elective'], required: true } // For students
+});
+
+
+
 export const Course = mongoose.model('Course', courseSchema);
 export const StudentCourse = mongoose.model('StudentCourse', studentCourseSchema);
 export const FacultyCourse = mongoose.model('FacultyCourse', facultyCourseSchema);
 export const CourseRegistration = mongoose.model('CourseRegistration', courseRegistrationSchema);
+export const ProgramCourseMapping = mongoose.model('ProgramCourseMapping', programCourseMappingSchema);
