@@ -5,8 +5,7 @@ import { validateAccessToken } from "../middleware/auth.middleware.js";
 
 const ComplaintsController = {
   createComplaint: async (req, res) => {
-    console.log(req.body)
-    const complaint = new Complaint(req.body);
+    const complaint = new Complaint({...req.body,userId:req.user.userId});
     try {
       await complaint.save();
       res.status(201).json({
@@ -22,7 +21,7 @@ const ComplaintsController = {
     }
   },
   getUserComplaints: async (req, res) => {
-    const userId = req.user._id;
+    const userId = req.user.userId;
     console.log(userId);
     try {
       const page = parseInt(req.body.page) || 1;
@@ -32,6 +31,7 @@ const ComplaintsController = {
       const totalComplaints = await Complaint.countDocuments({ userId });
       const totalPages = Math.ceil(totalComplaints / limit);
       const complaints = await Complaint.find({ userId }).skip(skip).limit(limit).sort({ createdAt: -1 });
+      console.log(complaints)
 
       res.send({
         data: complaints,

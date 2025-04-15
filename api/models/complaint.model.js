@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 const complaintSchema = new mongoose.Schema({
   complaintId: {
     type: mongoose.Schema.Types.ObjectId,
-    required: true,
+    required: false,
     unique: true
   },
   userId: {
@@ -21,6 +21,12 @@ const complaintSchema = new mongoose.Schema({
     required: true,
     enum: ["Received", "Assigned", "Done"],
     default: "Received"
+  },
+  status: {
+    type: String,
+    required: true,
+    enum: ['Pending', 'In Progress', 'Resolved'],
+    default: 'Pending'
   },
   description: {
     type: String,
