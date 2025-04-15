@@ -6,18 +6,29 @@ const AssignForm = ({ onClose, onAssign, complaint }) => {
     const [phoneNumber, setPhoneNumber] = useState("");
 
     const handleAssign = (e) => {
-        e.preventDefault(); // 
+        e.preventDefault();
+    
         if (selectedPerson.length === 0 || phoneNumber.length === 0) {
             alert("Please select a person and provide a phone number!");
             return;
         }
+    
+        const phoneRegex = /^\+\d{1,4}[\s-]?\d{10}$/;
+    
+        if (!phoneRegex.test(phoneNumber)) {
+            alert("Please enter a valid phone number in the format +91 9876543210");
+            return;
+        }
+    
         const assignedPerson = {
             name: selectedPerson,
             phoneNo: phoneNumber,
         };
-        console.log(assignedPerson)
+    
+        console.log(assignedPerson);
         onAssign(assignedPerson);
     };
+    
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
