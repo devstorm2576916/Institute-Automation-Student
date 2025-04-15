@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { 
   FaArrowLeft, 
   FaBullhorn, 
@@ -7,7 +7,7 @@ import {
   FaUserCircle, 
   FaExclamationTriangle,
   FaTag,
-  FaPaperclip,
+  // FaPaperclip, // Commented out
   FaPlus,
   FaCheck,
   FaTimes,
@@ -29,20 +29,17 @@ export default function FacultyCourseAnnouncements() {
     title: "",
     content: "",
     importance: "Medium",
-    attachments: [] // Will handle file uploads separately
+    // attachments: [] // Commented out
   });
-  const [fileInputs, setFileInputs] = useState([{ name: "", url: "" }]);
+  // const [fileInputs, setFileInputs] = useState([{ name: "", url: "" }]); // Commented out
   const [formErrors, setFormErrors] = useState({});
 
   // Get current user data
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-  console.log("Current User Data:", currentUser);
   const userId = currentUser?.data?.user?.userId;
   const facultyName = currentUser?.data?.user?.email;
   const facultyNameWithoutDomain = facultyName?.split("@")[0];
 
-  console.log("Current Course ID:", courseId);
-  
   // Fetch course data
   const { 
     isLoading, 
@@ -52,7 +49,6 @@ export default function FacultyCourseAnnouncements() {
     queryKey: ["facultyCourseAnnouncements", courseId],
     queryFn: () => 
       newRequest.get(`/faculty/courses/${courseId}`).then((res) => {
-        console.log("Course data received:", res.data);
         setCourse(res.data);
         return res.data;
       }),
@@ -70,7 +66,6 @@ export default function FacultyCourseAnnouncements() {
       setIsAddingAnnouncement(false);
     },
     onError: (error) => {
-      console.error("Error adding announcement:", error);
       // Handle error state
     }
   });
@@ -87,7 +82,6 @@ export default function FacultyCourseAnnouncements() {
       setEditingAnnouncementId(null);
     },
     onError: (error) => {
-      console.error("Error editing announcement:", error);
       // Handle error state
     }
   });
@@ -101,7 +95,6 @@ export default function FacultyCourseAnnouncements() {
       queryClient.invalidateQueries(["facultyCourseAnnouncements", courseId]);
     },
     onError: (error) => {
-      console.error("Error deleting announcement:", error);
       // Handle error state
     }
   });
@@ -113,8 +106,6 @@ export default function FacultyCourseAnnouncements() {
       ...prev,
       [name]: value
     }));
-    
-    // Clear error for this field if exists
     if (formErrors[name]) {
       setFormErrors(prev => ({
         ...prev,
@@ -123,23 +114,23 @@ export default function FacultyCourseAnnouncements() {
     }
   };
 
-  // Handle attachment input change
-  const handleAttachmentChange = (index, e) => {
-    const { name, value } = e.target;
-    const newFileInputs = [...fileInputs];
-    newFileInputs[index] = { ...newFileInputs[index], [name]: value };
-    setFileInputs(newFileInputs);
+  // Reset form
+  const resetForm = () => {
+    setFormData({
+      title: "",
+      content: "",
+      importance: "Medium"
+    });
+    // setFileInputs([{ name: "", url: "" }]); // Commented out
+    setFormErrors({});
   };
 
-  // Add new attachment input field
-  const addAttachmentField = () => {
-    setFileInputs([...fileInputs, { name: "", url: "" }]);
-  };
-
-  // Remove attachment input field
-  const removeAttachmentField = (index) => {
-    const newFileInputs = fileInputs.filter((_, i) => i !== index);
-    setFileInputs(newFileInputs);
+  // Cancel adding/editing announcement
+  const handleCancel = () => {
+    setIsAddingAnnouncement(false);
+    setIsEditing(false);
+    setEditingAnnouncementId(null);
+    resetForm();
   };
 
   // Format date function
@@ -189,19 +180,7 @@ export default function FacultyCourseAnnouncements() {
     const errors = {};
     if (!formData.title.trim()) errors.title = "Title is required";
     if (!formData.content.trim()) errors.content = "Content is required";
-    
-    // Validate attachments with both name and URL
-    const validAttachments = fileInputs.filter(
-      attach => attach.name.trim() && attach.url.trim()
-    );
-    const invalidAttachments = fileInputs.filter(
-      attach => (attach.name.trim() && !attach.url.trim()) || (!attach.name.trim() && attach.url.trim())
-    );
-    
-    if (invalidAttachments.length > 0) {
-      errors.attachments = "All attachments must have both name and URL";
-    }
-    
+    // Attachment validation commented out
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -209,22 +188,12 @@ export default function FacultyCourseAnnouncements() {
   // Handle form submission for adding new announcement
   const handleSubmit = (e) => {
     e.preventDefault();
-    
     if (!validateForm()) return;
-    
-    // Prepare attachments from valid inputs
-    const validAttachments = fileInputs.filter(
-      attach => attach.name.trim() && attach.url.trim()
-    );
-    
     const announcementData = {
       ...formData,
       postedBy: facultyNameWithoutDomain,
-      attachments: validAttachments
+      // attachments: [] // Commented out
     };
-
-    // console.log("Announcement Data:", announcementData);
-
     if (isEditing && editingAnnouncementId) {
       editAnnouncementMutation.mutate({ 
         announcementId: editingAnnouncementId, 
@@ -244,13 +213,11 @@ export default function FacultyCourseAnnouncements() {
       content: announcement.content,
       importance: announcement.importance
     });
-    
-    if (announcement.attachments && announcement.attachments.length > 0) {
-      setFileInputs(announcement.attachments);
-    } else {
-      setFileInputs([{ name: "", url: "" }]);
-    }
-    
+    // if (announcement.attachments && announcement.attachments.length > 0) {
+    //   setFileInputs(announcement.attachments);
+    // } else {
+    //   setFileInputs([{ name: "", url: "" }]);
+    // }
     setIsAddingAnnouncement(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -258,28 +225,8 @@ export default function FacultyCourseAnnouncements() {
   // Handle delete announcement
   const handleDeleteAnnouncement = (announcementId) => {
     if (window.confirm("Are you sure you want to delete this announcement?")) {
-      // console.log("Deleting announcement with ID:", announcementId);
       deleteAnnouncementMutation.mutate(announcementId);
     }
-  };
-
-  // Reset form
-  const resetForm = () => {
-    setFormData({
-      title: "",
-      content: "",
-      importance: "Medium"
-    });
-    setFileInputs([{ name: "", url: "" }]);
-    setFormErrors({});
-  };
-
-  // Cancel adding/editing announcement
-  const handleCancel = () => {
-    setIsAddingAnnouncement(false);
-    setIsEditing(false);
-    setEditingAnnouncementId(null);
-    resetForm();
   };
 
   // Loading state
@@ -322,7 +269,7 @@ export default function FacultyCourseAnnouncements() {
       {/* Header with Back Button */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
-          <Link to="/faculty/courses" className="mr-4 text-pink-500 hover:text-pink-600">
+          <Link to="/courses" className="mr-4 text-pink-500 hover:text-pink-600">
             <FaArrowLeft className="text-xl" />
           </Link>
           <h1 className="text-3xl font-bold text-gray-800">{course?.courseName} Announcements</h1>
@@ -428,16 +375,15 @@ export default function FacultyCourseAnnouncements() {
               )}
             </div>
             
-            {/* Attachments */}
+            {/* Attachments - commented out */}
+            {/*
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Attachments (Optional)
               </label>
-              
               {formErrors.attachments && (
                 <p className="text-red-500 text-xs mb-2">{formErrors.attachments}</p>
               )}
-              
               {fileInputs.map((file, index) => (
                 <div key={index} className="flex gap-2 mb-2">
                   <input
@@ -465,7 +411,6 @@ export default function FacultyCourseAnnouncements() {
                   </button>
                 </div>
               ))}
-              
               <button
                 type="button"
                 onClick={addAttachmentField}
@@ -474,6 +419,7 @@ export default function FacultyCourseAnnouncements() {
                 <FaPlus size={12} /> Add another attachment
               </button>
             </div>
+            */}
             
             {/* Action Buttons */}
             <div className="flex justify-end gap-3 mt-6">
@@ -531,7 +477,6 @@ export default function FacultyCourseAnnouncements() {
               {/* Importance Badge */}
               <div className={`${getImportanceClass(announcement.importance)} text-white text-xs font-semibold py-1 px-3 flex justify-between items-center`}>
                 <span>{getImportanceLabel(announcement.importance)}</span>
-                
                 {/* Admin Actions */}
                 <div className="flex gap-2">
                   <button
@@ -560,7 +505,6 @@ export default function FacultyCourseAnnouncements() {
                   <div className="flex items-center mr-4 mb-2">
                     <FaUserCircle className="mr-1" />
                     <span>
-                      {/* {announcement.postedBy === userId ? `${facultyName} (You)` : (announcement.faculty?.name || "Faculty")} */}
                       {announcement.postedBy}
                     </span>
                   </div>
@@ -579,7 +523,8 @@ export default function FacultyCourseAnnouncements() {
                   <p>{announcement.content}</p>
                 </div>
                 
-                {/* Attachments if any */}
+                {/* Attachments if any - commented out */}
+                {/*
                 {announcement.attachments && announcement.attachments.length > 0 && (
                   <div className="mt-4 pt-4 border-t border-gray-200">
                     <h3 className="text-sm font-medium flex items-center text-gray-700 mb-2">
@@ -603,6 +548,7 @@ export default function FacultyCourseAnnouncements() {
                     </ul>
                   </div>
                 )}
+                */}
               </div>
             </div>
           ))}
