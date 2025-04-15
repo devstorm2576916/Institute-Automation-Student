@@ -11,6 +11,7 @@ import {
 } from "../models/documents.models.js";
 import { User } from "../models/user.model.js";
 import { FeeBreakdown, FeeDetails } from "../models/fees.model.js";
+import mongoose from "mongoose";
 
 // Get basic student info
 export const getStudent = async (req, res) => {
@@ -234,11 +235,9 @@ export const createBonafideApplication = async (req, res) => {
     });
   } catch (error) {
     console.error("Error creating bonafide application:", error);
-    res
-      .status(500)
-      .json({
-        message: error.message || "Error submitting bonafide application",
-      });
+    res.status(500).json({
+      message: error.message || "Error submitting bonafide application",
+    });
   }
 };
 
@@ -372,11 +371,9 @@ export const submitPassportApplication = async (req, res) => {
     });
   } catch (error) {
     console.error("Error creating passport application:", error);
-    res
-      .status(500)
-      .json({
-        message: error.message || "Error submitting passport application",
-      });
+    res.status(500).json({
+      message: error.message || "Error submitting passport application",
+    });
   }
 };
 
@@ -571,56 +568,107 @@ const calculateTotalAmount = (feeBreakdown) => {
 export const recordFeePayment = async (req, res) => {
   try {
     const studentId = req.params.id;
-    const { semester, feeBreakdownId, transactionId, paymentDetails } =
-      req.body;
+    const {
+      semester,
+      feeBreakdownId,
+      transactionId,
+      paymentDetails,
+      academicYear,
+      paidAt,
+    } = req.body;
 
     // Find the student
     const student = await Student.findOne({ userId: studentId });
-
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
 
-    // Check if fee has already been paid
-    let feeDetails = await FeeDetails.findOne({
+    // Double check for existing payment
+    const existingPayment = await FeeDetails.findOne({
       rollNo: student.rollNo,
       semester,
       feeBreakdownId,
+      isPaid: true,
     });
 
-    if (feeDetails && feeDetails.isPaid) {
+    if (existingPayment) {
       return res
         .status(400)
         .json({ message: "Fee already paid for this semester" });
     }
 
-    // Create or update fee details record
-    if (!feeDetails) {
-      feeDetails = new FeeDetails({
-        rollNo: student.rollNo,
-        semester,
-        feeBreakdownId,
-        isPaid: true,
-        transactionId,
-        paymentDetails,
-        paidAt: new Date(),
-      });
-    } else {
-      feeDetails.isPaid = true;
-      feeDetails.transactionId = transactionId;
-      feeDetails.paymentDetails = paymentDetails;
-      feeDetails.paidAt = new Date();
-      feeDetails.updatedAt = new Date();
-    }
+    // Create new fee details record
+    const feeDetails = new FeeDetails({
+      rollNo: student.rollNo,
+      semester,
+      feeBreakdownId,
+      isPaid: true,
+      transactionId,
+      paymentDetails,
+      academicYear: academicYear || getCurrentAcademicYear(),
+      viewableDocumentId: new mongoose.Types.ObjectId(),
+      paidAt: paidAt || new Date(),
+      updatedAt: new Date(),
+    });
 
     await feeDetails.save();
 
+    // Return success response with complete fee details
     res.status(200).json({
       message: "Fee payment recorded successfully",
       feeDetails,
     });
   } catch (error) {
     console.error("Error recording fee payment:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Add this new endpoint for fee payment history
+export const getFeePaymentHistory = async (req, res) => {
+  try {
+    const studentId = req.params.id;
+
+    // Find student
+    const student = await Student.findOne({ userId: studentId }).populate(
+      "userId",
+      "name email contactNo"
+    );
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    // Get all fee payments for this student
+    const feePayments = await FeeDetails.find({
+      rollNo: student.rollNo,
+      isPaid: true,
+    })
+      .populate("feeBreakdownId")
+      .sort({ semester: 1 });
+
+    const payments = feePayments.map((payment) => ({
+      semester: payment.semester,
+      academicYear: payment.academicYear,
+      transactionId: payment.transactionId,
+      paidAt: payment.paidAt,
+      viewableDocumentId: payment.viewableDocumentId,
+      feeBreakdown: payment.feeBreakdownId,
+    }));
+
+    res.status(200).json({
+      student: {
+        name: student.userId.name,
+        rollNo: student.rollNo,
+        program: student.program,
+        department: student.department,
+        email: student.userId.email,
+        contact: student.userId.contactNo,
+      },
+      payments,
+    });
+  } catch (error) {
+    console.error("Error fetching fee payment history:", error);
     res.status(500).json({ message: error.message });
   }
 };
