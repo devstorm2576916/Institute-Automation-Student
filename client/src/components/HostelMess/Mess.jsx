@@ -35,12 +35,12 @@ function Mess() {
 
   if (role === 'student') {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
         <div className="container mx-auto px-4 py-8">
           <StudentSubscriptionForm />
         </div>
-      </div>
+    //   </div>
+    //   <div className="min-h-screen bg-gray-50">
+    //     <Header />
     );
   } else if (role === 'nonAcadAdmin') {
     return (

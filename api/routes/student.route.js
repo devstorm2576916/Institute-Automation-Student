@@ -1,6 +1,8 @@
 import express from "express";
 import { 
     getStudent, 
+    getStudentCourses,
+    dropCourse,
     getStudentBonafideDetails, 
     createBonafideApplication,
     getBonafideApplications,
@@ -10,10 +12,11 @@ import {
     updateStudentProfile
 } from "../controllers/student.controller.js";
 
-const router = express.Router();
 
-// Basic student routes
+const router = express.Router();
 router.get("/:id", getStudent);
+router.get("/:id/courses", getStudentCourses);
+router.delete("/:id/courses/:courseId",dropCourse);
 router.put("/:id/profile", updateStudentProfile);
 
 // Bonafide routes
