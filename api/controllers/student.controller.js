@@ -564,6 +564,14 @@ const calculateTotalAmount = (feeBreakdown) => {
   );
 };
 
+// Helper function to get current academic year
+const getCurrentAcademicYear = () => {
+  const today = new Date();
+  const month = today.getMonth();
+  const year = today.getFullYear();
+  return month < 6 ? `${year - 1}-${year}` : `${year}-${year + 1}`;
+};
+
 // Add a record of a successful fee payment
 export const recordFeePayment = async (req, res) => {
   try {
@@ -575,48 +583,75 @@ export const recordFeePayment = async (req, res) => {
       paymentDetails,
       academicYear,
       paidAt,
+      isPaid = true,
     } = req.body;
 
-    // Find the student
+    console.log(
+      "Incoming fee payment payload:",
+      JSON.stringify(req.body, null, 2)
+    );
+
+    // Find student and validate rollNo
     const student = await Student.findOne({ userId: studentId });
-    if (!student) {
-      return res.status(404).json({ message: "Student not found" });
+    if (!student) return res.status(404).json({ message: "Student not found" });
+    if (!student.rollNo) {
+      console.error("Student missing rollNo:", student);
+      return res
+        .status(400)
+        .json({ message: "Student record missing roll number" });
+    }
+    const semesterNum = Number(semester);
+    if (!feeBreakdownId || !transactionId) {
+      return res
+        .status(400)
+        .json({ message: "feeBreakdownId and transactionId are required" });
     }
 
-    // Double check for existing payment
     const existingPayment = await FeeDetails.findOne({
       rollNo: student.rollNo,
-      semester,
+      semester: semesterNum,
       feeBreakdownId,
-      isPaid: true,
     });
 
     if (existingPayment) {
-      return res
-        .status(400)
-        .json({ message: "Fee already paid for this semester" });
+      console.log("Existing payment found:", existingPayment);
+      if (existingPayment.isPaid) {
+        return res.status(400).json({
+          message: "Fee already paid for this semester",
+          feeDetails: existingPayment,
+        });
+      }
+      existingPayment.isPaid = true;
+      existingPayment.transactionId = transactionId;
+      existingPayment.paymentDetails = paymentDetails;
+      existingPayment.paidAt = paidAt || new Date();
+      existingPayment.updatedAt = new Date();
+      await existingPayment.save();
+      console.log("Updated payment document:", existingPayment.toObject());
+      return res.status(200).json({
+        message: "Fee payment updated successfully",
+        feeDetails: existingPayment,
+      });
     }
 
-    // Create new fee details record
     const feeDetails = new FeeDetails({
       rollNo: student.rollNo,
-      semester,
+      semester: semesterNum,
       feeBreakdownId,
       isPaid: true,
       transactionId,
-      paymentDetails,
+      paymentDetails: paymentDetails || {},
       academicYear: academicYear || getCurrentAcademicYear(),
       viewableDocumentId: new mongoose.Types.ObjectId(),
       paidAt: paidAt || new Date(),
-      updatedAt: new Date(),
     });
+    console.log("FeeDetails document before save:", feeDetails.toObject());
+    const savedFeeDetails = await feeDetails.save();
+    console.log("Saved FeeDetails:", savedFeeDetails.toObject());
 
-    await feeDetails.save();
-
-    // Return success response with complete fee details
     res.status(200).json({
       message: "Fee payment recorded successfully",
-      feeDetails,
+      feeDetails: savedFeeDetails,
     });
   } catch (error) {
     console.error("Error recording fee payment:", error);
@@ -624,10 +659,11 @@ export const recordFeePayment = async (req, res) => {
   }
 };
 
-// Add this new endpoint for fee payment history
+// Update the fee payment history endpoint to include proper error handling and data checking
 export const getFeePaymentHistory = async (req, res) => {
   try {
     const studentId = req.params.id;
+    console.log("Fetching fee history for student ID:", studentId);
 
     // Find student
     const student = await Student.findOne({ userId: studentId }).populate(
@@ -639,31 +675,54 @@ export const getFeePaymentHistory = async (req, res) => {
       return res.status(404).json({ message: "Student not found" });
     }
 
+    console.log("Found student for fee history:", {
+      rollNo: student.rollNo,
+      name: student.userId?.name,
+      program: student.program,
+    });
+
     // Get all fee payments for this student
     const feePayments = await FeeDetails.find({
       rollNo: student.rollNo,
-      isPaid: true,
+      isPaid: true, // Only get payments that are marked as paid
     })
       .populate("feeBreakdownId")
       .sort({ semester: 1 });
 
-    const payments = feePayments.map((payment) => ({
-      semester: payment.semester,
-      academicYear: payment.academicYear,
-      transactionId: payment.transactionId,
-      paidAt: payment.paidAt,
-      viewableDocumentId: payment.viewableDocumentId,
-      feeBreakdown: payment.feeBreakdownId,
-    }));
+    console.log(
+      `Found ${feePayments.length} fee payments for student ${student.rollNo}`
+    );
+
+    // Transform payment data for the response
+    const payments = feePayments.map((payment) => {
+      // Log each payment for debugging
+      console.log(`Payment for semester ${payment.semester}:`, {
+        id: payment._id,
+        transactionId: payment.transactionId,
+        isPaid: payment.isPaid,
+        paidAt: payment.paidAt,
+      });
+
+      return {
+        semester: payment.semester,
+        academicYear: payment.academicYear,
+        transactionId: payment.transactionId,
+        paidAt: payment.paidAt,
+        viewableDocumentId: payment.viewableDocumentId,
+        feeBreakdown: payment.feeBreakdownId,
+        isPaid: payment.isPaid,
+        paymentDetails: payment.paymentDetails,
+      };
+    });
 
     res.status(200).json({
       student: {
-        name: student.userId.name,
+        name: student.userId?.name || "Unknown",
         rollNo: student.rollNo,
         program: student.program,
         department: student.department,
-        email: student.userId.email,
-        contact: student.userId.contactNo,
+        email: student.userId?.email,
+        contact: student.userId?.contactNo,
       },
       payments,
     });

@@ -73,15 +73,40 @@ const FeePayment = () => {
   // Process payment success
   const recordPayment = useMutation({
     mutationFn: (paymentData) => {
+      console.log("Sending payment data to backend:", paymentData);
       return newRequest.post(`/student/${userId}/fees/payment`, paymentData);
     },
-    onSuccess: () => {
+    onSuccess: (response, paymentData) => {
+      console.log("Payment record success response:", response.data);
       toast.success("Payment recorded successfully");
-      refetch(); // Refetch fee data to update status
+
+      const feeDetails = response.data.feeDetails;
+
+      // Ensure we have the actual transaction details from the response
+      setPaymentDetails({
+        slNo: 1,
+        feeType: feeSummary.feeType,
+        feeAmount: paymentData.paymentDetails.amount,
+        transactionId: feeDetails.transactionId || paymentData.transactionId,
+        razorpayOrderId:
+          feeDetails.paymentDetails?.razorpayOrderId ||
+          paymentData.paymentDetails.razorpayOrderId,
+        razorpaySignature:
+          feeDetails.paymentDetails?.razorpaySignature ||
+          paymentData.paymentDetails.razorpaySignature,
+        dateTime: new Date(feeDetails.paidAt || new Date()).toLocaleString(
+          "sv-SE"
+        ),
+        status: "Success",
+        viewableDocumentId: feeDetails.viewableDocumentId,
+      });
+
+      // Immediately refetch to update the UI
+      refetch();
     },
     onError: (error) => {
       console.error("Error recording payment:", error);
-      toast.error("Failed to record payment");
+      toast.error(error.response?.data?.message || "Failed to record payment");
     },
   });
 
@@ -217,7 +242,7 @@ const FeePayment = () => {
 
           // Prepare payment data with all required fields
           const paymentData = {
-            semester: feeData.student.nextSemester,
+            semester: Number(feeData.student.nextSemester), // Convert to number explicitly
             feeBreakdownId: feeData.feeBreakdown._id,
             transactionId: response.razorpay_payment_id,
             academicYear: getCurrentAcademicYear(),
@@ -228,33 +253,12 @@ const FeePayment = () => {
               amount: payableAmount,
               currency: currency,
             },
+            isPaid: true,
             paidAt: new Date().toISOString(),
           };
 
-          // Record payment with proper error handling
-          recordPayment.mutate(paymentData, {
-            onSuccess: (response) => {
-              toast.success("Payment recorded successfully");
-              setPaymentDetails({
-                slNo: 1,
-                feeType: feeSummary.feeType,
-                feeAmount: payableAmount,
-                transactionId: response.razorpay_payment_id,
-                razorpayOrderId: response.razorpay_order_id,
-                razorpaySignature: response.razorpay_signature,
-                dateTime: new Date().toLocaleString("sv-SE"),
-                status: "Success",
-                viewableDocumentId: response.data.feeDetails.viewableDocumentId,
-              });
-              refetch();
-            },
-            onError: (error) => {
-              console.error("Payment recording failed:", error);
-              toast.error(
-                "Payment successful but failed to record. Please contact support."
-              );
-            },
-          });
+          console.log("Sending payment data to backend:", paymentData);
+          recordPayment.mutate(paymentData);
         },
         prefill: {
           name: feeData?.student?.name || "",

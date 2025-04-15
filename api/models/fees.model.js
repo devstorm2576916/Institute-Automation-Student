@@ -40,29 +40,33 @@ mongoose.connection.on("connected", async () => {
 feeBreakdownSchema.index({ program: 1, semesterParity: 1 });
 
 // Fee Details Model
-const feeDetailsSchema = new mongoose.Schema({
-  rollNo: { type: String, required: true, ref: "Student" },
-  semester: { type: Number, required: true },
-  isPaid: { type: Boolean, default: false },
-  feeBreakdownId: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: "FeeBreakdown",
+const feeDetailsSchema = new mongoose.Schema(
+  {
+    rollNo: { type: String, required: true, ref: "Student" },
+    semester: { type: Number, required: true },
+    isPaid: { type: Boolean, default: false },
+    feeBreakdownId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "FeeBreakdown",
+    },
+    academicYear: { type: String, required: true },
+    viewableDocumentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+    },
+    transactionId: { type: String },
+    paymentDetails: {
+      razorpayOrderId: String,
+      razorpayPaymentId: String,
+      razorpaySignature: String,
+      amount: Number,
+      currency: String,
+    },
+    paidAt: { type: Date },
   },
-  academicYear: { type: String, required: true },
-  viewableDocumentId: { type: mongoose.Schema.Types.ObjectId, required: true },
-  transactionId: { type: String },
-  paymentDetails: {
-    razorpayOrderId: String,
-    razorpayPaymentId: String,
-    razorpaySignature: String,
-    amount: Number,
-    currency: String,
-  },
-  paidAt: { type: Date },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
-});
+  { timestamps: true }
+); // timestamps option replaces manual createdAt/updatedAt
 
 // Create models
 const FeeBreakdown =

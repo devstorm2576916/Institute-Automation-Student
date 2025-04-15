@@ -12,6 +12,7 @@ import {
   updateStudentProfile,
   getStudentFeeDetails,
   recordFeePayment,
+  getFeePaymentHistory,
 } from "../controllers/student.controller.js";
 
 const router = express.Router();
@@ -33,5 +34,6 @@ router.get("/:id/passport/applications", getPassportApplications);
 // Fee routes
 router.get("/:id/fees", getStudentFeeDetails);
 router.post("/:id/fees/payment", recordFeePayment);
+router.get("/:id/fees/history", getFeePaymentHistory); // Add this missing route
 
 export default router;
