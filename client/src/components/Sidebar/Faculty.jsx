@@ -46,7 +46,7 @@ const Faculty = () => {
                             </li>
 
                             <li>Grades Submission</li>
-                            <li><Link to="/assigngmentlanding" className="text-gray-700 hover:text-gray-900">
+                            <li><Link to="/assignmentlanding" className="text-gray-700 hover:text-gray-900">
                                 Assignment
                                 </Link></li>
                         </ul>
