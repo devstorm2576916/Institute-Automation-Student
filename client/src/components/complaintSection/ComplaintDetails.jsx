@@ -63,39 +63,42 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
 
     // ASSIGN
     const assignMutation = useMutation({
-        mutationFn: async ({ assignedPerson }) => {
+        mutationFn: async (assignData) => {
+            // Create the request body
             const body = {
                 complaintId: complaint._id,
-                assignedName: assignedPerson.name,
-                assignedContact: assignedPerson.phoneNo,
+                supportStaffId: assignData.supportStaffId || null,
+                assignedName: assignData.name,
+                assignedContact: assignData.phoneNo,
             };
-            console.log(body);
+            
+            console.log("Sending assignment data:", body);
+            
             const res = await fetch("http://localhost:8000/api/complaints/admin/assign", {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
+                    Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
                 },
-                body: JSON.stringify({
-                    complaintId: complaint._id,
-                    assignedName: assignedPerson.name,
-                    assignedContact: assignedPerson.phoneNo,
-                }),
+                body: JSON.stringify(body),
                 credentials: "include",
             });
 
             if (!res.ok) {
-                console.log(res);
-                throw new Error(`Failed to assign complaint ${res}`);
+                const errorData = await res.text();
+                console.error("Assignment error response:", errorData);
+                throw new Error(`Failed to assign complaint: ${errorData}`);
             }
+            
+            return await res.json();
         },
         onSuccess: () => {
-            toast.success("Complaint assigned");
+            toast.success("Complaint assigned successfully");
             onBack(true);
             queryClient.invalidateQueries(["complaints"]);
         },
         onError: (err) => {
-            console.log(err.error);
+            console.error("Assignment error:", err);
             toast.error(err.message);
         },
     });
@@ -111,8 +114,9 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
         markAsDoneMutation.mutate();
     };
 
-    const handleAssign = (assignedPerson) => {
-        assignMutation.mutate({ assignedPerson });
+    const handleAssign = (assignData) => {
+        // Pass the entire assignData object directly to the mutation
+        assignMutation.mutate(assignData);
         setShowAssignModal(false);
     };
 

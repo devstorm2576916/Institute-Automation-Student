@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import NewComplaintForm from "./newComplaintForm.jsx";
 import ComplaintDetails from "./ComplaintDetails";
 import { RoleContext } from "../../context/Rolecontext.jsx";
+import SupportStaffManagement from "./supportStaff/SupportStaffManagement.jsx";
 
 /**
  * ComplaintSection component renders the complaint management interface.
@@ -157,13 +158,21 @@ const ComplaintSection = () => {
                             {isStudentOrFaculty ? "New Complaint" : "In Progress"}
                         </li>
 
-                        {isStudentOrFaculty ? "":(
-                            <li
-                                className={`text-white px-4 py-2 rounded-md p-2 cursor-pointer ${activePage === (isStudentOrFaculty ? "Delete Complaint" : "Resolved") ? "bg-gray-800" : "bg-gray-600"}`}
-                                onClick={() => setActivePage("Resolved")}
-                            >
-                                {"Resolved"}
-                            </li>
+                        {isStudentOrFaculty ? "" : (
+                            <>
+                                <li
+                                    className={`text-white px-4 py-2 rounded-md p-2 cursor-pointer ${activePage === "Resolved" ? "bg-gray-800" : "bg-gray-600"}`}
+                                    onClick={() => setActivePage("Resolved")}
+                                >
+                                    {"Resolved"}
+                                </li>
+                                <li
+                                    className={`text-white px-4 py-2 rounded-md p-2 cursor-pointer ${activePage === "Support Staff" ? "bg-gray-800" : "bg-gray-600"}`}
+                                    onClick={() => setActivePage("Support Staff")}
+                                >
+                                    {"Support Staff"}
+                                </li>
+                            </>
                         )}
                     </ul>
                 </nav>
@@ -285,6 +294,11 @@ const ComplaintSection = () => {
                         onBack={handleBackFromDetails}
                         role={role}
                     />
+                )}
+
+                {/* Support Staff Management */}
+                {!isStudentOrFaculty && activePage === "Support Staff" && (
+                    <SupportStaffManagement />
                 )}
             </div>
         </div>
