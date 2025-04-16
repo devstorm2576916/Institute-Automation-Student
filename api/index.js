@@ -42,7 +42,6 @@ app.use("/api/attendancelanding", attendanceRoute);
 app.use("/api/assignment", assignmentRoute);
 app.use('/api/complaints', complaintsRouter);
  
-const port = process.env.PORT || 8000;
 
 // --- Middleware ---
 app.use(express.urlencoded({ extended: true,limit: '5mb' }));
