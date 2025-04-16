@@ -242,8 +242,8 @@ const FeePayment = () => {
 
           // Prepare payment data with all required fields
           const paymentData = {
-            semester: Number(feeData.student.nextSemester), // Convert to number explicitly
-            feeBreakdownId: feeData.feeBreakdown._id,
+            semester: Number(feeData.student.nextSemester),
+            feeBreakdownId: feeData.feeBreakdown._id, // Keep this to retrieve fee breakdown data on server
             transactionId: response.razorpay_payment_id,
             academicYear: getCurrentAcademicYear(),
             paymentDetails: {
@@ -407,8 +407,11 @@ const FeePayment = () => {
     );
   }
 
-  // No fee structure available
-  if (error && error.response?.status === 404) {
+  // No fee structure available or max semester reached
+  if (
+    (error && error.response?.status === 404) ||
+    feeData?.isMaxSemesterReached
+  ) {
     return (
       <div className="max-w-[1000px] mx-auto my-10 px-10 py-[35px] bg-white rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.08)] text-gray-800 text-center p-12">
         <h1 className="text-2xl font-semibold mb-4 text-gray-900">
@@ -416,8 +419,10 @@ const FeePayment = () => {
         </h1>
         <div className="p-8 bg-yellow-50 rounded-lg border border-yellow-200">
           <p className="text-lg text-yellow-800">
-            Fee payment is not yet available for the next semester. Please check
-            back later.
+            {feeData?.isMaxSemesterReached
+              ? feeData.message ||
+                "You have completed the maximum number of semesters for your program."
+              : "Fee payment is not yet available for the next semester. Please check back later."}
           </p>
         </div>
       </div>

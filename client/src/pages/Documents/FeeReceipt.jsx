@@ -73,60 +73,90 @@ const FeeReceiptPage = () => {
         return;
       }
 
-      // Prepare fee data for PDF
+      // Directly use feeBreakdownData from the stored payment
       const feeBreakdown = semesterPayment.feeBreakdown;
+      if (!feeBreakdown) {
+        console.error(
+          "Fee breakdown data missing for semester:",
+          selectedSemester
+        );
+        setPreparedFeeData(null);
+        return;
+      }
 
-      // Format fee particulars data
+      console.log("Using fee breakdown data:", feeBreakdown);
+
+      // Format fee particulars data - ensure all values are numbers
       const feeParticulars = [
-        { particular: "Tuition Fees", amount: feeBreakdown.tuitionFees },
-        { particular: "Examination Fee", amount: feeBreakdown.examinationFees },
+        {
+          particular: "Tuition Fees",
+          amount: Number(feeBreakdown.tuitionFees) || 0,
+        },
+        {
+          particular: "Examination Fee",
+          amount: Number(feeBreakdown.examinationFees) || 0,
+        },
         {
           particular: "Registration/Enrollment Fee",
-          amount: feeBreakdown.registrationFee,
+          amount: Number(feeBreakdown.registrationFee) || 0,
         },
-        { particular: "Gymkhana Fee", amount: feeBreakdown.gymkhanaFee },
-        { particular: "Medical Fee", amount: feeBreakdown.medicalFee },
-        { particular: "Hostel Fund", amount: feeBreakdown.hostelFund },
-        { particular: "Hostel Rent", amount: feeBreakdown.hostelRent },
+        {
+          particular: "Gymkhana Fee",
+          amount: Number(feeBreakdown.gymkhanaFee) || 0,
+        },
+        {
+          particular: "Medical Fee",
+          amount: Number(feeBreakdown.medicalFee) || 0,
+        },
+        {
+          particular: "Hostel Fund",
+          amount: Number(feeBreakdown.hostelFund) || 0,
+        },
+        {
+          particular: "Hostel Rent",
+          amount: Number(feeBreakdown.hostelRent) || 0,
+        },
         {
           particular: "Electricity and Water Charges",
-          amount: feeBreakdown.elecAndWater,
+          amount: Number(feeBreakdown.elecAndWater) || 0,
         },
         {
           particular: "Adjustable Mess Advance",
-          amount: feeBreakdown.messAdvance,
+          amount: Number(feeBreakdown.messAdvance) || 0,
         },
         {
           particular: "Students Brotherhood Fund",
-          amount: feeBreakdown.studentsBrotherhoodFund,
+          amount: Number(feeBreakdown.studentsBrotherhoodFund) || 0,
         },
         {
           particular: "Academic Facilities Fee",
-          amount: feeBreakdown.acadFacilitiesFee,
+          amount: Number(feeBreakdown.acadFacilitiesFee) || 0,
         },
         {
           particular: "Hostel Maintenance Charge",
-          amount: feeBreakdown.hostelMaintenance,
+          amount: Number(feeBreakdown.hostelMaintenance) || 0,
         },
         {
           particular: "Students Travel Assistance Fund",
-          amount: feeBreakdown.studentsTravelAssistance,
+          amount: Number(feeBreakdown.studentsTravelAssistance) || 0,
         },
       ];
 
-      // Calculate total
-      const totalAmount = feeParticulars.reduce(
-        (sum, item) => sum + parseFloat(item.amount || 0),
-        0
-      );
+      // Calculate total amount or use pre-calculated total if available
+      const totalAmount =
+        Number(feeBreakdown.totalAmount) ||
+        feeParticulars.reduce((sum, item) => sum + (item.amount || 0), 0);
 
       // Add totals to fee particulars
       const completeParticulars = [
         ...feeParticulars,
-        { particular: "Total Amount", amount: totalAmount.toFixed(2) },
-        { particular: "Adjustment Amount", amount: "0.00" },
-        { particular: "Payable Amount", amount: totalAmount.toFixed(2) },
+        { particular: "Total Amount", amount: totalAmount },
+        { particular: "Adjustment Amount", amount: 0 },
+        { particular: "Payable Amount", amount: totalAmount },
       ];
+
+      // Log the prepared data for debugging
+      console.log("Prepared fee particulars:", completeParticulars);
 
       setPreparedFeeData({
         student: feeData.student,
@@ -142,7 +172,18 @@ const FeeReceiptPage = () => {
         },
       });
     } catch (error) {
-      console.error("Error preparing fee data:", error);
+      console.error(
+        "Error preparing fee data:",
+        error,
+        "for semester:",
+        selectedSemester
+      );
+      console.error(
+        "Fee payment data:",
+        feeData?.payments?.find(
+          (p) => p.semester === parseInt(selectedSemester)
+        )
+      );
       toast.error("Error preparing fee data");
       setPreparedFeeData(null);
     }

@@ -208,9 +208,10 @@ const FeeReceiptPDF = ({
 
   // Format currency
   const formatCurrency = (amount) => {
+    // Ensure amount is a number and handle invalid/NaN values
     const numAmount =
-      typeof amount === "number" ? amount : parseFloat(amount) || 0;
-    return `₹ ${numAmount.toFixed(2)}`;
+      typeof amount === "number" ? amount : parseFloat(amount || 0);
+    return `₹ ${isNaN(numAmount) ? "0.00" : numAmount.toFixed(2)}`;
   };
 
   // Generate a unique receipt number
