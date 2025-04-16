@@ -18,6 +18,9 @@ const SupportStaffManagement = () => {
   const [formError, setFormError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   
+  // Search state
+  const [searchQuery, setSearchQuery] = useState("");
+  
   // Sorting state
   const [sortConfig, setSortConfig] = useState({
     key: "name",
@@ -85,9 +88,27 @@ const SupportStaffManagement = () => {
         return 0;
       });
       
+      // Apply search filter
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase().trim();
+        sortedData = sortedData.filter(staff =>
+          // Search by name or phone
+          staff.name.toLowerCase().includes(query) ||
+          staff.phone.includes(query) ||
+          // Search by categories
+          (staff.categories && staff.categories.some(category => 
+            category.toLowerCase().includes(query)
+          )) ||
+          // Search by subcategories
+          (staff.subCategories && staff.subCategories.some(subCategory => 
+            subCategory.toLowerCase().includes(query)
+          ))
+        );
+      }
+      
       setDisplayedStaff(sortedData);
     }
-  }, [supportStaffData, sortConfig]);
+  }, [supportStaffData, sortConfig, searchQuery]);
 
   // Function to request a sort
   const requestSort = (key) => {
@@ -342,87 +363,131 @@ const SupportStaffManagement = () => {
           <p className="text-gray-600">Loading support staff data...</p>
         ) : isError ? (
           <p className="text-red-600">Error loading support staff data. Please try again.</p>
-        ) : displayedStaff.length === 0 ? (
-          <p className="text-gray-600">No support staff found. Add some staff members using the form above.</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-white">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th 
-                    className="py-2 px-4 text-left cursor-pointer hover:bg-gray-200"
-                    onClick={() => requestSort("name")}
+          <>
+            {/* Search bar */}
+            <div className="mb-4 flex">
+              <div className="relative flex-grow">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg className="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  className="block w-full p-2 pl-10 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Search by name, phone, or category..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                {searchQuery && (
+                  <button
+                    className="absolute inset-y-0 right-0 flex items-center pr-3"
+                    onClick={() => setSearchQuery("")}
+                    title="Clear search"
                   >
-                    Name {getSortDirectionIndicator("name")}
-                  </th>
-                  <th 
-                    className="py-2 px-4 text-left cursor-pointer hover:bg-gray-200"
-                    onClick={() => requestSort("phone")}
-                  >
-                    Phone {getSortDirectionIndicator("phone")}
-                  </th>
-                  <th className="py-2 px-4 text-left">Categories</th>
-                  <th className="py-2 px-4 text-left">Subcategories</th>
-                  <th 
-                    className="py-2 px-4 text-left cursor-pointer hover:bg-gray-200"
-                    onClick={() => requestSort("assignedComplaints")}
-                  >
-                    Assigned Complaints {getSortDirectionIndicator("assignedComplaints")}
-                  </th>
-                  <th className="py-2 px-4 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {displayedStaff.map((staff) => {
-                  const complaintsCount = staff.assignedComplaints ? staff.assignedComplaints.length : 0;
-                  
-                  return (
-                    <tr key={staff._id} className="border-t">
-                      <td className="py-3 px-4">{staff.name}</td>
-                      <td className="py-3 px-4">{staff.phone}</td>
-                      <td className="py-3 px-4">
-                        {staff.categories && staff.categories.length > 0
-                          ? staff.categories.join(", ")
-                          : "All categories"}
-                      </td>
-                      <td className="py-3 px-4">
-                        {staff.subCategories && staff.subCategories.length > 0
-                          ? staff.subCategories.join(", ")
-                          : "All subcategories"}
-                      </td>
-                      <td className="py-3 px-4">
-                        <span className={`font-medium ${complaintsCount >= 5 ? "text-red-600" : ""}`}>
-                          {complaintsCount}
-                        </span>
-                        {complaintsCount > 0 && (
-                          <span className="text-xs text-gray-500 ml-1">
-                            active {complaintsCount === 1 ? 'complaint' : 'complaints'}
-                          </span>
-                        )}
-                        {complaintsCount >= 5 && (
-                          <span className="ml-2 text-xs bg-red-100 text-red-600 py-1 px-2 rounded">
-                            At capacity
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-3 px-4">
-                        <button
-                          onClick={() => handleDeleteStaff(staff._id)}
-                          className={`bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded text-sm ${
-                            complaintsCount > 0 ? 'opacity-50 cursor-not-allowed' : ''
-                          }`}
-                          disabled={complaintsCount > 0}
-                          title={complaintsCount > 0 ? "Cannot delete staff with assigned complaints" : "Delete staff"}
+                    <svg className="w-4 h-4 text-gray-500 hover:text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            </div>
+            
+            {displayedStaff.length > 0 ? (
+              <>
+                {searchQuery && (
+                  <p className="text-sm text-gray-600 mb-2">
+                    Found {displayedStaff.length} {displayedStaff.length === 1 ? 'result' : 'results'} for "{searchQuery}"
+                  </p>
+                )}
+                <div className="overflow-x-auto">
+                  <table className="min-w-full bg-white">
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th 
+                          className="py-2 px-4 text-left cursor-pointer hover:bg-gray-200"
+                          onClick={() => requestSort("name")}
                         >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                          Name {getSortDirectionIndicator("name")}
+                        </th>
+                        <th 
+                          className="py-2 px-4 text-left cursor-pointer hover:bg-gray-200"
+                          onClick={() => requestSort("phone")}
+                        >
+                          Phone {getSortDirectionIndicator("phone")}
+                        </th>
+                        <th className="py-2 px-4 text-left">Categories</th>
+                        <th className="py-2 px-4 text-left">Subcategories</th>
+                        <th 
+                          className="py-2 px-4 text-left cursor-pointer hover:bg-gray-200"
+                          onClick={() => requestSort("assignedComplaints")}
+                        >
+                          Assigned Complaints {getSortDirectionIndicator("assignedComplaints")}
+                        </th>
+                        <th className="py-2 px-4 text-left">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {displayedStaff.map((staff) => {
+                        const complaintsCount = staff.assignedComplaints ? staff.assignedComplaints.length : 0;
+                        
+                        return (
+                          <tr key={staff._id} className="border-t">
+                            <td className="py-3 px-4">{staff.name}</td>
+                            <td className="py-3 px-4">{staff.phone}</td>
+                            <td className="py-3 px-4">
+                              {staff.categories && staff.categories.length > 0
+                                ? staff.categories.join(", ")
+                                : "All categories"}
+                            </td>
+                            <td className="py-3 px-4">
+                              {staff.subCategories && staff.subCategories.length > 0
+                                ? staff.subCategories.join(", ")
+                                : "All subcategories"}
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className={`font-medium ${complaintsCount >= 5 ? "text-red-600" : ""}`}>
+                                {complaintsCount}
+                              </span>
+                              {complaintsCount > 0 && (
+                                <span className="text-xs text-gray-500 ml-1">
+                                  active {complaintsCount === 1 ? 'complaint' : 'complaints'}
+                                </span>
+                              )}
+                              {complaintsCount >= 5 && (
+                                <span className="ml-2 text-xs bg-red-100 text-red-600 py-1 px-2 rounded">
+                                  At capacity
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-3 px-4">
+                              <button
+                                onClick={() => handleDeleteStaff(staff._id)}
+                                className={`bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded text-sm ${
+                                  complaintsCount > 0 ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
+                                disabled={complaintsCount > 0}
+                                title={complaintsCount > 0 ? "Cannot delete staff with assigned complaints" : "Delete staff"}
+                              >
+                                Delete
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            ) : (
+              <p className="text-gray-600">
+                {searchQuery 
+                  ? `No support staff found matching "${searchQuery}". Try a different search term.` 
+                  : "No support staff found. Add some staff members using the form above."}
+              </p>
+            )}
+          </>
         )}
       </div>
     </div>

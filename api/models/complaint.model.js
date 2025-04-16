@@ -15,6 +15,11 @@ const complaintSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
+  phoneNumber: {
+    type: String, 
+    required: true,
+    defualt: ""
+  },
   status: {
     type: String,
     required: true,

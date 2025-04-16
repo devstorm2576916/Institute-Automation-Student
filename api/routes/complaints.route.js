@@ -4,8 +4,9 @@ import { validateAccessToken } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-router.get('/', validateAccessToken, ComplaintsController.getUserComplaints);
-router.get('/admin',validateAccessToken, ComplaintsController.getAllComplaints);
+router.post('/', validateAccessToken, ComplaintsController.getUserComplaints);
+router.post('/admin',validateAccessToken, ComplaintsController.getAllComplaints);
+router.post('/admin/status',validateAccessToken, ComplaintsController.getComplaintsByStatus);
 router.post('/create',validateAccessToken, ComplaintsController.createComplaint);
 router.delete('/delete',validateAccessToken, ComplaintsController.deleteComplaint);
 router.patch('/admin/updateStatus', validateAccessToken,ComplaintsController.updateStatus);
