@@ -667,6 +667,49 @@ const ComplaintsController = {
       return res.status(500).json({ message: "Something went wrong while fetching complaints." });
     }
   },
+
+  /**
+   * Get complaint details by ID.
+   * 
+   * Input:
+   * - Params: { id }
+   * - User: { email } (from `req.user`)
+   * 
+   * Output:
+   * - Success: { message: "Complaint details fetched successfully!", complaint }
+   * - Error: { message: "Complaint not found!" } or { message: "Something went wrong!" }
+   */
+  getComplaintById: async (req, res) => {
+    try {
+      const complaintId = req.params.id;
+      
+      if (!complaintId) {
+        return res.status(400).json({
+          error: "Missing complaint ID",
+          message: "Complaint ID is required"
+        });
+      }
+
+      const complaint = await Complaint.findById(complaintId);
+      
+      if (!complaint) {
+        return res.status(404).json({
+          message: "Complaint not found!"
+        });
+      }
+
+      return res.status(200).json({
+        message: "Complaint details fetched successfully!",
+        complaint: complaint
+      });
+    } catch (e) {
+      console.error(`ERROR: Fetching complaint details by ID: ${e}`);
+      return res.status(500).json({
+        message: "Something went wrong while fetching complaint details."
+      });
+    }
+  },
+
 };
 
 export default ComplaintsController;

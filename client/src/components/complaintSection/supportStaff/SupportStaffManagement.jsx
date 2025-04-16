@@ -2,6 +2,168 @@ import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 /**
+ * Modal component to display complaints assigned to a support staff member
+ * @param {Object} props Component props
+ * @param {Object} props.staff - The support staff data
+ * @param {function} props.onClose - Function to close the modal
+ * @returns {JSX.Element} The rendered component
+ */
+const StaffComplaintsModal = ({ staff, onClose }) => {
+  const [complaints, setComplaints] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchComplaints = async () => {
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        // Fetch detailed complaints data for each complaint ID
+        if (staff.assignedComplaints && staff.assignedComplaints.length > 0) {
+          const complaintPromises = staff.assignedComplaints.map(async (complaintId) => {
+            const response = await fetch(`http://localhost:8000/api/complaints/detail/${complaintId}`, {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              },
+              credentials: "include",
+            });
+            
+            if (!response.ok) {
+              throw new Error(`Failed to fetch complaint details for ID: ${complaintId}`);
+            }
+            
+            return response.json();
+          });
+          
+          const complaintsData = await Promise.all(complaintPromises);
+          setComplaints(complaintsData.map(data => data.complaint));
+        }
+      } catch (err) {
+        console.error("Error fetching staff complaints:", err);
+        setError("Failed to load complaint details. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchComplaints();
+  }, [staff]);
+
+  // Get status color
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Pending": return "bg-red-100 text-red-800";
+      case "In Progress": return "bg-yellow-100 text-yellow-800";
+      case "Resolved": return "bg-green-100 text-green-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="flex justify-between items-center p-4 border-b">
+          <h3 className="text-xl font-semibold text-gray-800">
+            Complaints Assigned to {staff.name}
+          </h3>
+          <button 
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        
+        <div className="p-4 overflow-y-auto flex-grow">
+          {isLoading ? (
+            <div className="flex justify-center items-center h-40">
+              <svg className="animate-spin -ml-1 mr-3 h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span className="text-gray-600">Loading complaints...</span>
+            </div>
+          ) : error ? (
+            <div className="text-center p-6 text-red-600">
+              <svg className="w-12 h-12 mx-auto text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p>{error}</p>
+            </div>
+          ) : complaints.length === 0 ? (
+            <div className="text-center p-6 text-gray-600">
+              <svg className="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p>No complaints are currently assigned to this staff member.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {complaints.map((complaint) => (
+                <div key={complaint._id} className="border rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-3">
+                    <h4 className="font-semibold text-lg">{complaint.title}</h4>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(complaint.status)}`}>
+                      {complaint.status}
+                    </span>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3 text-sm">
+                    <div>
+                      <p><span className="font-medium">Category:</span> {complaint.category}</p>
+                      <p><span className="font-medium">Sub-category:</span> {complaint.subCategory}</p>
+                      <p><span className="font-medium">Date:</span> {new Date(complaint.date).toLocaleDateString()}</p>
+                    </div>
+                    <div>
+                      <p><span className="font-medium">Contact:</span> {complaint.phoneNumber}</p>
+                      <p><span className="font-medium">Location:</span> {complaint.locality} - {complaint.address}</p>
+                      <p><span className="font-medium">Time Availability:</span> {complaint.timeAvailability}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="mb-3">
+                    <p className="font-medium mb-1">Description:</p>
+                    <p className="text-gray-700 text-sm bg-gray-50 p-2 rounded line-clamp-2">{complaint.description}</p>
+                  </div>
+                  
+                  {complaint.imageUrls && complaint.imageUrls.length > 0 && (
+                    <div>
+                      <p className="font-medium text-sm mb-1">Images:</p>
+                      <div className="flex space-x-2 overflow-x-auto">
+                        {complaint.imageUrls.map((url, index) => (
+                          <img 
+                            key={index}
+                            src={`http://localhost:8000/uploads/complaints/${url}`}
+                            alt={`Complaint ${index + 1}`}
+                            className="h-16 w-16 object-cover rounded border border-gray-200"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        
+        <div className="border-t p-4 flex justify-end">
+          <button 
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-gray-800 transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/**
  * SupportStaffManagement component for hostel admins to add, view, and delete support staff.
  * @returns {JSX.Element} The rendered component.
  */
@@ -29,6 +191,9 @@ const SupportStaffManagement = () => {
   
   // Filtered and sorted staff data
   const [displayedStaff, setDisplayedStaff] = useState([]);
+  
+  // Selected staff for viewing complaints
+  const [selectedStaff, setSelectedStaff] = useState(null);
 
   // Categories and subcategories options - same as in the complaints form
   const categoriesOptions = {
@@ -260,6 +425,14 @@ const SupportStaffManagement = () => {
     });
     return [...new Set(subcategories)]; // Remove duplicates
   };
+  
+  // Handle row click to view staff complaints
+  const handleStaffRowClick = (staff) => {
+    // Only show complaints if the staff has assigned complaints
+    if (staff.assignedComplaints && staff.assignedComplaints.length > 0) {
+      setSelectedStaff(staff);
+    }
+  };
 
   return (
     <div className="max-w-5xl mx-auto p-6">
@@ -433,7 +606,11 @@ const SupportStaffManagement = () => {
                         const complaintsCount = staff.assignedComplaints ? staff.assignedComplaints.length : 0;
                         
                         return (
-                          <tr key={staff._id} className="border-t">
+                          <tr 
+                            key={staff._id} 
+                            className={`border-t ${complaintsCount > 0 ? 'cursor-pointer hover:bg-gray-50' : ''}`}
+                            onClick={() => handleStaffRowClick(staff)}
+                          >
                             <td className="py-3 px-4">{staff.name}</td>
                             <td className="py-3 px-4">{staff.phone}</td>
                             <td className="py-3 px-4">
@@ -447,7 +624,7 @@ const SupportStaffManagement = () => {
                                 : "All subcategories"}
                             </td>
                             <td className="py-3 px-4">
-                              <span className={`font-medium ${complaintsCount >= 5 ? "text-red-600" : ""}`}>
+                              <span className={`font-medium ${complaintsCount >= 5 ? "text-red-600" : complaintsCount > 0 ? "text-blue-600" : ""}`}>
                                 {complaintsCount}
                               </span>
                               {complaintsCount > 0 && (
@@ -460,8 +637,13 @@ const SupportStaffManagement = () => {
                                   At capacity
                                 </span>
                               )}
+                              {complaintsCount > 0 && (
+                                <span className="ml-2 text-xs text-blue-600 hover:underline">
+                                  (Click to view)
+                                </span>
+                              )}
                             </td>
-                            <td className="py-3 px-4">
+                            <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
                               <button
                                 onClick={() => handleDeleteStaff(staff._id)}
                                 className={`bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded text-sm ${
@@ -490,6 +672,14 @@ const SupportStaffManagement = () => {
           </>
         )}
       </div>
+      
+      {/* Staff Complaints Modal */}
+      {selectedStaff && (
+        <StaffComplaintsModal 
+          staff={selectedStaff} 
+          onClose={() => setSelectedStaff(null)}
+        />
+      )}
     </div>
   );
 };
