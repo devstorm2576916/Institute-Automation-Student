@@ -608,6 +608,65 @@ const ComplaintsController = {
       return res.status(500).json({ message: "Internal server error" });
     }
   },
+
+  /**
+   * Get complaints filtered by status with pagination (Admin only).
+   * 
+   * Input:
+   * - Body: { status, page (optional), limit (optional) }
+   * - User: { email } (from `req.user`)
+   * 
+   * Output:
+   * - Success: { data: complaints, pagination: { currentPage, totalPages, pageSize, totalItems } }
+   * - Error: { message: "Something went wrong while fetching complaints." }
+   */
+  getComplaintsByStatus: async (req, res) => {
+    try {
+      const admin = await Admin.findOne({ email: req.user.email });
+      if (!admin) {
+        console.log(`ERROR: Unauthorized access to fetch complaints by status by user with email: ${req.user.email}`);
+        return res.status(403).json({
+          error: "User is not authorized for this action",
+          message: "You are not authorized to view these complaints",
+        });
+      }
+
+      const status = req.body.status;
+      if (!status) {
+        return res.status(400).json({
+          error: "Missing required attribute",
+          message: "Status is required to filter complaints",
+        });
+      }
+
+      const page = parseInt(req.body.page) || 1;
+      const limit = parseInt(req.body.limit) || 10;
+      const skip = (page - 1) * limit;
+
+      // Find complaints with the specified status
+      const query = { status };
+      const totalComplaints = await Complaint.countDocuments(query);
+      const totalPages = Math.ceil(totalComplaints / limit);
+
+      const complaints = await Complaint.find(query)
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 });
+      
+      return res.send({
+        data: complaints,
+        pagination: {
+          currentPage: page,
+          totalPages: totalPages,
+          pageSize: limit,
+          totalItems: totalComplaints,
+        },
+      });
+    } catch (error) {
+      console.error("ERROR: Fetching complaints by status:", error);
+      return res.status(500).json({ message: "Something went wrong while fetching complaints." });
+    }
+  },
 };
 
 export default ComplaintsController;
