@@ -150,7 +150,7 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
                     </button>
                 )}
             </div>
-            
+
             <div className="p-4">
                 <h2 className="text-xl font-semibold mb-2">{complaint.title}</h2>
                 <p className="text-sm text-gray-600 mb-1">Date: {complaint.date}</p>
@@ -164,7 +164,17 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
                 <p className="text-sm text-gray-600 mb-4">
                     <span className="font-semibold">Description:</span> {complaint.description || "No additional details provided."}
                 </p>
-                {complaint.assignedName!=null && (
+                {complaint.imageUrls &&
+                    complaint.imageUrls.length > 0 &&
+                    complaint.imageUrls.map((url, index) => (
+                        <img
+                            key={index}
+                            src={`http://localhost:8000/uploads/complaints/${url}`}
+                            alt={`Complaint Image ${index + 1}`}
+                            className="w-full h-auto mb-4 rounded-md shadow-md"
+                        />
+                    ))}
+                {complaint.assignedName != null && (
                     <p className="text-sm text-gray-600 mb-4">
                         <div>
                             {" "}
