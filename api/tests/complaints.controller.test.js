@@ -95,6 +95,54 @@ describe("ComplaintsController", () => {
         });
     });
 
+    describe("getComplaintsByStatus", () => {
+        it("should fetch complaints filtered by status", async () => {
+            const response = await request(app)
+                .get("/api/complaints/status")
+                .set("Authorization", `Bearer ${adminToken}`)
+                .query({ status: "Pending" })
+                .send();
+
+            expect(response.status).toBe(200);
+            expect(response.body.data).toBeDefined();
+        });
+    });
+
+    describe("getComplaintById", () => {
+        it("should fetch a specific complaint by ID", async () => {
+            // Create a new complaint for this test
+            const createResponse = await request(app)
+                .post("/api/complaints")
+                .set("Authorization", `Bearer ${token}`)
+                .send({
+                    userId,
+                    title: "Detail Test Complaint",
+                    date: new Date(),
+                    description: "This is a test complaint for details",
+                    category: "General",
+                    subCategory: "Maintenance",
+                    imageUrl: "http://example.com/image.jpg"
+                });
+            
+            const testComplaintId = createResponse.body.complaint._id;
+            
+            const response = await request(app)
+                .get(`/api/complaints/detail/${testComplaintId}`)
+                .set("Authorization", `Bearer ${token}`)
+                .send();
+
+            expect(response.status).toBe(200);
+            expect(response.body.data).toBeDefined();
+            expect(response.body.data._id).toBe(testComplaintId);
+            
+            // Clean up
+            await request(app)
+                .delete("/api/complaints")
+                .set("Authorization", `Bearer ${token}`)
+                .send({ _id: testComplaintId });
+        });
+    });
+
     describe("deleteComplaint", () => {
         it("should delete a complaint", async () => {
             const response = await request(app)
@@ -154,6 +202,75 @@ describe("ComplaintsController", () => {
         });
     });
 
+    describe("getFilteredSupportStaff", () => {
+        it("should fetch support staff filtered by category and subcategory", async () => {
+            // Create a support staff with specific categories
+            const createResponse = await request(app)
+                .post("/api/support-staff")
+                .set("Authorization", `Bearer ${adminToken}`)
+                .send({
+                    name: "Category Specialist",
+                    phone: "5551234567",
+                    categories: ["Electrical", "Plumbing"],
+                    subCategories: ["Wiring", "Leakage"]
+                });
+            
+            const testStaffId = createResponse.body.supportStaff._id;
+            
+            const response = await request(app)
+                .get("/api/support-staff/filtered")
+                .set("Authorization", `Bearer ${adminToken}`)
+                .query({ 
+                    category: "Electrical",
+                    subCategory: "Wiring" 
+                })
+                .send();
+
+            expect(response.status).toBe(200);
+            expect(response.body.data).toBeDefined();
+            
+            // Clean up
+            await request(app)
+                .delete("/api/support-staff")
+                .set("Authorization", `Bearer ${adminToken}`)
+                .send({ supportStaffId: testStaffId });
+        });
+    });
+
+    describe("updateSupportStaffAvailability", () => {
+        it("should update support staff availability status", async () => {
+            // Create a new support staff
+            const createResponse = await request(app)
+                .post("/api/support-staff")
+                .set("Authorization", `Bearer ${adminToken}`)
+                .send({
+                    name: "Available Tester",
+                    phone: "1112223333",
+                    isAvailable: true
+                });
+            
+            const testStaffId = createResponse.body.supportStaff._id;
+            
+            const response = await request(app)
+                .patch("/api/support-staff/availability")
+                .set("Authorization", `Bearer ${adminToken}`)
+                .send({
+                    supportStaffId: testStaffId,
+                    isAvailable: false
+                });
+
+            expect(response.status).toBe(200);
+            expect(response.body.message).toBe("Support staff availability updated successfully!");
+            expect(response.body.data.isAvailable).toBe(false);
+            
+            // Clean up
+            await request(app)
+                .delete("/api/support-staff")
+                .set("Authorization", `Bearer ${adminToken}`)
+                .send({ supportStaffId: testStaffId });
+        });
+    });
+
     describe("deleteSupportStaff", () => {
         it("should delete a support staff", async () => {
             const response = await request(app)
@@ -175,6 +292,39 @@ describe("ComplaintsController", () => {
 
             expect(response.status).toBe(200);
             expect(response.body.message).toBe("Support staff fetched successfully!");
+        });
+    });
+
+    describe("Error Handling", () => {
+        it("should return 404 when complaint not found", async () => {
+            const nonExistentId = new mongoose.Types.ObjectId();
+            const response = await request(app)
+                .get(`/api/complaints/detail/${nonExistentId}`)
+                .set("Authorization", `Bearer ${token}`)
+                .send();
+
+            expect(response.status).toBe(404);
+        });
+
+        it("should return 403 when unauthorized user tries to access admin routes", async () => {
+            const response = await request(app)
+                .get("/api/complaints")
+                .set("Authorization", `Bearer ${token}`) // Using regular user token for admin route
+                .send();
+
+            expect(response.status).toBe(403);
+        });
+        
+        it("should return 400 when required fields are missing", async () => {
+            const response = await request(app)
+                .post("/api/complaints")
+                .set("Authorization", `Bearer ${token}`)
+                .send({
+                    // Missing required fields like title, description
+                    userId
+                });
+
+            expect(response.status).toBe(400);
         });
     });
 });
