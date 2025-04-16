@@ -1,4 +1,3 @@
-import newRequest from "../../client/src/utils/newRequest.js";
 import axios from "axios";
 import { HostelLeave, HostelTransfer } from "../models/hostel.model.js";
 import { Student } from '../models/student.model.js';
