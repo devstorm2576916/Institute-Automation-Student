@@ -5,10 +5,62 @@ import AssignForm from "./AssignForm";
 
 const token = localStorage.getItem("token");
 
+/**
+ * Confirmation dialog component for delete operations
+ * @param {Object} props Component props
+ * @param {Object} props.complaint - The complaint data to be deleted
+ * @param {function} props.onConfirm - Function to call when delete is confirmed
+ * @param {function} props.onCancel - Function to cancel the delete operation
+ * @returns {JSX.Element} The rendered component
+ */
+const DeleteConfirmationDialog = ({ complaint, onConfirm, onCancel }) => {
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden flex flex-col">
+                <div className="bg-red-50 p-4 border-b border-red-100">
+                    <h3 className="text-lg font-semibold text-red-700">Confirm Deletion</h3>
+                </div>
+                
+                <div className="p-6">
+                    <div className="flex items-center mb-4">
+                        <svg className="h-8 w-8 text-red-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <p className="text-gray-700">
+                            Are you sure you want to delete the complaint <span className="font-bold">{complaint.title}</span>?
+                        </p>
+                    </div>
+                    
+                    <p className="text-sm text-gray-500 mb-6">
+                        This action cannot be undone. All information associated with this complaint will be permanently removed.
+                    </p>
+                    
+                    <div className="flex justify-end space-x-3">
+                        <button 
+                            onClick={onCancel}
+                            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-gray-800 transition-colors font-medium"
+                        >
+                            Cancel
+                        </button>
+                        <button 
+                            onClick={onConfirm}
+                            className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-white transition-colors font-medium"
+                        >
+                            Delete Complaint
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const ComplaintDetails = ({ complaint, onBack, role }) => {
     const [showAssignModal, setShowAssignModal] = useState(false);
     const queryClient = useQueryClient();
     const [activeImageIndex, setActiveImageIndex] = useState(0);
+    // Add state for delete confirmation dialog
+    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
     // DELETE
     const deleteMutation = useMutation({
@@ -100,8 +152,19 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
 
     // Event Handlers
     const handleDelete = (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
         deleteMutation.mutate();
+    };
+
+    // New handler to show delete confirmation
+    const handleDeleteClick = (e) => {
+        e.preventDefault();
+        setShowDeleteConfirmation(true);
+    };
+
+    // Handler to cancel delete
+    const handleCancelDelete = () => {
+        setShowDeleteConfirmation(false);
     };
 
     const handleMarkAsDone = (e) => {
@@ -225,7 +288,7 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
                     {role === "student" && complaint.status !== "Resolved" && (
                         <button
                             className="flex items-center gap-1 bg-red-600 text-white px-3 py-1.5 rounded-md hover:bg-red-700 transition-colors"
-                            onClick={handleDelete}
+                            onClick={handleDeleteClick}
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -445,6 +508,15 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
                     onClose={() => setShowAssignModal(false)}
                     onAssign={handleAssign}
                     complaint={complaint}
+                />
+            )}
+
+            {/* Delete Confirmation Dialog */}
+            {showDeleteConfirmation && (
+                <DeleteConfirmationDialog
+                    complaint={complaint}
+                    onConfirm={handleDelete}
+                    onCancel={handleCancelDelete}
                 />
             )}
         </div>
