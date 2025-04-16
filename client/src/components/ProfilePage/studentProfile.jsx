@@ -15,28 +15,35 @@ const StudentProfile = () =>{
                 return res.data;
             }),
     });
+
+    const { isLoadingCourses, errorCourses, data: studentCourses = [] } = useQuery({
+        queryKey: ["completed-courses"],
+        queryFn: () =>
+          newRequest.get(`/student/${userId}/completed-courses`).then((res) => {
+            console.log("Course data received:", res.data);
+            return res.data.courses || [];
+          }),
+      });
+
     console.log(data)
+    console.log("courses: ", studentCourses)
     const student = {
-        rollNumber: data?.rollNo || "220101125",
-        name: data?.userId?.name || "Priyanshu Pratyay",
-        photo: "/student.jpg", // Place a student image in `public/` folder
-        signphoto: "/sign.jpg",
+        rollNumber: data?.rollNo,
+        name: data?.userId?.name,
+        photo: data?.userId?.profilePhoto || "/student.jpg", // Place a placeholder student image in `public/` folder
+        signphoto: data?.userId?.signature || "/sign.jpg",
         hostel: data?.hostel,
-        email: data?.email || "tanush@iitg.ac.in",
-        Bloodgr: "B+",
-        contactno: "9032145678",
-        dob: "06.04.2004",
-        roomNo: "C-302",
-        semester: 6,
-        branch: "Computer Science & Engineering",
-        yearOfJoining: 2021,
-        programme: "B.Tech",
-        facultyAdvisors: ["Dr. Aryabartta Sahu", "Prof. XYZ"],
-        courses: [
-          { code: "CS101", name: "Data Structures", department: "CS", creditAudit: "Credit", year: 2023, session: "Autumn", status: "Approved", grade: "A" },
-          { code: "CS202", name: "Operating Systems", department: "CS", creditAudit: "Credit", year: 2024, session: "Spring", status: "Pending", grade: "NA" },
-           { code: "CS202", name: "Operating Systems", department: "CS", creditAudit: "Credit", year: 2024, session: "Spring", status: "Pending", grade: "NA" }
-        ],
+        email: data?.email,
+        Bloodgr: data?.userId?.bloodGroup,
+        contactno: data?.userId?.contactNo,
+        dob: data?.userId?.dateOfBirth,
+        roomNo: data?.roomNo,
+        semester: data?.semester,
+        branch: data?.department,
+        yearOfJoining: data?.batch.substr(0, 4),
+        programme: data?.program,
+        // facultyAdvisors: ["Dr. Aryabartta Sahu", "Prof. XYZ"],
+        courses: studentCourses,
       };
     return (
         <>
@@ -63,18 +70,19 @@ const StudentProfile = () =>{
             </div>
 
             {/* Faculty Advisors */}
-            <div className={styles.facultySection}>
+            {/* <div className={styles.facultySection}>
                 <h2>Faculty Advisor(s)</h2>
                 <ul>
                 {student.facultyAdvisors.map((advisor, index) => (
                     <li key={index}>{advisor}</li>
                 ))}
                 </ul>
-            </div>
+            </div> */}
 
             {/* Courses Table */}
+            {isLoadingCourses? <p>Loading...</p> : errorCourses ? <p>Error: {error.message}</p> : 
             <div className={styles.courseSection}>
-                <h2>Enrolled Courses</h2>
+                <h2>Completed Courses</h2>
                 <table>
                 <thead>
                     <tr>
@@ -82,28 +90,26 @@ const StudentProfile = () =>{
                     <th>Course Name</th>
                     <th>Department</th>
                     <th>Credit/Audit</th>
-                    <th>Year</th>
-                    <th>Session</th>
-                    <th>Approval Status</th>
+                    <th>Semester</th>
+                    <th>Credits</th>
                     <th>Grade</th>
                     </tr>
                 </thead>
                 <tbody>
                     {student.courses.map((course, index) => (
                     <tr key={index}>
-                        <td>{course.code}</td>
-                        <td>{course.name}</td>
+                        <td>{course.courseCode}</td>
+                        <td>{course.courseName}</td>
                         <td>{course.department}</td>
-                        <td>{course.creditAudit}</td>
-                        <td>{course.year}</td>
-                        <td>{course.session}</td>
-                        <td>{course.status}</td>
+                        <td>{course.creditOrAudit}</td>
+                        <td>{course.semester}</td>
+                        <td>{course.credits}</td>
                         <td>{course.grade}</td>
                     </tr>
                     ))}
                 </tbody>
                 </table>
-            </div>
+            </div>}
             </div>
         }
         </>

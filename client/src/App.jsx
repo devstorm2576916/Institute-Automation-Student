@@ -36,7 +36,7 @@ import EditAssignment from "./components/Assignment/EditAssignment.jsx";
 import FacultyAssignmentSubmissions from "./components/Assignment/FacultyAssignmentSubmissions.jsx";
 import LoginPage from "./components/LoginPage/Login.jsx";
 import DropCourse from "./components/dropCourse/drop.jsx";
-import CourseAnnouncements from "./components/Announcements/CourseAnnouncements.jsx";
+import CourseAnnouncements from "./components/Announcements/studentAnnouncements.jsx";
 import MyCourses from "./components/mycourses/myCourse.jsx";
 import DocumentManager from "./pages/Documents/admin/DocumentManager.jsx";
 import DocumentAccessControl from "./pages/Documents/admin/DocumentAccessControl.jsx";
@@ -51,7 +51,13 @@ import HostelTransfer from './components/HostelTransfer/HostelTransfer.jsx';
 import { Toaster } from 'react-hot-toast';
 
 import AdminRegistration from './components/registration/admin_reg.jsx';
-import AdminDropCourseApproval from './components/dropCourse/dropCourseAdmin.jsx';
+import AdminDropRequests from './components/dropCourse/dropCourseAdmin.jsx';
+import CourseWrapper from './components/mycourses/courseWrapper.jsx';
+import FacultyCourseAnnouncements from './components/Announcements/facultyAnnouncements.jsx';
+import AnnouncementWrapper from './components/Announcements/announcementWrapper.jsx';
+import FacultyCourseStudents from './components/courseStudents/courseStudent.jsx';
+// import CourseStudents from './components/courseStudents/courseStudent.jsx';
+import CompletedCourses from './components/mycourses/CompletedCourses.jsx';
 
 const queryClient = new QueryClient()
 function App() {
@@ -137,7 +143,7 @@ function App() {
                   element:<FacultyDashboard/>  
                 },
                 {
-                    path:'facultyregistration/:id',
+                    path:'facultyregistration/:courseCode',
                     element:<CourseRegistrationFaculty/>
                 },
                 {
@@ -168,6 +174,10 @@ function App() {
                     path:"/course/:courseId/assignment/:assignmentId/submissions",
                     element: <FacultyAssignmentSubmissions/>
                 },
+                {   
+                    path:"/completed-courses",
+                    element: <CompletedCourses/>
+                },
 
                 {
                     path:"/attendancelanding",
@@ -179,15 +189,19 @@ function App() {
                 },
                 {
                     path:"/dropcourseApprovals",
-                    element: <AdminDropCourseApproval/>
+                    element: <AdminDropRequests/>
                 },
                 {
                     path:"/course/:courseId/announcements",
-                    element: <CourseAnnouncements/>
+                    element: <AnnouncementWrapper/>
                 },
                 {
-                    path:"/my-courses",
-                    element: <MyCourses/>
+                    path:"/courses",
+                    element: <CourseWrapper/>
+                },
+                {
+                    path: "/course/:courseId/students",
+                    element: <FacultyCourseStudents />
                 },
                 {
                     path:"/attendancelanding/:id",
