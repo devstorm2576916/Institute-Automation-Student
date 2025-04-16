@@ -8,8 +8,7 @@ const token = localStorage.getItem("token");
 const ComplaintDetails = ({ complaint, onBack, role }) => {
     const [showAssignModal, setShowAssignModal] = useState(false);
     const queryClient = useQueryClient();
-
-    console.log(complaint);
+    const [activeImageIndex, setActiveImageIndex] = useState(0);
 
     // DELETE
     const deleteMutation = useMutation({
@@ -48,7 +47,6 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
                 body: JSON.stringify({ complaintId: complaint._id, updatedStatus: "Resolved" }),
                 credentials: "include",
             });
-            console.log(res.data);
             if (!res.ok) throw new Error("Failed to mark as done");
         },
         onSuccess: () => {
@@ -72,8 +70,6 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
                 assignedContact: assignData.phoneNo,
             };
             
-            console.log("Sending assignment data:", body);
-            
             const res = await fetch("http://localhost:8000/api/complaints/admin/assign", {
                 method: "PATCH",
                 headers: {
@@ -86,7 +82,6 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
 
             if (!res.ok) {
                 const errorData = await res.text();
-                console.error("Assignment error response:", errorData);
                 throw new Error(`Failed to assign complaint: ${errorData}`);
             }
             
@@ -106,7 +101,9 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
     // Event Handlers
     const handleDelete = (e) => {
         e.preventDefault();
-        deleteMutation.mutate();
+        if (window.confirm("Are you sure you want to delete this complaint?")) {
+            deleteMutation.mutate();
+        }
     };
 
     const handleMarkAsDone = (e) => {
@@ -115,84 +112,232 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
     };
 
     const handleAssign = (assignData) => {
-        // Pass the entire assignData object directly to the mutation
         assignMutation.mutate(assignData);
         setShowAssignModal(false);
     };
+    
+    // Determine status color and icon
+    let statusColor, statusBgColor, statusIcon;
+    switch (complaint.status) {
+        case "Pending":
+            statusColor = "text-red-600";
+            statusBgColor = "bg-red-50";
+            statusIcon = (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-600" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                </svg>
+            );
+            break;
+        case "In Progress":
+            statusColor = "text-yellow-600";
+            statusBgColor = "bg-yellow-50";
+            statusIcon = (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-600" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 10.24a1 1 0 11-2 0 1 1 0 012 0z" clipRule="evenodd" />
+                </svg>
+            );
+            break;
+        case "Resolved":
+            statusColor = "text-green-600";
+            statusBgColor = "bg-green-50";
+            statusIcon = (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+            );
+            break;
+        default:
+            statusColor = "text-gray-600";
+            statusBgColor = "bg-gray-50";
+            statusIcon = (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                </svg>
+            );
+    }
+
+    // Get formatted date
+    const formattedDate = new Date(complaint.date).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
 
     return (
-        <div className="max-w-2xl mx-auto p-6 bg-white shadow-md rounded-lg relative">
-            <div className="flex justify-between items-center mb-4">
+        <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+            {/* Header with back button and actions */}
+            <div className="flex justify-between items-center p-4 border-b bg-gray-50">
                 <button
-                    className="bg-gray-600 text-white px-2 py-1 rounded-md hover:bg-gray-700"
-                    onClick={onBack}
+                    className="flex items-center gap-2 text-gray-700 px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-100 transition-colors"
+                    onClick={() => onBack(false)}
                 >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
                     Back
                 </button>
-                {role === "student" && (
-                    <button
-                        className="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-gray-700"
-                        onClick={handleDelete}
-                    >
-                        Delete
-                    </button>
-                )}
-                {role === "nonAcadAdmin" && complaint.status === "Pending" && (
-                    <button
-                        className="bg-green-500 text-white px-2 py-1 rounded-md hover:bg-green-700"
-                        onClick={() => setShowAssignModal(true)}
-                    >
-                        Assign
-                    </button>
-                )}
-                {role === "nonAcadAdmin" && complaint.status === "In Progress" && (
-                    <button
-                        className="bg-green-500 text-white px-2 py-1 rounded-md hover:bg-green-700"
-                        onClick={handleMarkAsDone}
-                    >
-                        Mark as Done
-                    </button>
-                )}
+                <div className="flex gap-2">
+                    {role === "student" && (
+                        <button
+                            className="flex items-center gap-1 bg-red-600 text-white px-3 py-1.5 rounded-md hover:bg-red-700 transition-colors"
+                            onClick={handleDelete}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Delete
+                        </button>
+                    )}
+                    {role === "nonAcadAdmin" && complaint.status === "Pending" && (
+                        <button
+                            className="flex items-center gap-1 bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700 transition-colors"
+                            onClick={() => setShowAssignModal(true)}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            Assign
+                        </button>
+                    )}
+                    {role === "nonAcadAdmin" && complaint.status === "In Progress" && (
+                        <button
+                            className="flex items-center gap-1 bg-green-600 text-white px-3 py-1.5 rounded-md hover:bg-green-700 transition-colors"
+                            onClick={handleMarkAsDone}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            Mark as Resolved
+                        </button>
+                    )}
+                </div>
             </div>
 
-            <div className="p-4">
-                <h2 className="text-xl font-semibold mb-2">{complaint.title}</h2>
-                <p className="text-sm text-gray-600 mb-1">Date: {complaint.date}</p>
-                <p className="text-sm text-gray-600 mb-1">Status: {complaint.status}</p>
-                <p className="text-sm text-gray-600 mb-1">
-                    <span className="font-semibold">Phone Number:</span> {complaint.phoneNumber}
-                </p>
-                <p className="text-sm text-gray-600 mb-1">
-                    <span className="font-semibold">Address:</span> Room {complaint.address} Hostel
-                </p>
-                <p className="text-sm text-gray-600 mb-4">
-                    <span className="font-semibold">Description:</span> {complaint.description || "No additional details provided."}
-                </p>
-                {complaint.imageUrls &&
-                    complaint.imageUrls.length > 0 &&
-                    complaint.imageUrls.map((url, index) => (
-                        <img
-                            key={index}
-                            src={`http://localhost:8000/uploads/complaints/${url}`}
-                            alt={`Complaint Image ${index + 1}`}
-                            className="w-full h-auto mb-4 rounded-md shadow-md"
-                        />
-                    ))}
-                {complaint.assignedName != null && (
-                    <p className="text-sm text-gray-600 mb-4">
-                        <div>
-                            {" "}
-                            <span className="font-semibold">Assigned Pesron : </span>
-                            {complaint.assignedName}
+            <div className="p-6">
+                {/* Title and Status */}
+                <div className="flex justify-between items-start mb-6">
+                    <h2 className="text-2xl font-bold text-gray-800">{complaint.title}</h2>
+                    <div className={`flex items-center ${statusBgColor} ${statusColor} px-3 py-1.5 rounded-full`}>
+                        {statusIcon}
+                        <span className="ml-1.5 font-medium">{complaint.status}</span>
+                    </div>
+                </div>
+                
+                {/* Complaint Info Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div className="space-y-4">
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                            <h3 className="text-sm font-medium text-gray-500 mb-2">COMPLAINT DETAILS</h3>
+                            <div className="space-y-3">
+                                <div>
+                                    <p className="text-xs text-gray-500">Date Submitted</p>
+                                    <p className="font-medium">{formattedDate}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-gray-500">Category</p>
+                                    <p className="font-medium">{complaint.category}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-gray-500">Sub-Category</p>
+                                    <p className="font-medium">{complaint.subCategory}</p>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            {" "}
-                            <span className="font-semibold">Phone Number : </span>
-                            {complaint.assignedContact}
+                        
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                            <h3 className="text-sm font-medium text-gray-500 mb-2">CONTACT INFORMATION</h3>
+                            <div className="space-y-3">
+                                <div>
+                                    <p className="text-xs text-gray-500">Phone Number</p>
+                                    <p className="font-medium">{complaint.phoneNumber || "Not provided"}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-gray-500">Address</p>
+                                    <p className="font-medium">Room {complaint.address} Hostel</p>
+                                </div>
+                                {complaint.timeAvailability && (
+                                    <div>
+                                        <p className="text-xs text-gray-500">Time Availability</p>
+                                        <p className="font-medium">{complaint.timeAvailability}</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                    </p>
+                    </div>
+                    
+                    <div className="space-y-4">
+                        {complaint.assignedName && (
+                            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <h3 className="text-sm font-medium text-blue-700 mb-2">ASSIGNED SUPPORT STAFF</h3>
+                                <div className="flex items-center mb-3">
+                                    <div className="bg-blue-100 rounded-full p-2 mr-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p className="font-semibold text-blue-900">{complaint.assignedName}</p>
+                                        <p className="text-sm text-blue-700">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                            </svg>
+                                            {complaint.assignedContact}
+                                        </p>
+                                    </div>
+                                </div>
+                                <p className="text-sm text-blue-600 italic">
+                                    Contact the assigned staff for updates on your complaint.
+                                </p>
+                            </div>
+                        )}
+                        
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                            <h3 className="text-sm font-medium text-gray-500 mb-2">DESCRIPTION</h3>
+                            <p className="text-gray-700 whitespace-pre-line">
+                                {complaint.description || "No description provided."}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                {/* Images */}
+                {complaint.imageUrls && complaint.imageUrls.length > 0 && (
+                    <div className="mt-6">
+                        <h3 className="text-lg font-medium text-gray-700 mb-3">Uploaded Images</h3>
+                        
+                        {/* Main image display */}
+                        <div className="mb-3 bg-gray-100 rounded-lg overflow-hidden flex justify-center">
+                            <img
+                                src={`http://localhost:8000/uploads/complaints/${complaint.imageUrls[activeImageIndex]}`}
+                                alt={`Complaint Image ${activeImageIndex + 1}`}
+                                className="max-h-80 object-contain"
+                            />
+                        </div>
+                        
+                        {/* Image thumbnails */}
+                        {complaint.imageUrls.length > 1 && (
+                            <div className="flex space-x-2 overflow-x-auto pb-2">
+                                {complaint.imageUrls.map((url, index) => (
+                                    <div 
+                                        key={index}
+                                        onClick={() => setActiveImageIndex(index)}
+                                        className={`cursor-pointer rounded-md overflow-hidden border-2 ${
+                                            index === activeImageIndex ? "border-blue-500" : "border-transparent"
+                                        }`}
+                                    >
+                                        <img
+                                            src={`http://localhost:8000/uploads/complaints/${url}`}
+                                            alt={`Thumbnail ${index + 1}`}
+                                            className="h-16 w-16 object-cover"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 )}
             </div>
+            
             {showAssignModal && (
                 <AssignForm
                     onClose={() => setShowAssignModal(false)}

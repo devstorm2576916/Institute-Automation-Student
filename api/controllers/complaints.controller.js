@@ -34,6 +34,7 @@ const ComplaintsController = {
       const filePath = `${Date.now()}_image_${i}.jpg`;
       imageNames.push(filePath);
       try {
+        await fs.mkdir(path.join(process.cwd(), 'uploads/complaints'), { recursive: true });
         await fs.writeFile(path.join(process.cwd(), 'uploads/complaints', filePath), buffer);
         console.log(`Saved image ${i} to ${filePath}`);
       } catch (err) {
