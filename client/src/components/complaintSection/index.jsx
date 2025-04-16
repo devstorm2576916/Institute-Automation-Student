@@ -3,11 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { RoleContext } from "../../context/Rolecontext.jsx";
 
 // Import tab components
-import PendingComplaints from "./tabs/PendingComplaints";
-import InProgressComplaints from "./tabs/InProgressComplaints";
-import ResolvedComplaints from "./tabs/ResolvedComplaints";
-import MyComplaints from "./tabs/MyComplaints";
-import NewComplaintSelection from "./tabs/NewComplaintSelection";
+import PendingComplaints from "./tabs/PendingComplaints.jsx";
+import InProgressComplaints from "./tabs/InProgressComplaints.jsx";
+import ResolvedComplaints from "./tabs/ResolvedComplaints.jsx";
+import MyComplaints from "./tabs/MyComplaints.jsx";
+import NewComplaintSelection from "./tabs/NewComplaintSelection.jsx";
 import SupportStaffManagement from "./supportStaff/SupportStaffManagement.jsx";
 
 /**
