@@ -25,10 +25,10 @@ const complaintSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  imageUrl: {
-    type: String,
+  imageUrls: {
+    type: [String],
     required: false,
-    default: null
+    default: []
   },
   category: {
     type: String,

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import convertImageToBase64 from "../../utils/convertImageToBase64";
 
 const NewComplaintForm = ({ category, subCategory, onBack }) => {
     const [title, setTitle] = useState("");
@@ -47,7 +48,7 @@ const NewComplaintForm = ({ category, subCategory, onBack }) => {
         },
     });
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         // Basic validation for required fields
@@ -69,19 +70,21 @@ const NewComplaintForm = ({ category, subCategory, onBack }) => {
             return;
         }
 
+        const base64Images = await Promise.all(files.map((file) => convertImageToBase64(file)));
         const formData = {
-            title,
+            title:title,
             date: new Date(),
             description: complaint,
-            phoneNumber,
-            timeAvailability,
+            phoneNumber:phoneNumber,
+            timeAvailability: timeAvailability,
             address: detailedAddress,
-            locality,
-            category,
-            subCategory,
-            images: files,
-            imagesNames: files.map((file) => file.name),
+            locality: locality,
+            category: category,
+            subCategory: subCategory,
+            status: "Pending",
+            images: base64Images,
         };
+        console.log(formData);
 
         mutation.mutate(formData);
     };
@@ -98,9 +101,12 @@ const NewComplaintForm = ({ category, subCategory, onBack }) => {
     const handleFileChange = (e) => {
         const newFiles = Array.from(e.target.files);
 
-        // Filter valid formats and size (<2MB)
-        const validFiles = newFiles.filter((file) => /\.(jpe?g)$/i.test(file.name) && file.size <= 2 * 1024 * 1024);
-
+        // Filter valid formats and size (<200kB)
+        const validFiles = newFiles.filter((file) => /\.(jpe?g)$/i.test(file.name) && file.size <= 2 * 1024 * 100);
+        if(files.length+validFiles.length > 5) {
+            toast.error("You can only upload a maximum of 5 files.");
+            return;
+        }
         setFiles((prevFiles) => [...prevFiles, ...validFiles]);
     };
 
@@ -170,7 +176,7 @@ const NewComplaintForm = ({ category, subCategory, onBack }) => {
                     onChange={(e) => setDetailedAddress(e.target.value)}
                 />
 
-                <label className="block font-semibold mb-2">Upload Images: only .jpg, .jpeg, .JPG format, size2MB </label>
+                <label className="block font-semibold mb-2">Upload Images: only .jpg, .jpeg, .JPG format,  <br /> size limit 200KB </label>
                 <input
                     type="file"
                     className="w-full p-2 border rounded-md mb-1"

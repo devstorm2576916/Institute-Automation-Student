@@ -1,8 +1,10 @@
 // import { mongoose } from "../database/mongoDb.js";
 import { HostelAdmin as Admin } from "../models/hostelAdmin.model.js";
 import { Complaint, SupportStaff } from "../models/complaint.model.js";
-// import { Complaint } from "../models/complaint.model.js";
-import { validateAccessToken } from "../middleware/auth.middleware.js";
+
+import { promises as fs } from 'fs'; // Using the promise-based fs module
+import path from 'path'; // Import path module
+import { Buffer } from 'buffer'; // Import Buffer
 
 const ComplaintsController = {
   /**
@@ -17,9 +19,31 @@ const ComplaintsController = {
    * - Error: { message: "Something went wrong!" }
    */
   createComplaint: async (req, res) => {
-    const complaint = new Complaint({ ...req.body, userId: req.user.userId });
+    const { title, date, description, phoneNumber, timeAvailability, address, locality, category, subCategory, images } = req.body;
+    const imageNames = [];
+    // Loop through each image in the array
+    for (let i = 0; i < images.length; i++) {
+      const image = images[i];
+
+      // Ensure the image is a valid Base64 string
+      if (typeof image !== 'string') {
+        continue; // Skip invalid entries
+      }
+      // Decode Base64 to a buffer and  Generate a unique file name
+      const buffer = Buffer.from(image, 'base64');
+      const filePath = `${Date.now()}_image_${i}.jpg`;
+      imageNames.push(filePath);
+      try {
+        await fs.writeFile(path.join(process.cwd(), 'uploads/complaints', filePath), buffer);
+        console.log(`Saved image ${i} to ${filePath}`);
+      } catch (err) {
+        console.error(`Failed to save image ${i}:`, err.message);
+      }
+    }
+    const complaint = new Complaint({ title, date, description, phoneNumber, timeAvailability, address, locality, category, subCategory, userId: req.user.userId, imageUrls: imageNames });
     try {
       await complaint.save();
+      console.log(`Complaint created successfully: ${complaint._id}`);
       res.status(201).json({
         message: "Successfully created the complaint",
         complaint: complaint,
@@ -132,7 +156,7 @@ const ComplaintsController = {
   deleteComplaint: async (req, res) => {
     const complaintId = req.body._id;
     const userId = req.user.userId;
-  
+
     if (!complaintId) {
       res.status(400).json({
         message: "Missing required attribute 'complaintId'",
@@ -152,6 +176,17 @@ const ComplaintsController = {
         return res.status(403).json({
           message: "User don't have access to this complaint",
         });
+      }
+      // Delete associated images from disk
+      if (complaint.imageUrls && complaint.imageUrls.length > 0) {
+        for (const imagePath of complaint.imageUrls) {
+          try {
+            await fs.unlink(path.join(process.cwd(), 'uploads/complaints', imagePath));
+            console.log(`Deleted image: ${imagePath}`);
+          } catch (err) {
+            console.error(`Failed to delete image '${imagePath}':`, err.message);
+          }
+        }
       }
       const deletedComplaint = await Complaint.findByIdAndDelete(complaintId);
       if (deletedComplaint) {
