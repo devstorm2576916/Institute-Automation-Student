@@ -12,6 +12,7 @@ const StaffComplaintsModal = ({ staff, onClose }) => {
   const [complaints, setComplaints] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState("assigned"); // "assigned" or "resolved"
 
   useEffect(() => {
     const fetchComplaints = async () => {
@@ -19,9 +20,13 @@ const StaffComplaintsModal = ({ staff, onClose }) => {
       setError(null);
       
       try {
-        // Fetch detailed complaints data for each complaint ID
-        if (staff.assignedComplaints && staff.assignedComplaints.length > 0) {
-          const complaintPromises = staff.assignedComplaints.map(async (complaintId) => {
+        // Fetch detailed complaints data for the active tab
+        const complaintsToFetch = activeTab === "assigned" 
+          ? staff.assignedComplaints || []
+          : staff.resolvedComplaints || [];
+          
+        if (complaintsToFetch.length > 0) {
+          const complaintPromises = complaintsToFetch.map(async (complaintId) => {
             const response = await fetch(`http://localhost:8000/api/complaints/detail/${complaintId}`, {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -38,6 +43,9 @@ const StaffComplaintsModal = ({ staff, onClose }) => {
           
           const complaintsData = await Promise.all(complaintPromises);
           setComplaints(complaintsData.map(data => data.complaint));
+        } else {
+          // If there are no complaints for this tab
+          setComplaints([]);
         }
       } catch (err) {
         console.error("Error fetching staff complaints:", err);
@@ -48,7 +56,7 @@ const StaffComplaintsModal = ({ staff, onClose }) => {
     };
     
     fetchComplaints();
-  }, [staff]);
+  }, [staff, activeTab]);
 
   // Get status color
   const getStatusColor = (status) => {
@@ -65,7 +73,7 @@ const StaffComplaintsModal = ({ staff, onClose }) => {
       <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <div className="flex justify-between items-center p-4 border-b">
           <h3 className="text-xl font-semibold text-gray-800">
-            Complaints Assigned to {staff.name}
+            Complaints for {staff.name}
           </h3>
           <button 
             onClick={onClose}
@@ -74,6 +82,22 @@ const StaffComplaintsModal = ({ staff, onClose }) => {
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
+          </button>
+        </div>
+        
+        {/* Tabs */}
+        <div className="flex border-b">
+          <button 
+            className={`px-4 py-2 font-medium ${activeTab === "assigned" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-600 hover:text-gray-800"}`}
+            onClick={() => setActiveTab("assigned")}
+          >
+            Assigned ({staff.assignedComplaints?.length || 0})
+          </button>
+          <button 
+            className={`px-4 py-2 font-medium ${activeTab === "resolved" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-600 hover:text-gray-800"}`}
+            onClick={() => setActiveTab("resolved")}
+          >
+            Resolved ({staff.resolvedComplaints?.length || 0})
           </button>
         </div>
         
@@ -98,7 +122,7 @@ const StaffComplaintsModal = ({ staff, onClose }) => {
               <svg className="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <p>No complaints are currently assigned to this staff member.</p>
+              <p>No {activeTab === "assigned" ? "active" : "resolved"} complaints found for this staff member.</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -239,6 +263,15 @@ const SupportStaffManagement = () => {
         if (sortConfig.key === "assignedComplaints") {
           const aLength = a.assignedComplaints ? a.assignedComplaints.length : 0;
           const bLength = b.assignedComplaints ? b.assignedComplaints.length : 0;
+          return sortConfig.direction === "ascending" 
+            ? aLength - bLength 
+            : bLength - aLength;
+        }
+        
+        // Special case for resolvedComplaints length sorting
+        if (sortConfig.key === "resolvedComplaints") {
+          const aLength = a.resolvedComplaints ? a.resolvedComplaints.length : 0;
+          const bLength = b.resolvedComplaints ? b.resolvedComplaints.length : 0;
           return sortConfig.direction === "ascending" 
             ? aLength - bLength 
             : bLength - aLength;
@@ -428,8 +461,9 @@ const SupportStaffManagement = () => {
   
   // Handle row click to view staff complaints
   const handleStaffRowClick = (staff) => {
-    // Only show complaints if the staff has assigned complaints
-    if (staff.assignedComplaints && staff.assignedComplaints.length > 0) {
+    // Show complaints if the staff has assigned or resolved complaints
+    if ((staff.assignedComplaints && staff.assignedComplaints.length > 0) || 
+        (staff.resolvedComplaints && staff.resolvedComplaints.length > 0)) {
       setSelectedStaff(staff);
     }
   };
@@ -533,7 +567,10 @@ const SupportStaffManagement = () => {
         <h3 className="text-xl font-semibold mb-4">Support Staff List</h3>
         
         {isLoading ? (
-          <p className="text-gray-600">Loading support staff data...</p>
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading support staff data...</p>
+          </div>
         ) : isError ? (
           <p className="text-red-600">Error loading support staff data. Please try again.</p>
         ) : (
@@ -598,17 +635,25 @@ const SupportStaffManagement = () => {
                         >
                           Assigned Complaints {getSortDirectionIndicator("assignedComplaints")}
                         </th>
+                        <th 
+                          className="py-2 px-4 text-left cursor-pointer hover:bg-gray-200"
+                          onClick={() => requestSort("resolvedComplaints")}
+                        >
+                          Resolved Complaints {getSortDirectionIndicator("resolvedComplaints")}
+                        </th>
                         <th className="py-2 px-4 text-left">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {displayedStaff.map((staff) => {
-                        const complaintsCount = staff.assignedComplaints ? staff.assignedComplaints.length : 0;
+                        const assignedCount = staff.assignedComplaints ? staff.assignedComplaints.length : 0;
+                        const resolvedCount = staff.resolvedComplaints ? staff.resolvedComplaints.length : 0;
+                        const hasComplaints = assignedCount > 0 || resolvedCount > 0;
                         
                         return (
                           <tr 
                             key={staff._id} 
-                            className={`border-t ${complaintsCount > 0 ? 'cursor-pointer hover:bg-gray-50' : ''}`}
+                            className={`border-t ${hasComplaints ? 'cursor-pointer hover:bg-gray-50' : ''}`}
                             onClick={() => handleStaffRowClick(staff)}
                           >
                             <td className="py-3 px-4">{staff.name}</td>
@@ -624,21 +669,36 @@ const SupportStaffManagement = () => {
                                 : "All subcategories"}
                             </td>
                             <td className="py-3 px-4">
-                              <span className={`font-medium ${complaintsCount >= 5 ? "text-red-600" : complaintsCount > 0 ? "text-blue-600" : ""}`}>
-                                {complaintsCount}
+                              <span className={`font-medium ${assignedCount >= 5 ? "text-red-600" : assignedCount > 0 ? "text-blue-600" : ""}`}>
+                                {assignedCount}
                               </span>
-                              {complaintsCount > 0 && (
+                              {assignedCount > 0 && (
                                 <span className="text-xs text-gray-500 ml-1">
-                                  active {complaintsCount === 1 ? 'complaint' : 'complaints'}
+                                  active {assignedCount === 1 ? 'complaint' : 'complaints'}
                                 </span>
                               )}
-                              {complaintsCount >= 5 && (
+                              {assignedCount >= 5 && (
                                 <span className="ml-2 text-xs bg-red-100 text-red-600 py-1 px-2 rounded">
                                   At capacity
                                 </span>
                               )}
-                              {complaintsCount > 0 && (
+                              {assignedCount > 0 && (
                                 <span className="ml-2 text-xs text-blue-600 hover:underline">
+                                  (Click to view)
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className={`font-medium ${resolvedCount > 0 ? "text-green-600" : ""}`}>
+                                {resolvedCount}
+                              </span>
+                              {resolvedCount > 0 && (
+                                <span className="text-xs text-gray-500 ml-1">
+                                  resolved {resolvedCount === 1 ? 'complaint' : 'complaints'}
+                                </span>
+                              )}
+                              {resolvedCount > 0 && (
+                                <span className="ml-2 text-xs text-green-600 hover:underline">
                                   (Click to view)
                                 </span>
                               )}
@@ -647,10 +707,10 @@ const SupportStaffManagement = () => {
                               <button
                                 onClick={() => handleDeleteStaff(staff._id)}
                                 className={`bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded text-sm ${
-                                  complaintsCount > 0 ? 'opacity-50 cursor-not-allowed' : ''
+                                  assignedCount > 0 ? 'opacity-50 cursor-not-allowed' : ''
                                 }`}
-                                disabled={complaintsCount > 0}
-                                title={complaintsCount > 0 ? "Cannot delete staff with assigned complaints" : "Delete staff"}
+                                disabled={assignedCount > 0}
+                                title={assignedCount > 0 ? "Cannot delete staff with assigned complaints" : "Delete staff"}
                               >
                                 Delete
                               </button>
