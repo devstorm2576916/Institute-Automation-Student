@@ -4,7 +4,7 @@ import ComplaintSection from './components/complaintSection';
 import HostelLeave from './components/HostelLeave/HostelLeave';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar/Sidebar';
-import CourseRegistration from './components/CourseRegistration';
+import CourseRegistration from './components/registration/courseRegistration';
 import AttendanceLandingPage from './components/Attendance/AttendanceLandingPage';
 import AttendanceCoursePage from './components/Attendance/AttendanceCoursePage';
 import FeedbackAdmin from './components/courseFeedback/feedbackadmin.jsx';
@@ -17,8 +17,8 @@ import Mess from './components/HostelMess/Mess.jsx';
 import StudentSubscriptionForm from './components/HostelMess/StudentSubscriptionForm.jsx';
 import AdminSubscriptionRequests from './components/HostelMess/AdminSubscriptionRequests.jsx';
 import { Navigate } from "react-router-dom";
-import CourseRegistrationFaculty from './components/registration/faculty_reg_dashboard.jsx';
-
+import FacultyDashboard from './components/registration/faculty_reg_dashboard.jsx';
+import CourseRegistrationFaculty from './components/registration/faculty_registration_page.jsx';
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -47,7 +47,6 @@ import AdminFeeControl from "./pages/Documents/admin/AdminFeeControl.jsx";
 import { RoleProvider } from './context/Rolecontext.jsx';
 import StudentProfile from './pages/ProfilePage.jsx';
 import TimeTable from './components/TimeTable/timetable.jsx';
-import FacultyDashboard from "./components/registration/faculty_registration_page.jsx";  // New Course Selection Page
 import HostelTransfer from './components/HostelTransfer/HostelTransfer.jsx';
 //import CourseRegistration from "./pages/CourseRegistration";  // New Registration Page
 import { Toaster } from 'react-hot-toast';

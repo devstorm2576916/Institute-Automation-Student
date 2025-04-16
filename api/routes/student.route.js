@@ -14,7 +14,10 @@ import {
     getStudentDropRequests,
     cancelDropRequest,
     getCompletedCourses,
-    updateStudentProfile
+    updateStudentProfile,
+    getAvailableCourses,
+    submitCourseApprovalRequest,
+    getPendingRequests,
 } from "../controllers/student.controller.js";
 
 //courses routes
@@ -45,5 +48,17 @@ router.get("/:id/bonafide/applications", getBonafideApplications);
 router.get('/:id/passport', getStudentPassportDetails);
 router.post('/:id/passport/apply', submitPassportApplication);
 router.get('/:id/passport/applications', getPassportApplications);
+
+
+// Course approval request routes
+
+// Fetch available courses
+router.get("/:id/available-courses", getAvailableCourses);
+
+// Submit a course approval request
+router.post("/:id/course-approval", submitCourseApprovalRequest);
+
+// Fetch pending requests
+router.get("/:id/pending-requests", getPendingRequests);
 
 export default router;
