@@ -19,7 +19,7 @@ function MyCourses() {
   
   const [isFeedbackAvailable, setIsFeedbackAvailable] = useState(false);
 
-  console.log("User ID:", userId);
+  // console.log("User ID:", userId);
 
   const { isLoading, error, data: studentCourses = [] } = useQuery({
     queryKey: ["courses"],
@@ -30,6 +30,8 @@ function MyCourses() {
         return res.data.courses || [];
       }),
   });
+
+  // console.log("+++++++++++++++++++++++++++++++++++", studentCourses);
 
   return (
     <div className="p-6">
@@ -179,6 +181,18 @@ function MyCourses() {
           <FaExternalLinkAlt className="ml-1 text-xs" />
         </Link>
       </div>
+
+      {/* Completed Courses Link */}
+    <div className="mt-4 text-center">
+      <Link
+        to={`/completed-courses`}
+        className="inline-flex items-center text-pink-600 hover:text-pink-700"
+      >
+        Want to see your completed courses? Click here
+        <FaExternalLinkAlt className="ml-1 text-xs" />
+      </Link>
+    </div>
+      
       
       {/* Feedback availability notice */}
       {!isFeedbackAvailable && studentCourses.length > 0 && (

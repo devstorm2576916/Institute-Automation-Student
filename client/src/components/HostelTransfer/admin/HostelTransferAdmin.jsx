@@ -6,6 +6,7 @@ import ApprovedRequests from './ApprovedRequests';
 import RejectedRequests from './RejectedRequests';
 
 const HostelTransferAdmin = () => {
+
   const [requests, setRequests] = useState([]);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [approvedRequests, setApprovedRequests] = useState([]);
@@ -45,9 +46,9 @@ const HostelTransferAdmin = () => {
   }, [requests]);
 
 
-  const handleAction = (id, newStatus, newReason) => {
-    // console.log(id,newStatus,newReason);
-    newRequest.put(`/hostel/transfer-requests/${id}`, { status: newStatus, reason: newReason })
+  const handleAction = (id, newStatus, newReason, newHostel, rollNo) => {
+    // console.log(id,newStatus,newReason,newHostel, rollNo);
+    newRequest.put(`/hostel/transfer-requests/${id}`, { status: newStatus, reason: newReason, newHostel: newHostel, rollNo: rollNo})
       .then(response => {
         console.log('Status updated successfully');
         // Update local state based on new status
