@@ -178,6 +178,15 @@ const ComplaintsController = {
           message: "User don't have access to this complaint",
         });
       }
+      
+      // Check if complaint is resolved, and if so, prevent deletion
+      if (complaint.status === 'Resolved') {
+        return res.status(403).json({
+          message: "Resolved complaints cannot be deleted",
+          error: "Resolved complaints are permanently stored in the system"
+        });
+      }
+      
       // Delete associated images from disk
       if (complaint.imageUrls && complaint.imageUrls.length > 0) {
         for (const imagePath of complaint.imageUrls) {
@@ -256,12 +265,15 @@ const ComplaintsController = {
       
       const updatedComplaint = await Complaint.findByIdAndUpdate(complaintId, patch, { new: true });
 
-      // If the status is changed to "Resolved" and the complaint has an assigned staff member,
-      // remove this complaint from the staff member's list of assigned complaints
+      // If the status is changed to "Resolved" and the complaint has an assigned staff member
       if (updatedStatus === 'Resolved' && complaint.assignedStaffId) {
+        // Add to resolved complaints and remove from assigned complaints
         await SupportStaff.findByIdAndUpdate(
           complaint.assignedStaffId,
-          { $pull: { assignedComplaints: complaintId } }
+          { 
+            $pull: { assignedComplaints: complaintId },
+            $addToSet: { resolvedComplaints: complaintId }
+          }
         );
       }
 

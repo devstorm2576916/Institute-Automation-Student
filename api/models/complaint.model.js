@@ -84,6 +84,10 @@ const SupportStaffSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Complaint"
   }],
+  resolvedComplaints: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Complaint"
+  }],
   isAvailable: {
     type: Boolean,
     default: true
@@ -97,6 +101,11 @@ const SupportStaffSchema = new mongoose.Schema({
 // Virtual property to calculate availability based on assigned complaints
 SupportStaffSchema.virtual('isBusy').get(function() {
   return this.assignedComplaints && this.assignedComplaints.length >= 5; // Staff is busy if they have 5 or more active complaints
+});
+
+// Virtual property to get total resolved complaints count
+SupportStaffSchema.virtual('totalResolved').get(function() {
+  return this.resolvedComplaints ? this.resolvedComplaints.length : 0;
 });
 
 // Set toJSON option to include virtuals
