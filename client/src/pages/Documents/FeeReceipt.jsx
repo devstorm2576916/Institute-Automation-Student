@@ -46,8 +46,15 @@ const FeeReceiptPage = () => {
   // Add a check for empty fee data
   useEffect(() => {
     if (feeData && (!feeData.payments || feeData.payments.length === 0)) {
-      // Replace toast.info with toast() for an informational message.
-      toast("You don't have any fee payment records yet.");
+      // Replace toast.info (which doesn't exist) with standard toast()
+      toast("You don't have any fee payment records yet.", {
+        icon: 'ℹ️', // Information emoji
+        style: {
+          backgroundColor: '#EFF6FF', // Light blue background
+          border: '1px solid #BFDBFE',
+          color: '#1E40AF',
+        },
+      });
     }
   }, [feeData]);
 
@@ -149,30 +156,89 @@ const FeeReceiptPage = () => {
 
     setIsLoading(true);
     try {
-      const blob = await pdf(
-        <FeeReceiptPDF
-          student={preparedFeeData.student}
-          semester={`Semester ${selectedSemester}`}
-          feeData={preparedFeeData.feeParticulars}
-          isPaid={true}
-          transactionDetails={preparedFeeData.transactionDetails}
-        />
-      ).toBlob();
+      // Verify all data exists and is properly formatted before generating PDF
+      if (!preparedFeeData.student || !preparedFeeData.feeParticulars) {
+        throw new Error("Missing required data for PDF generation");
+      }
 
-      const url = URL.createObjectURL(blob);
+      // Deep check all required props to ensure nothing is null/undefined
+      const requiredProps = {
+        student: preparedFeeData.student,
+        semester: `Semester ${selectedSemester}`,
+        feeData: preparedFeeData.feeParticulars,
+        transactionDetails: preparedFeeData.transactionDetails
+      };
+      
+      // Log data for debugging
+      console.log("PDF generation data:", JSON.stringify(requiredProps, null, 2));
+      
+      // Check for any null/undefined values in nested properties
+      const studentKeys = ['name', 'rollNo', 'program', 'department'];
+      const missingStudentProps = studentKeys.filter(key => !requiredProps.student[key]);
+      
+      if (missingStudentProps.length > 0) {
+        console.warn(`Missing student properties: ${missingStudentProps.join(', ')}`);
+        // Add fallbacks for missing properties
+        missingStudentProps.forEach(prop => {
+          requiredProps.student[prop] = prop === 'name' ? 'Student' : 'N/A';
+        });
+      }
+
+      // Create a safer transaction details object with fallbacks
+      const safeTransactionDetails = {
+        slNo: 1,
+        feeType: "Semester Registration Fee",
+        feeAmount: requiredProps.feeData.reduce((sum, item) => {
+          return sum + (typeof item.amount === 'number' ? item.amount : parseFloat(item.amount) || 0);
+        }, 0),
+        transactionId: (requiredProps.transactionDetails?.transactionId || "N/A"),
+        dateTime: (requiredProps.transactionDetails?.dateTime || new Date().toLocaleString("sv-SE")),
+        status: "Success"
+      };
+
+      // Try rendering the PDF with safe props
+      let pdfBlob;
+      try {
+        // Create PDF document with fallback values for any missing properties
+        const pdfDocument = (
+          <FeeReceiptPDF
+            student={requiredProps.student}
+            semester={requiredProps.semester}
+            feeData={requiredProps.feeData}
+            isPaid={true}
+            transactionDetails={safeTransactionDetails}
+          />
+        );
+        
+        // Log before attempting to generate PDF
+        console.log("Attempting to generate PDF with component:", pdfDocument);
+        
+        pdfBlob = await pdf(pdfDocument).toBlob();
+      } catch (pdfError) {
+        console.error("PDF generation error details:", pdfError);
+        throw new Error(`PDF generation failed: ${pdfError.message}`);
+      }
+
+      // Only proceed if PDF blob was created successfully
+      const url = URL.createObjectURL(pdfBlob);
       setPdfUrl(url);
-      setPdfBlob(blob);
+      setPdfBlob(pdfBlob);
       toast.success("Receipt generated successfully");
     } catch (error) {
       console.error("Error generating PDF:", error);
-      toast.error("Failed to generate receipt");
+      toast.error("Failed to generate receipt: " + error.message);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleDownload = () => {
-    if (pdfBlob) {
+    if (!pdfBlob) {
+      toast.error("Please generate the receipt first");
+      return;
+    }
+    
+    try {
       const link = document.createElement("a");
       link.href = URL.createObjectURL(pdfBlob);
       const timestamp = new Date().toISOString().split("T")[0];
@@ -181,8 +247,9 @@ const FeeReceiptPage = () => {
       link.click();
       document.body.removeChild(link);
       toast.success("Receipt downloaded successfully");
-    } else {
-      toast.error("Please generate the receipt first");
+    } catch (error) {
+      console.error("Error downloading PDF:", error);
+      toast.error("Failed to download receipt: " + error.message);
     }
   };
 
