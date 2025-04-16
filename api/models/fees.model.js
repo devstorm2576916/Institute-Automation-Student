@@ -26,15 +26,15 @@ const feeBreakdownSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-// Drop indexes on connection
-mongoose.connection.on("connected", async () => {
-  try {
-    await mongoose.connection.db.collection("feebreakdowns").dropIndexes();
-    console.log("Indexes dropped successfully");
-  } catch (error) {
-    console.log("No existing indexes to drop or collection does not exist");
-  }
-});
+// // Drop indexes on connection
+// mongoose.connection.on("connected", async () => {
+//   try {
+//     await mongoose.connection.db.collection("feebreakdowns").dropIndexes();
+//     console.log("Indexes dropped successfully");
+//   } catch (error) {
+//     console.log("No existing indexes to drop or collection does not exist");
+//   }
+// });
 
 // Add a simple index without unique constraint
 feeBreakdownSchema.index({ program: 1, semesterParity: 1 });
@@ -72,7 +72,6 @@ const feeDetailsSchema = new mongoose.Schema(
 const FeeBreakdown =
   mongoose.models.FeeBreakdown ||
   mongoose.model("FeeBreakdown", feeBreakdownSchema);
-const FeeDetails =
-  mongoose.models.FeeDetails || mongoose.model("FeeDetails", feeDetailsSchema);
+const FeeDetails = mongoose.model("FeeDetails", feeDetailsSchema);
 
 export { FeeBreakdown, FeeDetails };
