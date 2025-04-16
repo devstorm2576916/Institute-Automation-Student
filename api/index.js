@@ -3,12 +3,14 @@ import { connectDB } from "./database/mongoDb.js";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import mongoose from "mongoose";
 import authRoute from "../api/routes/auth.route.js";
 import hostelRoute from "../api/routes/hostel.route.js";
 import studentRoute from "../api/routes/student.route.js";
+import complaintsRouter from "../api/routes/complaints.route.js";
 import createCourseRoute from "../api/routes/createCourse.route.js";
 import acadAdminRoute from "../api/routes/acadAdmin.route.js";
+import facultyRoute from "../api/routes/faculty.route.js";
+// import { seedDatabase, seedStudentCourses, seedCourses, seedFacultyCourses } from "../api/scripts/seedDb.js";
 import attendanceRoute from "../api/routes/attendance.route.js"
 import assignmentRoute from "../api/routes/assignment.route.js"
 
@@ -30,10 +32,11 @@ app.use("/api/auth",authRoute);
 app.use("/api/hostel",hostelRoute);
 app.use("/api/student",studentRoute);
 app.use("/api/course",createCourseRoute);
-
+app.use("/api/faculty",facultyRoute);
 app.use("/api/acadadmin", acadAdminRoute);
 app.use("/api/attendancelanding", attendanceRoute);
 app.use("/api/assignment", assignmentRoute);
+app.use('/api/complaints', complaintsRouter);
  
 const port = process.env.PORT || 8000;
 
@@ -46,7 +49,6 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-// --- Routes ---
 
 // Endpoint to create a Razorpay order
 app.post("/api/payment/create-order", async (req, res) => {
