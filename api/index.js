@@ -12,6 +12,7 @@ import createCourseRoute from "../api/routes/createCourse.route.js";
 import acadAdminRoute from "../api/routes/acadAdmin.route.js";
 import facultyRoute from "../api/routes/faculty.route.js";
 // import { seedDatabase, seedStudentCourses, seedCourses, seedFacultyCourses } from "../api/scripts/seedDb.js";
+import seedSupportStaff from "./scripts/seedSupportStaff.js";
 import attendanceRoute from "../api/routes/attendance.route.js"
 import assignmentRoute from "../api/routes/assignment.route.js"
 
@@ -119,6 +120,10 @@ app.post("/api/payment/verify", (req, res) => {
 const startServer = async () => {
   try {
     await connectDB();
+    
+    // Seed support staff data
+    // await seedSupportStaff();
+    
     app.listen(8000, () => {
       console.log(`Backend server is running on port ${8000}`);
       if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
