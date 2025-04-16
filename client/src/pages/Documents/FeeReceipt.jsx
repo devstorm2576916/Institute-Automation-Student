@@ -48,11 +48,11 @@ const FeeReceiptPage = () => {
     if (feeData && (!feeData.payments || feeData.payments.length === 0)) {
       // Replace toast.info (which doesn't exist) with standard toast()
       toast("You don't have any fee payment records yet.", {
-        icon: 'ℹ️', // Information emoji
+        icon: "ℹ️", // Information emoji
         style: {
-          backgroundColor: '#EFF6FF', // Light blue background
-          border: '1px solid #BFDBFE',
-          color: '#1E40AF',
+          backgroundColor: "#EFF6FF", // Light blue background
+          border: "1px solid #BFDBFE",
+          color: "#1E40AF",
         },
       });
     }
@@ -166,21 +166,28 @@ const FeeReceiptPage = () => {
         student: preparedFeeData.student,
         semester: `Semester ${selectedSemester}`,
         feeData: preparedFeeData.feeParticulars,
-        transactionDetails: preparedFeeData.transactionDetails
+        transactionDetails: preparedFeeData.transactionDetails,
       };
-      
+
       // Log data for debugging
-      console.log("PDF generation data:", JSON.stringify(requiredProps, null, 2));
-      
+      console.log(
+        "PDF generation data:",
+        JSON.stringify(requiredProps, null, 2)
+      );
+
       // Check for any null/undefined values in nested properties
-      const studentKeys = ['name', 'rollNo', 'program', 'department'];
-      const missingStudentProps = studentKeys.filter(key => !requiredProps.student[key]);
-      
+      const studentKeys = ["name", "rollNo", "program", "department"];
+      const missingStudentProps = studentKeys.filter(
+        (key) => !requiredProps.student[key]
+      );
+
       if (missingStudentProps.length > 0) {
-        console.warn(`Missing student properties: ${missingStudentProps.join(', ')}`);
+        console.warn(
+          `Missing student properties: ${missingStudentProps.join(", ")}`
+        );
         // Add fallbacks for missing properties
-        missingStudentProps.forEach(prop => {
-          requiredProps.student[prop] = prop === 'name' ? 'Student' : 'N/A';
+        missingStudentProps.forEach((prop) => {
+          requiredProps.student[prop] = prop === "name" ? "Student" : "N/A";
         });
       }
 
@@ -189,11 +196,18 @@ const FeeReceiptPage = () => {
         slNo: 1,
         feeType: "Semester Registration Fee",
         feeAmount: requiredProps.feeData.reduce((sum, item) => {
-          return sum + (typeof item.amount === 'number' ? item.amount : parseFloat(item.amount) || 0);
+          return (
+            sum +
+            (typeof item.amount === "number"
+              ? item.amount
+              : parseFloat(item.amount) || 0)
+          );
         }, 0),
-        transactionId: (requiredProps.transactionDetails?.transactionId || "N/A"),
-        dateTime: (requiredProps.transactionDetails?.dateTime || new Date().toLocaleString("sv-SE")),
-        status: "Success"
+        transactionId: requiredProps.transactionDetails?.transactionId || "N/A",
+        dateTime:
+          requiredProps.transactionDetails?.dateTime ||
+          new Date().toLocaleString("sv-SE"),
+        status: "Success",
       };
 
       // Try rendering the PDF with safe props
@@ -209,10 +223,10 @@ const FeeReceiptPage = () => {
             transactionDetails={safeTransactionDetails}
           />
         );
-        
+
         // Log before attempting to generate PDF
         console.log("Attempting to generate PDF with component:", pdfDocument);
-        
+
         pdfBlob = await pdf(pdfDocument).toBlob();
       } catch (pdfError) {
         console.error("PDF generation error details:", pdfError);
@@ -237,7 +251,7 @@ const FeeReceiptPage = () => {
       toast.error("Please generate the receipt first");
       return;
     }
-    
+
     try {
       const link = document.createElement("a");
       link.href = URL.createObjectURL(pdfBlob);

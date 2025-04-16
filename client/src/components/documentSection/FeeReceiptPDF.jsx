@@ -178,7 +178,13 @@ const styles = StyleSheet.create({
   },
 });
 
-const FeeReceiptPDF = ({ student, semester, feeData, isPaid, transactionDetails }) => {
+const FeeReceiptPDF = ({
+  student,
+  semester,
+  feeData,
+  isPaid,
+  transactionDetails,
+}) => {
   // Add default values for props to prevent null errors
   const safeStudent = student || {
     name: "Student",
@@ -186,9 +192,9 @@ const FeeReceiptPDF = ({ student, semester, feeData, isPaid, transactionDetails 
     program: "N/A",
     department: "N/A",
     email: "N/A",
-    contact: "N/A"
+    contact: "N/A",
   };
-  
+
   const safeSemester = semester || "Current Semester";
   const safeFeeData = feeData || [];
   const safeTransactionDetails = transactionDetails || {
@@ -197,17 +203,23 @@ const FeeReceiptPDF = ({ student, semester, feeData, isPaid, transactionDetails 
     feeAmount: 0,
     transactionId: "N/A",
     dateTime: new Date().toLocaleString(),
-    status: "N/A"
+    status: "N/A",
   };
 
   // Format currency
   const formatCurrency = (amount) => {
-    const numAmount = typeof amount === 'number' ? amount : parseFloat(amount) || 0;
+    const numAmount =
+      typeof amount === "number" ? amount : parseFloat(amount) || 0;
     return `₹ ${numAmount.toFixed(2)}`;
   };
-  
+
   // Generate a unique receipt number
-  const receiptNo = `${safeStudent.rollNo || 'STUDENT'}-${safeSemester?.replace(/\D/g, '') || 'SEM'}-${safeTransactionDetails.transactionId?.slice(-6) || Date.now().toString().slice(-6)}`;
+  const receiptNo = `${safeStudent.rollNo || "STUDENT"}-${
+    safeSemester?.replace(/\D/g, "") || "SEM"
+  }-${
+    safeTransactionDetails.transactionId?.slice(-6) ||
+    Date.now().toString().slice(-6)
+  }`;
 
   // Get current date for receipt date
   const receiptDate = new Date().toLocaleDateString("en-IN", {
@@ -228,10 +240,16 @@ const FeeReceiptPDF = ({ student, semester, feeData, isPaid, transactionDetails 
           <Image
             style={styles.logo}
             src="/iitg_logo.png"
-            fallback={<View style={styles.logo}><Text>IITG</Text></View>}
+            fallback={
+              <View style={styles.logo}>
+                <Text>IITG</Text>
+              </View>
+            }
           />
           <View style={styles.headerText}>
-            <Text style={styles.instituteName}>INDIAN INSTITUTE OF TECHNOLOGY GUWAHATI</Text>
+            <Text style={styles.instituteName}>
+              INDIAN INSTITUTE OF TECHNOLOGY GUWAHATI
+            </Text>
             <Text style={styles.title}>FEE RECEIPT</Text>
             <Text style={styles.receiptNumber}>Receipt No: {receiptNo}</Text>
           </View>
@@ -253,7 +271,9 @@ const FeeReceiptPDF = ({ student, semester, feeData, isPaid, transactionDetails 
           </View>
           <View style={styles.studentInfoRow}>
             <Text style={styles.studentInfoLabel}>Department:</Text>
-            <Text style={styles.studentInfoValue}>{safeStudent.department}</Text>
+            <Text style={styles.studentInfoValue}>
+              {safeStudent.department}
+            </Text>
           </View>
           <View style={styles.studentInfoRow}>
             <Text style={styles.studentInfoLabel}>Semester:</Text>
@@ -276,27 +296,42 @@ const FeeReceiptPDF = ({ student, semester, feeData, isPaid, transactionDetails 
               <Text style={styles.tableCellHeader}>Amount (INR)</Text>
             </View>
           </View>
-          
+
           {/* Table Body */}
           {safeFeeData.map((item, index) => {
             const isLastThree = index >= safeFeeData.length - 3;
             const isPayableRow = index === safeFeeData.length - 1;
-            
+
             return (
-              <View 
+              <View
                 key={`fee-${index}`}
                 style={[
                   styles.tableRow,
-                  isPayableRow ? styles.payableRow : (isLastThree ? styles.totalRow : {}),
+                  isPayableRow
+                    ? styles.payableRow
+                    : isLastThree
+                    ? styles.totalRow
+                    : {},
                 ]}
               >
                 <View style={[styles.tableCol, { width: "70%" }]}>
-                  <Text style={[styles.tableCell, isLastThree ? { fontWeight: "bold" } : {}]}>
+                  <Text
+                    style={[
+                      styles.tableCell,
+                      isLastThree ? { fontWeight: "bold" } : {},
+                    ]}
+                  >
                     {item.particular}
                   </Text>
                 </View>
                 <View style={[styles.tableCol, { width: "30%" }]}>
-                  <Text style={[styles.tableCell, { textAlign: "right" }, isLastThree ? { fontWeight: "bold" } : {}]}>
+                  <Text
+                    style={[
+                      styles.tableCell,
+                      { textAlign: "right" },
+                      isLastThree ? { fontWeight: "bold" } : {},
+                    ]}
+                  >
                     {formatCurrency(item.amount)}
                   </Text>
                 </View>
@@ -311,15 +346,24 @@ const FeeReceiptPDF = ({ student, semester, feeData, isPaid, transactionDetails 
             <Text style={styles.paymentDetailsTitle}>Payment Details</Text>
             <View style={styles.paymentInfoRow}>
               <Text style={styles.studentInfoLabel}>Transaction ID:</Text>
-              <Text style={styles.studentInfoValue}>{safeTransactionDetails.transactionId}</Text>
+              <Text style={styles.studentInfoValue}>
+                {safeTransactionDetails.transactionId}
+              </Text>
             </View>
             <View style={styles.paymentInfoRow}>
               <Text style={styles.studentInfoLabel}>Payment Date:</Text>
-              <Text style={styles.studentInfoValue}>{safeTransactionDetails.dateTime}</Text>
+              <Text style={styles.studentInfoValue}>
+                {safeTransactionDetails.dateTime}
+              </Text>
             </View>
             <View style={styles.paymentInfoRow}>
               <Text style={styles.studentInfoLabel}>Status:</Text>
-              <Text style={[styles.studentInfoValue, { color: "#15803d", fontWeight: "bold" }]}>
+              <Text
+                style={[
+                  styles.studentInfoValue,
+                  { color: "#15803d", fontWeight: "bold" },
+                ]}
+              >
                 {safeTransactionDetails.status}
               </Text>
             </View>
@@ -330,8 +374,6 @@ const FeeReceiptPDF = ({ student, semester, feeData, isPaid, transactionDetails 
         <View style={styles.signature}>
           <Text style={styles.signatureText}>Authorized Signatory</Text>
         </View>
-
-    
       </Page>
     </Document>
   );
