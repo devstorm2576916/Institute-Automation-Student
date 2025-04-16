@@ -6,7 +6,7 @@ import { Student } from '../models/student.model.js';
 import { StudentCourse } from '../models/course.model.js';
 
 
-export const getFacultyCourses = async (req, res) => {
+export const getFacultyCourses = async (req, res) => {    
   try {
     const {id}=req.params;
     console.log(id);
