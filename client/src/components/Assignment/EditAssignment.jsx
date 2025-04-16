@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { assignments } from "./data";
 
 export default function EditAssignment() {
   const { courseId, assignmentId } = useParams();
@@ -10,22 +9,10 @@ export default function EditAssignment() {
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
 
-  useEffect(() => {
-    const assignment = assignments.find(
-      (a) => a.id === assignmentId && a.course_id === courseId
-    );
 
-    if (assignment) {
-      setTitle(assignment.title);
-      setDescription(assignment.description);
-      setDueDate(assignment.due_date);
-    } else {
-      alert("Assignment not found.");
-      navigate(`/course/${courseId}/assignment`);
-    }
-  }, [assignmentId, courseId, navigate]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
+    console.log("Submitting form...", { title, description, dueDate });
     e.preventDefault();
 
     if (!title || !description || !dueDate) {
@@ -33,25 +20,52 @@ export default function EditAssignment() {
       return;
     }
 
-    const assignmentIndex = assignments.findIndex(
-      (a) => a.id === assignmentId && a.course_id === courseId
-    );
+    try {
+      const res = await fetch(`http://localhost:8000/api/assignment/${courseId}/${assignmentId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ title, description, dueDate }),
+      });
+      console.log("Response from server:", res);
+      
+      const data = await res.json();
 
-    if (assignmentIndex !== -1) {
-      assignments[assignmentIndex] = {
-        ...assignments[assignmentIndex],
-        title,
-        description,
-        due_date: dueDate,
-      };
-
-      alert("Assignment updated successfully!");
-      navigate(`/course/${courseId}/assignment`);
-    } else {
-      alert("Error: Assignment not found.");
+      if (res.ok) {
+        alert("Assignment updated successfully!");
+        navigate(`/course/${courseId}/assignments`);
+      } else {
+        alert(data.message || "Failed to update assignment.");
+      }
+    } catch (err) {
+      console.error("Error updating assignment:", err);
+      alert("Server error. Please try again.");
     }
   };
-
+  useEffect(() => {
+    const fetchAssignment = async () => {
+      try {
+        const res = await fetch(`http://localhost:8000/api/assignment/${courseId}/${assignmentId}`);
+        const data = await res.json();
+  
+        if (res.ok) {
+          const { title, description, dueDate } = data.assignment;
+          setTitle(title);
+          setDescription(description);
+          setDueDate(dueDate.slice(0, 10)); // format for <input type="date" />
+        } else {
+          alert(data.message || "Failed to load assignment.");
+        }
+      } catch (err) {
+        console.error("Fetch error:", err);
+        alert("Something went wrong fetching assignment.");
+      }
+    };
+  
+    fetchAssignment();
+  }, [courseId, assignmentId]);
+  
   return (
     <div className="max-w-xl mx-auto bg-white p-6 mt-6 rounded-lg shadow-md">
       <h2 className="text-2xl font-bold text-gray-800 mb-4">Edit Assignment</h2>

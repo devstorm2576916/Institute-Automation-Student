@@ -1,11 +1,11 @@
 {
+  "type": "module",
   "scripts": {
     "start": "node index.js",
     "test": "jest",
     "dev": "nodemon index.js",
     "seed": "node scripts/seedDb.js"
   },
-  "type": "module",
   "dependencies": {
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.7",

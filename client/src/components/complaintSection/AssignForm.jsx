@@ -6,8 +6,7 @@ const AssignForm = ({ onClose, onAssign, complaint }) => {
     const [phoneNumber, setPhoneNumber] = useState("");
 
     const handleAssign = (e) => {
-        e.preventDefault();
-    
+        e.preventDefault(); // 
         if (selectedPerson.length === 0 || phoneNumber.length === 0) {
             alert("Please select a person and provide a phone number!");
             return;

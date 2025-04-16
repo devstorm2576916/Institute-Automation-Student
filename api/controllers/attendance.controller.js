@@ -94,8 +94,12 @@ export const getPercentages = async (req, res) => {
       });
       
       // Calculate statistics
+      console.log("Attendance");
+      console.log(attendanceAll);
       const classesAttended = attendanceAll.filter(record => record.isPresent && record.isApproved).length;
-      const classesMissed = attendanceAll.length - classesAttended;
+      console.log("Attended" + classesAttended);
+      const classesMissed = attendanceAll.filter(record => record.isApproved).length - classesAttended;
+      console.log("Missed" + classesMissed);
       const percentage = ((classesAttended + classesMissed) ? 
         (classesAttended / (classesAttended + classesMissed)) * 100 : 0).toFixed(2);
       const reqClasses = Math.max(0, 3 * classesMissed - classesAttended);
@@ -104,10 +108,10 @@ export const getPercentages = async (req, res) => {
       const eventList = attendanceAll.map(record => {
         let title = '';
         
-        if (!record.isPresent) {
-          title = "absent";
-        } else if (record.isPresent && !record.isApproved) {
+        if (!record.isApproved) {
           title = "pending approval";
+        } else if (!record.isPresent) {
+          title = "absent";
         } else {
           title = "present";
         }
@@ -353,10 +357,10 @@ export const getFacultyCourses = async (req, res) => {
         const totalStudents = uniqueStudents.length;
         
         // Count total present attendance
-        const totalPresent = attendanceRecords.filter(record => record.isPresent).length;
+        const totalPresent = attendanceRecords.filter(record => record.isPresent && record.isApproved).length;
         
         // Total possible attendance (total records)
-        const totalAttendance = attendanceRecords.length;
+        const totalAttendance = attendanceRecords.filter(record => record.isApproved).length;
         
         // Calculate percentage
         const attendancePercentage = totalAttendance > 0 
