@@ -170,13 +170,13 @@ function MyCourses() {
                 </div>
                 
                 <div className="mt-4">
-                  <Link 
+                  {/* <Link 
                     to={`/course/${course.id}`}
                     className="flex items-center justify-center gap-2 w-full bg-pink-50 text-pink-600 border border-pink-200 rounded-md p-2 text-sm font-medium hover:bg-pink-100 transition duration-200"
                   >
                     <span>View Course Details</span>
                     <FaExternalLinkAlt className="text-xs" />
-                  </Link>
+                  </Link> */}
                 </div>
               </div>
             </div>
