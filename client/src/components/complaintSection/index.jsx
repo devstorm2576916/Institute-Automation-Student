@@ -110,69 +110,41 @@ const ComplaintSection = () => {
     if (role === "acadAdmin") {
         return null;
     }
-    
+
     return (
-        <div className="flex flex-col h-[100%] border-1 w-[98%] m-2">
+        <div className="flex flex-col border-1 w-[98%] m-2">
             {/* Improved Navbar with better styling */}
             <div className="bg-white p-2 rounded-lg shadow-md w-[98%] h-auto mb-4 m-auto">
                 <nav className="w-full p-4 h-auto">
                     <ul className="flex justify-start space-x-4">
                         <li
-                            className={`px-4 py-2 rounded-md font-medium transition-all duration-200 cursor-pointer ${
-                                activePage === (isStudentOrFaculty ? "My Complaints" : "Pending")
-                                    ? "bg-blue-600 text-white shadow-md"
-                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                            }`}
+                            className={`px-4 py-2 rounded-md font-medium transition-all duration-200 cursor-pointer ${activePage === (isStudentOrFaculty ? "My Complaints" : "Pending") ? "bg-blue-600 text-white shadow-md" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
                             onClick={() => setActivePage(isStudentOrFaculty ? "My Complaints" : "Pending")}
                         >
                             {isStudentOrFaculty ? "My Complaints" : "Pending"}
-                            {!isStudentOrFaculty && 
-                             complaintData.filter(c => c.status === "Pending").length > 0 && (
-                                <span className="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                                    {complaintData.filter(c => c.status === "Pending").length}
-                                </span>
-                            )}
+                            {!isStudentOrFaculty && complaintData.filter((c) => c.status === "Pending").length > 0 && <span className="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">{complaintData.filter((c) => c.status === "Pending").length}</span>}
                         </li>
                         <li
-                            className={`px-4 py-2 rounded-md font-medium transition-all duration-200 cursor-pointer ${
-                                activePage === (isStudentOrFaculty ? "New Complaint" : "In Progress")
-                                    ? "bg-blue-600 text-white shadow-md"
-                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                            }`}
+                            className={`px-4 py-2 rounded-md font-medium transition-all duration-200 cursor-pointer ${activePage === (isStudentOrFaculty ? "New Complaint" : "In Progress") ? "bg-blue-600 text-white shadow-md" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
                             onClick={() => setActivePage(isStudentOrFaculty ? "New Complaint" : "In Progress")}
                         >
                             {isStudentOrFaculty ? "New Complaint" : "In Progress"}
-                            {!isStudentOrFaculty &&
-                             complaintData.filter(c => c.status === "In Progress").length > 0 && (
-                                <span className="ml-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full">
-                                    {complaintData.filter(c => c.status === "In Progress").length}
-                                </span>
-                            )}
+                            {!isStudentOrFaculty && complaintData.filter((c) => c.status === "In Progress").length > 0 && <span className="ml-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full">{complaintData.filter((c) => c.status === "In Progress").length}</span>}
                         </li>
 
-                        {isStudentOrFaculty ? "" : (
+                        {isStudentOrFaculty ? (
+                            ""
+                        ) : (
                             <>
                                 <li
-                                    className={`px-4 py-2 rounded-md font-medium transition-all duration-200 cursor-pointer ${
-                                        activePage === "Resolved"
-                                            ? "bg-blue-600 text-white shadow-md"
-                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                    }`}
+                                    className={`px-4 py-2 rounded-md font-medium transition-all duration-200 cursor-pointer ${activePage === "Resolved" ? "bg-blue-600 text-white shadow-md" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
                                     onClick={() => setActivePage("Resolved")}
                                 >
                                     {"Resolved"}
-                                    {complaintData.filter(c => c.status === "Resolved").length > 0 && (
-                                        <span className="ml-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                                            {complaintData.filter(c => c.status === "Resolved").length}
-                                        </span>
-                                    )}
+                                    {complaintData.filter((c) => c.status === "Resolved").length > 0 && <span className="ml-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">{complaintData.filter((c) => c.status === "Resolved").length}</span>}
                                 </li>
                                 <li
-                                    className={`px-4 py-2 rounded-md font-medium transition-all duration-200 cursor-pointer ${
-                                        activePage === "Support Staff"
-                                            ? "bg-blue-600 text-white shadow-md"
-                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                    }`}
+                                    className={`px-4 py-2 rounded-md font-medium transition-all duration-200 cursor-pointer ${activePage === "Support Staff" ? "bg-blue-600 text-white shadow-md" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
                                     onClick={() => setActivePage("Support Staff")}
                                 >
                                     {"Support Staff"}
@@ -184,7 +156,7 @@ const ComplaintSection = () => {
             </div>
 
             {/* Main Content with improved styling */}
-            <div className="bg-white p-6 rounded-lg shadow-md w-[98%] min-h-full mb-4 m-auto">
+            <div className="bg-white p-6 rounded-lg shadow-md w-[98%] min-h-screen mb-4 m-auto">
                 {/* Loading and Error States with better feedback */}
                 {isLoading && isStudentOrFaculty && (
                     <div className="flex justify-center items-center h-40">
@@ -203,20 +175,20 @@ const ComplaintSection = () => {
                         {/* Student/Faculty Views */}
                         {isStudentOrFaculty && activePage === "My Complaints" && (
                             <>
-                                <MyComplaints 
-                                    complaintData={complaintData} 
-                                    isLoading={isLoading} 
-                                    refetch={refetch} 
-                                    role={role} 
+                                <MyComplaints
+                                    complaintData={complaintData}
+                                    isLoading={isLoading}
+                                    refetch={refetch}
+                                    role={role}
                                 />
-                                
+
                                 {/* Pagination Controls */}
                                 {pagination && (
                                     <div className="mt-6 flex flex-col sm:flex-row justify-between items-center">
                                         <div className="flex items-center mb-4 sm:mb-0">
                                             <span className="mr-2 text-sm text-gray-600">Items per page:</span>
-                                            <select 
-                                                className="border rounded p-1 text-sm" 
+                                            <select
+                                                className="border rounded p-1 text-sm"
                                                 value={limit}
                                                 onChange={(e) => handleLimitChange(Number(e.target.value))}
                                             >
@@ -226,38 +198,38 @@ const ComplaintSection = () => {
                                                 <option value={50}>50</option>
                                             </select>
                                             <span className="ml-4 text-sm text-gray-600">
-                                                Showing {((pagination.currentPage - 1) * pagination.pageSize) + 1} - {Math.min(pagination.currentPage * pagination.pageSize, pagination.totalItems)} of {pagination.totalItems}
+                                                Showing {(pagination.currentPage - 1) * pagination.pageSize + 1} - {Math.min(pagination.currentPage * pagination.pageSize, pagination.totalItems)} of {pagination.totalItems}
                                             </span>
                                         </div>
-                                        
+
                                         <div className="flex items-center">
-                                            <button 
+                                            <button
                                                 className="mx-1 px-2 py-1 rounded border bg-gray-100 disabled:opacity-50"
                                                 disabled={pagination.currentPage === 1}
                                                 onClick={() => handlePageChange(1)}
                                             >
                                                 &laquo;
                                             </button>
-                                            <button 
+                                            <button
                                                 className="mx-1 px-2 py-1 rounded border bg-gray-100 disabled:opacity-50"
                                                 disabled={pagination.currentPage === 1}
                                                 onClick={() => handlePageChange(pagination.currentPage - 1)}
                                             >
                                                 &lt;
                                             </button>
-                                            
+
                                             <span className="mx-2 text-sm">
                                                 Page {pagination.currentPage} of {pagination.totalPages}
                                             </span>
-                                            
-                                            <button 
+
+                                            <button
                                                 className="mx-1 px-2 py-1 rounded border bg-gray-100 disabled:opacity-50"
                                                 disabled={pagination.currentPage === pagination.totalPages}
                                                 onClick={() => handlePageChange(pagination.currentPage + 1)}
                                             >
                                                 &gt;
                                             </button>
-                                            <button 
+                                            <button
                                                 className="mx-1 px-2 py-1 rounded border bg-gray-100 disabled:opacity-50"
                                                 disabled={pagination.currentPage === pagination.totalPages}
                                                 onClick={() => handlePageChange(pagination.totalPages)}
@@ -269,41 +241,35 @@ const ComplaintSection = () => {
                                 )}
                             </>
                         )}
-                        
-                        {isStudentOrFaculty && activePage === "New Complaint" && (
-                            <NewComplaintSelection 
-                                refetch={refetch} 
-                            />
-                        )}
-                        
+
+                        {isStudentOrFaculty && activePage === "New Complaint" && <NewComplaintSelection refetch={refetch} />}
+
                         {/* Admin Views - Each tab now handles its own data fetching and pagination */}
                         {!isStudentOrFaculty && activePage === "Pending" && (
-                            <PendingComplaints 
-                                isLoading={isLoading} 
-                                refetch={refetch} 
-                                role={role} 
+                            <PendingComplaints
+                                isLoading={isLoading}
+                                refetch={refetch}
+                                role={role}
                             />
                         )}
-                        
+
                         {!isStudentOrFaculty && activePage === "In Progress" && (
-                            <InProgressComplaints 
-                                isLoading={isLoading} 
-                                refetch={refetch} 
-                                role={role} 
+                            <InProgressComplaints
+                                isLoading={isLoading}
+                                refetch={refetch}
+                                role={role}
                             />
                         )}
-                        
+
                         {!isStudentOrFaculty && activePage === "Resolved" && (
-                            <ResolvedComplaints 
-                                isLoading={isLoading} 
-                                refetch={refetch} 
-                                role={role} 
+                            <ResolvedComplaints
+                                isLoading={isLoading}
+                                refetch={refetch}
+                                role={role}
                             />
                         )}
-                        
-                        {!isStudentOrFaculty && activePage === "Support Staff" && (
-                            <SupportStaffManagement />
-                        )}
+
+                        {!isStudentOrFaculty && activePage === "Support Staff" && <SupportStaffManagement />}
                     </>
                 )}
             </div>
