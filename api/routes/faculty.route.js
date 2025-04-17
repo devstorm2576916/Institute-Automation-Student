@@ -6,6 +6,7 @@ import { getCourseStudents, getFacultyCourses, handleRequestApprovalFaculty,getP
 const router = express.Router();
 
 // router.get('/', getByIds);
+router.get('/:id', getFaculty);
 router.get('/:id/courses', getFacultyCourses);
 router.get('/courses/:courseId/announcements', getCourseAnnouncements);
 router.post('/courses/:courseId/announcements/add', addCourseAnnouncement);

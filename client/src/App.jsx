@@ -145,7 +145,7 @@ function App() {
                   element:<FacultyDashboard/>  
                 },
                 {
-                    path:'facultyregistration/:id',
+                    path:'facultyregistration/:courseCode',
                     element:<CourseRegistrationFaculty/>
                 },
                 {
@@ -153,11 +153,11 @@ function App() {
                     element:<AdminRegistration/>
                 },
                 {
-                    path:"/assigngmentlanding",
+                    path:"/assignmentlanding",
                     element: <AssignmentLanding/>
                 },
                 {
-                    path:"/course/:courseId/assignment/",
+                    path:"/course/:courseId/assignments/",
                     element: <AssignmentList/>
                 },
                 {

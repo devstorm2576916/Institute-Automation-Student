@@ -28,7 +28,6 @@ const Navbar = () => {
     }
 
     return (
-        <>
             <nav className="bg-white py-4 shadow-lg">
                 <div className="container mx-auto flex items-center justify-between px-8">
                     {/* Logo + Title */}
@@ -49,7 +48,7 @@ const Navbar = () => {
                     </div>
                 </div>
             </nav>
-        </>
+    
 
 
     );

@@ -1,7 +1,6 @@
 import React from "react";
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { assignments } from "./data";
 
 export default function CreateAssignment() {
   const { courseId } = useParams();
@@ -11,27 +10,46 @@ export default function CreateAssignment() {
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  // Inside CreateAssignment.jsx
 
-    if (!title || !description || !dueDate) {
-      alert("Please fill in all fields.");
-      return;
-    }
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    const newAssignment = {
-      id: Date.now().toString(), // temporary unique ID
-      course_id: courseId,
-      title,
-      description,
-      due_date: dueDate,
-    };
-
-    assignments.push(newAssignment);
-
-    alert("Assignment created successfully!");
-    navigate(`/course/${courseId}/assignment`);
+  if (!title || !description || !dueDate) {
+    alert("Please fill in all fields.");
+    return;
   }
+
+  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+  const facultyId = currentUser?.data?.user?.userId;
+
+  try {
+    const res = await fetch(`http://localhost:8000/api/assignment/course/${courseId}/assignments`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title,
+        description,
+        dueDate,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert("Assignment created successfully!");
+      navigate(`/course/${courseId}/assignments`);
+    } else {
+      alert(data.message || "Failed to create assignment.");
+    }
+  } catch (err) {
+    console.error("Error creating assignment:", err);
+    alert("Server error. Please try again.");
+  }
+};
+
 
     return (
     <div className="max-w-xl mx-auto bg-white p-6 mt-6 rounded-lg shadow-md">

@@ -46,7 +46,7 @@ const Faculty = () => {
                             </li>
 
                             <li>Grades Submission</li>
-                            <li><Link to="/assigngmentlanding" className="text-gray-700 hover:text-gray-900">
+                            <li><Link to="/assignmentlanding" className="text-gray-700 hover:text-gray-900">
                                 Assignment
                                 </Link></li>
                         </ul>
@@ -72,7 +72,11 @@ const Faculty = () => {
                 </span>
                 {expandedSections.profile && (
                     <ul className="pl-5">
-                        <li>View Profile</li>
+                        <li>
+                            <Link to="/profile" className="text-gray-700 hover:text-gray-900">
+                                View Profile
+                            </Link>
+                        </li>
                     </ul>
                 )}
                 </li>
