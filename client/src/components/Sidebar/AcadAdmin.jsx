@@ -29,7 +29,7 @@ const AcadAdmin = () => {
                     </span>
                     {expandedSections.course && (
                         <ul className="pl-5">
-                            <li>Registration</li>
+                            {/* <li>Registration</li> */}
                             <li>
                                 <Link to="/adminregistration" className="text-gray-700 hover:text-gray-900">
                                   Create course
@@ -93,7 +93,7 @@ const AcadAdmin = () => {
           )}
         </li>
 
-        <li className="mt-2">
+        {/* <li className="mt-2">
           <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('complaint')}>
             {expandedSections.complaint ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Complaint
           </span>
@@ -102,7 +102,7 @@ const AcadAdmin = () => {
               <li>View Complaints</li>
             </ul>
           )}
-        </li>
+        </li> */}
 
         <li className="mt-2">
           <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('profile')}>
@@ -110,7 +110,11 @@ const AcadAdmin = () => {
           </span>
           {expandedSections.profile && (
             <ul className="pl-5">
-              <li>View Profile</li>
+              <li>
+                <Link to="/profile" className="text-gray-700 hover:text-gray-900">
+                  View Profile
+                </Link>
+              </li>
             </ul>
           )}
         </li>
