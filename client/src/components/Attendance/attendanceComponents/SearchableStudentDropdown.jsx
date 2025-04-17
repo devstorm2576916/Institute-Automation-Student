@@ -105,7 +105,7 @@ function SearchableStudentDropdown({ courseId, onStudentSelect }) {
                     ) : (
                         filteredStudents.map(student => (
                             <option key={student.rollNumber} value={student.rollNumber}>
-                                {student.name} ({student.rollNumber})
+                                {student.rollNumber}
                             </option>
                         ))
                     )}
