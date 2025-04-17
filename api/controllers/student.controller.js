@@ -4,6 +4,7 @@ import { ApplicationDocument, Bonafide, Passport } from '../models/documents.mod
 import { Faculty } from '../models/faculty.model.js';
 import { CourseDropRequest } from '../models/courseDropRequest.model.js';
 import { User } from '../models/user.model.js';
+import { Feedback , GlobalFeedbackConfig } from '../models/feedback.model.js';
 
 // Get basic student info
 export const getStudent = async (req, res) => {
@@ -169,6 +170,11 @@ export const getStudentCourses = async (req, res) => {
             });
         }
 
+        // // Get global feedback status
+        const globalConfig = await GlobalFeedbackConfig.getConfig();
+        const globalFeedbackActive = globalConfig.isActive;
+
+
         // console.log(`Courses enrolled by student:`, studentCourses);
         
         // Get course details and faculty information
@@ -187,6 +193,24 @@ export const getStudentCourses = async (req, res) => {
                 console.log("Faculty course details fetched:", facultyCourse);
                 // .populate('facultyId', 'name');
                 
+                                // Added feedback active logic here
+                let feedbackOpen = false;
+                if (globalFeedbackActive && facultyCourse && facultyCourse.facultyId) {
+                    // Get the faculty document to use the correct ObjectId
+                    const faculty = await Faculty.findById(facultyCourse.facultyId);
+                    if (faculty) {
+                        // Check if feedback already exists for this student-course-faculty combination
+                        const feedbackExists = await Feedback.findOne({
+                            student: student._id,
+                            course: course._id,
+                            faculty: faculty._id
+                        });
+                        // Set feedbackOpen to true if feedback doesn't exist
+                        feedbackOpen = !feedbackExists;
+                        console.log("already submitted",feedbackExists);
+                    }
+                }
+
                 // Use placeholder values for some fields
                 return {
                     id: course.courseCode,
@@ -195,7 +219,8 @@ export const getStudentCourses = async (req, res) => {
                     credits: course.credits,
                     assignments: 8, // Placeholder
                     announcements: course.announcements.length,
-                    attendance: 85 // Placeholder
+                    attendance: 85, // Placeholder
+                    feedbackOpen: feedbackOpen
                 };
             })
         );
@@ -210,8 +235,7 @@ export const getStudentCourses = async (req, res) => {
         const isFeedbackAvailable = false; // Placeholder
         
         res.status(200).json({
-            courses: validCourses,
-            feedbackOpen: isFeedbackAvailable
+            courses: validCourses
         });
         
     } catch (error) {
