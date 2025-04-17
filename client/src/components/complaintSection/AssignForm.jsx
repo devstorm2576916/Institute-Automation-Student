@@ -15,7 +15,7 @@ const AssignForm = ({ onClose, onAssign, complaint }) => {
             try {
                 console.log(`Fetching support staff for category: ${complaint.category}, subCategory: ${complaint.subCategory}`);
                 const token = localStorage.getItem("accessToken");
-                const response = await fetch(`http://localhost:8000/api/complaints/admin/filteredSupportStaff`, {
+                const response = await fetch(`${process.env.REACT_APP_API_URL}/complaints/admin/filteredSupportStaff`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

@@ -26,9 +26,8 @@ dotenv.config(); // Load environment variables first
 
 // index.js
 // const cors = require("cors");
+app.use(cors({ origin: "*", credentials: true }));
 
-
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(express.json({ limit: "5mb" }));
 app.use(cookieParser());
 
@@ -129,7 +128,7 @@ const startServer = async () => {
     // Seed support staff data
     // await seedSupportStaff();
     
-    app.listen(8000, () => {
+    app.listen(process.env.PORT || 8000, () => {
       console.log(`Backend server is running on port ${8000}`);
       if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
         console.warn(

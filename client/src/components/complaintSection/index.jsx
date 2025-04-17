@@ -38,7 +38,7 @@ const ComplaintSection = () => {
      * API endpoint for fetching complaints based on user role.
      * type {string}
      */
-    const endpoint = role === "student" || role === "faculty" ? "http://localhost:8000/api/complaints/" : "http://localhost:8000/api/complaints/admin";
+    const endpoint = role === "student" || role === "faculty" ? `${process.env.REACT_APP_API_URL}/complaints/` : `${process.env.REACT_APP_API_URL}/complaints/admin`;
 
     /**
      * Fetches complaint data using React Query.
