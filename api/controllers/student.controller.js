@@ -224,7 +224,7 @@ export const getStudentCourses = async (req, res) => {
                     assignments: 8, // Placeholder
                     announcements: course.announcements.length,
                     attendance: 85, // Placeholder
-                    feedbackOpen: feedbackOpen
+                    feedbackOpen: feedbackOpen,
                     slot: course.slot,
                 };
             })
