@@ -6,10 +6,10 @@ import mongoose from "mongoose";
 
 export const studentLeave = async (req, res) => {
   try {
-    const { studentId, startDate, endDate, applicationId, email, reason } = req.body;
-    console.log(req.body);
+    const { startDate, endDate, email, reason } = req.body;
+    // console.log(req.body);
     // Validate input
-    if (!studentId || !startDate || !endDate) {
+    if (!startDate || !endDate) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -30,9 +30,9 @@ export const studentLeave = async (req, res) => {
     if (!student) {
         return res.status(404).json({ message: "Student not found" });
     }
-    if (student.rollNo !== studentId) {
-        return res.status(400).json({ message: "Student ID does not match email" });
-    }
+    // if (student.rollNo !== studentId) {
+    //     return res.status(400).json({ message: "Student ID does not match email" });
+    // }
     // Create leave request object
     const leaveRequest = {
         rollNo: student.rollNo,
@@ -65,7 +65,7 @@ export const getStudentLeave = async (req, res) => {
       }
   
       const leaves = await HostelLeave.find({ rollNo: student.rollNo });
-  
+      console.log(leaves)
       if (!leaves || leaves.length === 0) {
         return res.status(404).json({ message: "No leaves found for this student" });
       }
