@@ -240,28 +240,25 @@ export const updateTransferRequest = async (req, res) => {
 };
 
 
-//MESS CONTROLLERS
+//hostel.controller.js
 
 export const getStudentSubscriptionInfo = async (req, res) => {
     try {
-     
       if (!req.student) {
         return res.status(404).json({ message: "Student record not found" });
       }
   
-      const subscription = await MealSubscription.findOne({ studentId: req.student._id }).lean();
+      const subscription = await MealSubscription.findOne({ userId: req.student.userId }).lean();
   
-    
       const pendingRequest = await MealPlanRequest.findOne({
-        studentId: req.student._id,
+        userId: req.student.userId,
         status: 'Pending'
       }).lean();
   
-     
       const currentSubscription = subscription || {
         currentPlan: 'None',
         isActive: false,
-        studentId: req.student._id,
+        userId: req.student.userId,
         rollNo: req.student.rollNo
       };
   
@@ -273,11 +270,10 @@ export const getStudentSubscriptionInfo = async (req, res) => {
       console.error("Error fetching student subscription info:", error);
       res.status(500).json({ message: "Internal server error" });
     }
-  };
-  
-  export const createMealPlanRequest = async (req, res) => {
+};
+
+export const createMealPlanRequest = async (req, res) => {
     try {
-    
       if (!req.student) {
         return res.status(404).json({ message: "Student record not found" });
       }
@@ -293,7 +289,7 @@ export const getStudentSubscriptionInfo = async (req, res) => {
         return res.status(400).json({ message: `Invalid meal plan requested. Valid plans are: ${validPlans.join(', ')}` });
       }
   
-      const subscription = await MealSubscription.findOne({ studentId: req.student._id }).lean();
+      const subscription = await MealSubscription.findOne({ userId: req.student.userId }).lean();
       const currentPlan = subscription ? subscription.currentPlan : 'None';
   
       if (currentPlan === newPlan) {
@@ -303,7 +299,7 @@ export const getStudentSubscriptionInfo = async (req, res) => {
       }
   
       const existingPending = await MealPlanRequest.findOne({ 
-        studentId: req.student._id, 
+        userId: req.student.userId, 
         status: 'Pending' 
       });
       
@@ -312,7 +308,7 @@ export const getStudentSubscriptionInfo = async (req, res) => {
       }
   
       const request = new MealPlanRequest({
-        studentId: req.student._id,
+        userId: req.student.userId,
         rollNo: req.student.rollNo,
         currentPlan: currentPlan,
         newPlan: newPlan,
@@ -333,17 +329,15 @@ export const getStudentSubscriptionInfo = async (req, res) => {
       }
       res.status(500).json({ message: "Internal server error" });
     }
-  };
-  
-  export const getStudentMealRequestHistory = async (req, res) => {
+};
+
+export const getStudentMealRequestHistory = async (req, res) => {
     try {
-     
       if (!req.student) {
         return res.status(404).json({ message: "Student record not found" });
       }
   
-     
-      const history = await MealPlanRequest.find({ studentId: req.student._id })
+      const history = await MealPlanRequest.find({ userId: req.student.userId })
         .sort({ createdAt: -1 })
         .lean();
   
@@ -353,11 +347,9 @@ export const getStudentSubscriptionInfo = async (req, res) => {
       console.error("Error fetching meal request history:", error);
       res.status(500).json({ message: "Internal server error" });
     }
-  };
-  
-  // --- Admin Mess Controllers ---
-  
-  export const getSubscriptionRequestsForAdmin = async (req, res) => {
+};
+
+export const getSubscriptionRequestsForAdmin = async (req, res) => {
     try {
       if (!req.user || req.user.role !== 'nonAcadAdmin') {
         return res.status(403).json({ message: "Access denied. Admin role required." });
@@ -371,28 +363,18 @@ export const getStudentSubscriptionInfo = async (req, res) => {
       }
   
       const requests = await MealPlanRequest.find(filter)
-        .populate({
-          path: 'studentId',
-          select: 'rollNo userId name',
-          populate: {
-            path: 'userId',
-            select: 'name'
-          }
-        })
+        .populate('userId', 'name email')
         .populate('processedBy', 'name')
         .sort({ createdAt: -1 })
         .lean();
-  
-      const enhancedRequests = requests.map(req => {
-        let studentName = "N/A";
-        if (req.studentId) {
-          studentName = req.studentId.userId?.name || req.studentId.name || "N/A";
-        }
-        
+
+        const filteredRequests = requests.filter(req => req.userId);
+
+        const enhancedRequests = filteredRequests.map(req => {
         return {
           ...req,
-          studentName: studentName,
-          studentRollNo: req.studentId?.rollNo || req.rollNo,
+          studentName: req.userId?.name || "N/A", 
+          studentRollNo: req.rollNo,
           processedByName: req.processedBy?.name || null,
         };
       });
@@ -404,8 +386,7 @@ export const getStudentSubscriptionInfo = async (req, res) => {
       res.status(500).json({ message: "Internal server error" });
     }
   };
-  
-  export const processSubscriptionRequest = async (req, res) => {
+export const processSubscriptionRequest = async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
   
@@ -420,7 +401,6 @@ export const getStudentSubscriptionInfo = async (req, res) => {
       const { status, rejectionReason } = req.body;
       const adminUserId = req.user._id;
   
-    
       if (!requestId || !mongoose.Types.ObjectId.isValid(requestId)) {
         await session.abortTransaction();
         session.endSession();
@@ -453,7 +433,6 @@ export const getStudentSubscriptionInfo = async (req, res) => {
         return res.status(400).json({ message: `Request has already been processed with status: ${request.status} `});
       }
   
-   
       request.status = status;
       request.processedAt = new Date();
       request.processedBy = adminUserId;
@@ -464,28 +443,33 @@ export const getStudentSubscriptionInfo = async (req, res) => {
       }
   
       if (status === 'Approved') {
-        const studentObjectId = request.studentId;
+        const userObjectId = request.userId;
         const studentRollNo = request.rollNo;
         const newPlan = request.newPlan;
-  
-        let subscription = await MealSubscription.findOne({ studentId: studentObjectId }).session(session);
-  
+      
+        let subscription = await MealSubscription.findOne({ userId: userObjectId }).session(session);
+      
         const now = new Date();
         if (!subscription) {
+          // Generate a unique subscription ID
+          const subscriptionId = `SUB-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
           
           subscription = new MealSubscription({
-            studentId: studentObjectId,
+            userId: userObjectId,
             rollNo: studentRollNo,
+            subscriptionId: subscriptionId, 
             currentPlan: newPlan,
             startDate: now,
             isActive: true,
           });
         } else {
-         
           subscription.currentPlan = newPlan;
           subscription.isActive = true;
           subscription.startDate = subscription.startDate || now;
           subscription.updatedAt = now;
+          if (!subscription.subscriptionId) {
+            subscription.subscriptionId = `SUB-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+          }
         }
         await subscription.save({ session });
       }
@@ -495,7 +479,7 @@ export const getStudentSubscriptionInfo = async (req, res) => {
       await session.commitTransaction();
   
       const updatedRequest = await MealPlanRequest.findById(request._id)
-        .populate('studentId', 'name rollNo')
+        .populate('userId', 'name')
         .populate('processedBy', 'name')
         .lean();
   
@@ -505,16 +489,13 @@ export const getStudentSubscriptionInfo = async (req, res) => {
       });
   
     } catch (error) {
-  
       await session.abortTransaction();
-  
       console.error("Error processing subscription request:", error);
       if (error.name === 'CastError') {
         return res.status(400).json({ message: "Invalid request ID format." });
       }
       res.status(500).json({ message: "Internal server error during request processing." });
     } finally {
-    
       session.endSession();
     }
-  };
+};
