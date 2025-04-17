@@ -1,10 +1,19 @@
 // import { mongoose } from "../database/mongoDb.js";
 import { HostelAdmin as Admin } from "../models/hostelAdmin.model.js";
 import { Complaint, SupportStaff } from "../models/complaint.model.js";
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
 
-import { promises as fs } from 'fs'; // Using the promise-based fs module
-import path from 'path'; // Import path module
-import { Buffer } from 'buffer'; // Import Buffer
+// Load environment variables
+dotenv.config();
+
+// Initialize Supabase client
+const supabaseUrl = process.env.COMPLAINTS_SUPABASE_URL;
+const supabaseKey = process.env.COMPLAINTS_SUPABASE_KEY;
+const supabaseBucket = process.env.COMPLAINTS_SUPABASE_BUCKET || 'complaints';
+
+// Create Supabase client
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const ComplaintsController = {
   /**
@@ -20,29 +29,70 @@ const ComplaintsController = {
    */
   createComplaint: async (req, res) => {
     const { title, date, description, phoneNumber, timeAvailability, address, locality, category, subCategory, images } = req.body;
-    const imageNames = [];
-    // Loop through each image in the array
-    for (let i = 0; i < images.length; i++) {
-      const image = images[i];
-
-      // Ensure the image is a valid Base64 string
-      if (typeof image !== 'string') {
-        continue; // Skip invalid entries
-      }
-      // Decode Base64 to a buffer and  Generate a unique file name
-      const buffer = Buffer.from(image, 'base64');
-      const filePath = `${Date.now()}_image_${i}.jpg`;
-      imageNames.push(filePath);
-      try {
-        await fs.mkdir(path.join(process.cwd(), 'uploads/complaints'), { recursive: true });
-        await fs.writeFile(path.join(process.cwd(), 'uploads/complaints', filePath), buffer);
-        console.log(`Saved image ${i} to ${filePath}`);
-      } catch (err) {
-        console.error(`Failed to save image ${i}:`, err.message);
-      }
-    }
-    const complaint = new Complaint({ title, date, description, phoneNumber, timeAvailability, address, locality, category, subCategory, userId: req.user.userId, imageUrls: imageNames });
+    const imageUrls = [];
+    
     try {
+      // Upload images to Supabase if any are provided
+      if (images && images.length > 0) {
+        for (let i = 0; i < images.length; i++) {
+          const image = images[i];
+          
+          // Ensure the image is a valid Base64 string
+          if (typeof image !== 'string') {
+            continue; // Skip invalid entries
+          }
+          
+          // Remove data:image/jpeg;base64, prefix if present
+          const base64Data = image.includes('base64,') 
+            ? image.split('base64,')[1]
+            : image;
+          
+          // Convert base64 to buffer
+          const buffer = Buffer.from(base64Data, 'base64');
+          
+          // Generate a unique file name
+          const fileName = `${req.user.userId}_${Date.now()}_${i}.jpg`;
+          
+          // Upload to Supabase Storage
+          const { data, error } = await supabase
+            .storage
+            .from(supabaseBucket)
+            .upload(`complaints/${fileName}`, buffer, {
+              contentType: 'image/jpeg',
+              upsert: false
+            });
+            
+          if (error) {
+            console.error(`Failed to upload image ${i}:`, error);
+            continue;
+          }
+          
+          // Get public URL
+          const { data: urlData } = supabase
+            .storage
+            .from(supabaseBucket)
+            .getPublicUrl(`complaints/${fileName}`);
+            
+          imageUrls.push(urlData.publicUrl);
+          console.log(`Uploaded image ${i} to Supabase: ${fileName}`);
+        }
+      }
+      
+      // Create and save the new complaint
+      const complaint = new Complaint({ 
+        title, 
+        date, 
+        description, 
+        phoneNumber, 
+        timeAvailability, 
+        address, 
+        locality, 
+        category, 
+        subCategory, 
+        userId: req.user.userId, 
+        imageUrls: imageUrls 
+      });
+      
       await complaint.save();
       console.log(`Complaint created successfully: ${complaint._id}`);
       res.status(201).json({
@@ -187,14 +237,18 @@ const ComplaintsController = {
         });
       }
       
-      // Delete associated images from disk
+      // Delete associated images from Supabase
       if (complaint.imageUrls && complaint.imageUrls.length > 0) {
-        for (const imagePath of complaint.imageUrls) {
-          try {
-            await fs.unlink(path.join(process.cwd(), 'uploads/complaints', imagePath));
-            console.log(`Deleted image: ${imagePath}`);
-          } catch (err) {
-            console.error(`Failed to delete image '${imagePath}':`, err.message);
+        for (const imageUrl of complaint.imageUrls) {
+          const fileName = imageUrl.split('/').pop();
+          const { error } = await supabase
+            .storage
+            .from(supabaseBucket)
+            .remove([`complaints/${fileName}`]);
+          if (error) {
+            console.error(`Failed to delete image '${fileName}' from Supabase:`, error.message);
+          } else {
+            console.log(`Deleted image from Supabase: ${fileName}`);
           }
         }
       }
@@ -532,23 +586,11 @@ const ComplaintsController = {
           // Staff who have fewer than 5 active complaints
           { $expr: { $lt: [{ $size: { $ifNull: ["$assignedComplaints", []] } }, 5] } },
           {
-            $or: [
-              // Staff who specialize in this category/subcategory
-              { 
-                $or: [
-                  { categories: { $in: [category] } },
-                  { categories: { $size: 0 } },
-                  { categories: { $exists: false } }
-                ]
-              },
-              { 
-                $or: [
-                  { subCategories: { $in: [subCategory] } },
-                  { subCategories: { $size: 0 } },
-                  { subCategories: { $exists: false } }
-                ]
-              }
-            ]
+        // Staff who specialize in both the category and subcategory
+        $and: [
+          { categories: { $in: [category] } },
+          { subCategories: { $in: [subCategory] } }
+        ]
           }
         ]
       });
@@ -571,53 +613,6 @@ const ComplaintsController = {
         message: "Something went wrong!",
         error: e,
       });
-    }
-  },
-
-  /**
-   * Update a support staff's availability status.
-   * @route PATCH /api/complaints/admin/supportStaff/availability
-   * @access Private - Admin only
-   * @param {Object} req - Express request object
-   * @param {Object} req.body - Request body
-   * @param {string} req.body.supportStaffId - The ID of the support staff to update
-   * @param {boolean} req.body.isAvailable - The new availability status
-   * @param {Object} res - Express response object
-   * @returns {Object} - Response object
-   * - Success: { message: "Successfully updated support staff availability", supportStaff }
-   * - Error: { message: "Error message" }
-   */
-  updateSupportStaffAvailability: async (req, res) => {
-    try {
-      // Validate request
-      const { supportStaffId, isAvailable } = req.body;
-      
-      if (!supportStaffId) {
-        return res.status(400).json({ message: "Support staff ID is required" });
-      }
-      
-      if (typeof isAvailable !== 'boolean') {
-        return res.status(400).json({ message: "isAvailable must be a boolean value" });
-      }
-      
-      // Find and update the support staff
-      const supportStaff = await SupportStaff.findByIdAndUpdate(
-        supportStaffId,
-        { isAvailable },
-        { new: true } // Return the updated document
-      );
-      
-      if (!supportStaff) {
-        return res.status(404).json({ message: "Support staff not found" });
-      }
-      
-      return res.status(200).json({
-        message: "Successfully updated support staff availability",
-        supportStaff: supportStaff,
-      });
-    } catch (error) {
-      console.error("Error updating support staff availability:", error);
-      return res.status(500).json({ message: "Internal server error" });
     }
   },
 

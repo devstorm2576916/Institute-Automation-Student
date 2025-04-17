@@ -232,21 +232,6 @@ Retrieves support staff filtered by category and subcategory (admin only).
 - Returns staff with fewer than 5 assigned complaints
 - Prioritizes staff with fewer current assignments
 
-#### `updateSupportStaffAvailability`
-Updates a support staff's availability status (admin only).
-
-**Input:**
-- `req.body`: Contains supportStaffId and isAvailable
-- `req.user`: Contains email for authorization check
-
-**Process:**
-1. Verifies inputs are valid
-2. Updates the staff's availability status in the database
-
-**Output:**
-- Success (200): Returns success message and updated staff object
-- Error (400/404/500): Returns appropriate error message
-
 ## Error Handling Strategy
 
 The controller implements comprehensive error handling throughout:

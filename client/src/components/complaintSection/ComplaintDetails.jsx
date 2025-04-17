@@ -467,8 +467,8 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
                         {/* Main image display */}
                         <div className="mb-3 bg-gray-100 rounded-lg overflow-hidden flex justify-center">
                             <img
-                                src={`http://localhost:8000/uploads/complaints/${complaint.imageUrls[activeImageIndex]}`}
-                                alt="Complaint Image"
+                                src={complaint.imageUrls[activeImageIndex]}
+                                alt="Complaint"
                                 onError={(e) => {
                                     e.target.onerror = null; // Prevent infinite loop
                                     e.target.src = "/complaint_placeholder.jpeg";
@@ -487,8 +487,8 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
                                         className={`cursor-pointer rounded-md overflow-hidden border-2 ${index === activeImageIndex ? "border-blue-500" : "border-transparent"}`}
                                     >
                                         <img
-                                            src={`http://localhost:8000/uploads/complaints/${url}`}
-                                            alt={`Thumbnail image`}
+                                            src={url}
+                                            alt={`Thumbnail`}
                                             onError={(e) => {
                                                 e.target.onerror = null; // Prevent infinite loop
                                                 e.target.src = "/complaint_placeholder.jpeg";

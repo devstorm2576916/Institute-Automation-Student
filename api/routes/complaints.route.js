@@ -15,7 +15,6 @@ router.post('/admin/supportStaff',validateAccessToken, ComplaintsController.crea
 router.delete('/admin/supportStaff',validateAccessToken, ComplaintsController.deleteSupportStaff);
 router.get('/admin/supportStaff',validateAccessToken, ComplaintsController.getAllSupportStaff);
 router.get('/admin/filteredSupportStaff', validateAccessToken, ComplaintsController.getFilteredSupportStaff);
-router.patch('/admin/supportStaff/availability', validateAccessToken, ComplaintsController.updateSupportStaffAvailability);
 router.get('/detail/:id', validateAccessToken, ComplaintsController.getComplaintById);
 
 export default router;

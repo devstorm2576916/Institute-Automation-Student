@@ -194,20 +194,6 @@ router.get('/admin/filteredSupportStaff', validateAccessToken, ComplaintsControl
   - `subCategory`: Subcategory to filter by
 - **Response**: Array of matching support staff objects
 
-#### Update Support Staff Availability
-```javascript
-router.patch('/admin/supportStaff/availability', validateAccessToken, ComplaintsController.updateSupportStaffAvailability);
-```
-- **Method**: PATCH
-- **Path**: `/api/complaints/admin/supportStaff/availability`
-- **Controller Function**: `updateSupportStaffAvailability`
-- **Authentication**: Required (Admin only)
-- **Description**: Updates a support staff member's availability status
-- **Request Body**: 
-  - `supportStaffId`: ID of the support staff to update
-  - `isAvailable`: Boolean indicating availability status
-- **Response**: Success message and updated staff object
-
 ## Authentication
 
 All routes are protected by the `validateAccessToken` middleware, which:

@@ -237,40 +237,6 @@ describe("ComplaintsController", () => {
         });
     });
 
-    describe("updateSupportStaffAvailability", () => {
-        it("should update support staff availability status", async () => {
-            // Create a new support staff
-            const createResponse = await request(app)
-                .post("/api/support-staff")
-                .set("Authorization", `Bearer ${adminToken}`)
-                .send({
-                    name: "Available Tester",
-                    phone: "1112223333",
-                    isAvailable: true
-                });
-            
-            const testStaffId = createResponse.body.supportStaff._id;
-            
-            const response = await request(app)
-                .patch("/api/support-staff/availability")
-                .set("Authorization", `Bearer ${adminToken}`)
-                .send({
-                    supportStaffId: testStaffId,
-                    isAvailable: false
-                });
-
-            expect(response.status).toBe(200);
-            expect(response.body.message).toBe("Support staff availability updated successfully!");
-            expect(response.body.data.isAvailable).toBe(false);
-            
-            // Clean up
-            await request(app)
-                .delete("/api/support-staff")
-                .set("Authorization", `Bearer ${adminToken}`)
-                .send({ supportStaffId: testStaffId });
-        });
-    });
-
     describe("deleteSupportStaff", () => {
         it("should delete a support staff", async () => {
             const response = await request(app)
