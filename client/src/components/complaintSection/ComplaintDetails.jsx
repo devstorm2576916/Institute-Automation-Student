@@ -285,7 +285,7 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
                     Back
                 </button>
                 <div className="flex gap-2">
-                    {role === "student" && complaint.status !== "Resolved" && (
+                    {(role === "student" || role === "faculty") && complaint.status !== "Resolved" && (
                         <button
                             className="flex items-center gap-1 bg-red-600 text-white px-3 py-1.5 rounded-md hover:bg-red-700 transition-colors"
                             onClick={handleDeleteClick}
