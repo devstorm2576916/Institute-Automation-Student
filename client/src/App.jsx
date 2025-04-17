@@ -59,6 +59,7 @@ import AnnouncementWrapper from './components/Announcements/announcementWrapper.
 import FacultyCourseStudents from './components/courseStudents/courseStudent.jsx';
 // import CourseStudents from './components/courseStudents/courseStudent.jsx';
 import CompletedCourses from './components/mycourses/CompletedCourses.jsx';
+import DropCourseWrapper from './components/dropCourse/dropCourseWrapper.jsx';
 
 const queryClient = new QueryClient()
 function App() {
@@ -186,7 +187,7 @@ function App() {
                 },
                 {
                     path:"/dropcourse",
-                    element: <DropCourse/>
+                    element: <DropCourseWrapper/>
                 },
                 {
                     path:"/dropcourseApprovals",
