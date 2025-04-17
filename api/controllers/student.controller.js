@@ -160,7 +160,7 @@ export const getStudentCourses = async (req, res) => {
         // console.log(student.rollNo);
         
         // Find approved courses for this student
-        const studentCourses = await StudentCourse.find({rollNo: student.rollNo, status: 'Approved'})
+        const studentCourses = await StudentCourse.find({rollNo: student.rollNo, status: 'Approved', isCompleted: false})
         // console.log(`Found ${studentCourses.length} enrolled courses for student`);
         
         if (!studentCourses || studentCourses.length === 0) {
@@ -173,7 +173,7 @@ export const getStudentCourses = async (req, res) => {
         // // Get global feedback status
         const globalConfig = await GlobalFeedbackConfig.getConfig();
         const globalFeedbackActive = globalConfig.isActive;
-
+        console.log("Global feedback active status:", globalFeedbackActive);
 
         // console.log(`Courses enrolled by student:`, studentCourses);
         
@@ -181,12 +181,12 @@ export const getStudentCourses = async (req, res) => {
         const courses = await Promise.all(
             studentCourses.map(async (sc) => {
                 const course = await Course.findOne({ courseCode: sc.courseId });
-                console.log("Course details fetched:", course);
+                // console.log("Course details fetched:", course);
                 if (!course) {
                     console.log(`Course not found for ID: ${sc.courseId}`);
                     return null;
                 }
-                
+                // console.log("Course details:", sc);
                 const facultyCourse = await FacultyCourse.findOne({
                     courseCode: sc.courseId
                 });
@@ -195,16 +195,20 @@ export const getStudentCourses = async (req, res) => {
                 
                                 // Added feedback active logic here
                 let feedbackOpen = false;
+                
                 if (globalFeedbackActive && facultyCourse && facultyCourse.facultyId) {
                     // Get the faculty document to use the correct ObjectId
-                    const faculty = await Faculty.findById(facultyCourse.facultyId);
+                    const faculty = await Faculty.findOne({userId: facultyCourse.facultyId});
+                    console.log("Facccc", faculty);
+                    console.log("Coursss", course);
+                    console.log("Studd", student);
                     if (faculty) {
-                        // Check if feedback already exists for this student-course-faculty combination
-                        const feedbackExists = await Feedback.findOne({
-                            student: student._id,
-                            course: course._id,
-                            faculty: faculty._id
+                        const feedbackExists = await Feedback.exists({
+                            student: student._id.toString(),
+                            course: course._id.toString(),
+                            faculty: faculty._id.toString()
                         });
+                        console.log("Feedback exists:", feedbackExists);
                         // Set feedbackOpen to true if feedback doesn't exist
                         feedbackOpen = !feedbackExists;
                         console.log("already submitted",feedbackExists);
@@ -227,7 +231,7 @@ export const getStudentCourses = async (req, res) => {
         console.log("Hehehhe", courses);
         // console.log(`Fetched course details for ${courses.length} courses`);
         // console.log(courses);
-        // Filter out null values (courses that weren't found)
+        // Filter out null value    s (courses that weren't found)
         const validCourses = courses.filter(course => course !== null);
         console.log(`Returning ${validCourses.length} valid courses`);
         
@@ -239,7 +243,7 @@ export const getStudentCourses = async (req, res) => {
         });
         
     } catch (error) {
-        console.error("Error fetching student courses:", error);
+        console.log("Error fetching student courses:", error);
         res.status(500).json({ message: "Failed to fetch courses" });
     }
 };
