@@ -33,6 +33,7 @@ function MyCourses() {
       }),
   });
 
+  console.log("Student Courses:", studentCourses);
   const handleFeedback = (course) => {
     navigate('/student/feedback/submit', {
       state: {
