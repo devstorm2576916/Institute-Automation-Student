@@ -64,7 +64,7 @@ export const login = async (req, res) => {
         // res.cookie('refreshToken', refreshToken, { httpOnly: false, sameSite: 'none' });
 
         return res.status(200)
-            .cookie('user', JSON.stringify({ email: user.email, userId: user._id }), { httpOnly: false, sameSite: 'none', maxAge: 1000 * 60 * 60 * 24, secure: true }) // Set cookie to expire in 1 day
+            .cookie('user', JSON.stringify({ email: user.email, userId: user._id, role:role }), { httpOnly: false, sameSite: 'none', maxAge: 1000 * 60 * 60 * 24, secure: true }) // Set cookie to expire in 1 day
             .cookie('refreshToken', refreshToken, { httpOnly: false, sameSite: 'none', maxAge: 1000 * 60 * 60 * 24, secure: true }) // Set cookie to expire in 1 day
             .cookie('accessToken', accessToken, { httpOnly: false, sameSite: 'none', maxAge: 1000 * 60 * 60 * 24, secure: true }) // Set cookie to expire in 1 hour
             .header('Authorization', accessToken)
