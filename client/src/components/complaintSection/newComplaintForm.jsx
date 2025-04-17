@@ -19,10 +19,10 @@ const NewComplaintForm = ({ category, subCategory, onBack }) => {
     const dragCounter = useRef(0);
 
     const queryClient = useQueryClient();
-    
+
     const submitComplaint = async (formData) => {
         const accessToken = localStorage.getItem("accessToken");
-        const res = await fetch("http://localhost:8000/api/complaints/create", {
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/complaints/create`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -53,7 +53,7 @@ const NewComplaintForm = ({ category, subCategory, onBack }) => {
         },
         onSettled: () => {
             setIsSubmitting(false);
-        }
+        },
     });
 
     const handleSubmit = async (e) => {
@@ -120,25 +120,25 @@ const NewComplaintForm = ({ category, subCategory, onBack }) => {
         const newFiles = Array.from(e.target.files);
         processFiles(newFiles);
     };
-    
+
     // Process and validate files from drag-drop or file input
     const processFiles = (newFiles) => {
         // Filter valid formats and size (<200kB)
         const validFiles = newFiles.filter((file) => /\.(jpe?g)$/i.test(file.name) && file.size <= 2 * 1024 * 100);
-        const invalidFiles = newFiles.filter(file => !(/\.(jpe?g)$/i.test(file.name) && file.size <= 2 * 1024 * 100));
-        
+        const invalidFiles = newFiles.filter((file) => !(/\.(jpe?g)$/i.test(file.name) && file.size <= 2 * 1024 * 100));
+
         if (invalidFiles.length > 0) {
             toast.error("Some files were rejected. Make sure they are JPG format and under 200KB.");
         }
-        
+
         if (files.length + validFiles.length > 5) {
             toast.error("You can only upload a maximum of 5 files.");
             return;
         }
-        
+
         setFiles((prevFiles) => [...prevFiles, ...validFiles]);
     };
-    
+
     // Drag event handlers
     const handleDragEnter = (e) => {
         e.preventDefault();
@@ -148,7 +148,7 @@ const NewComplaintForm = ({ category, subCategory, onBack }) => {
             setIsDragging(true);
         }
     };
-    
+
     const handleDragLeave = (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -157,7 +157,7 @@ const NewComplaintForm = ({ category, subCategory, onBack }) => {
             setIsDragging(false);
         }
     };
-    
+
     const handleDragOver = (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -165,13 +165,13 @@ const NewComplaintForm = ({ category, subCategory, onBack }) => {
             setIsDragging(true);
         }
     };
-    
+
     const handleDrop = (e) => {
         e.preventDefault();
         e.stopPropagation();
         setIsDragging(false);
         dragCounter.current = 0;
-        
+
         // Get the dropped files
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             const droppedFiles = Array.from(e.dataTransfer.files);
@@ -186,11 +186,11 @@ const NewComplaintForm = ({ category, subCategory, onBack }) => {
             dragCounter.current = 0;
         };
     }, []);
-    
+
     const removeFile = (index) => {
         setFiles(files.filter((_, i) => i !== index));
     };
-    
+
     const handleDescriptionChange = (e) => {
         const text = e.target.value;
         setCharacterCount(text.length);
@@ -198,17 +198,7 @@ const NewComplaintForm = ({ category, subCategory, onBack }) => {
     };
 
     // Array of locality options specific to the campus
-    const localityOptions = [
-        "Academic Complex",
-        "Administration Building",
-        "Faculty Quarters",
-        "Hostel Area - Men's",
-        "Hostel Area - Women's",
-        "Library Complex",
-        "Market Complex",
-        "Sports Complex",
-        "Student Activity Center"
-    ];
+    const localityOptions = ["Academic Complex", "Administration Building", "Faculty Quarters", "Hostel Area - Men's", "Hostel Area - Women's", "Library Complex", "Market Complex", "Sports Complex", "Student Activity Center"];
 
     return (
         <div className="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-12 border border-gray-200">
@@ -219,7 +209,10 @@ const NewComplaintForm = ({ category, subCategory, onBack }) => {
                 </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form
+                onSubmit={handleSubmit}
+                className="space-y-6"
+            >
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Complaint Title</label>
                     <input
@@ -234,13 +227,11 @@ const NewComplaintForm = ({ category, subCategory, onBack }) => {
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Complaint Description 
-                        <span className={`ml-2 text-xs font-normal ${characterCount > 350 ? 'text-red-500' : 'text-gray-500'}`}>
-                            ({characterCount}/400 characters)
-                        </span>
+                        Complaint Description
+                        <span className={`ml-2 text-xs font-normal ${characterCount > 350 ? "text-red-500" : "text-gray-500"}`}>({characterCount}/400 characters)</span>
                     </label>
                     <textarea
-                        className={`w-full p-3 border ${characterCount > 350 ? 'border-orange-300' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                        className={`w-full p-3 border ${characterCount > 350 ? "border-orange-300" : "border-gray-300"} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                         rows="4"
                         maxLength={400}
                         placeholder="Describe your issue in detail..."
@@ -282,7 +273,11 @@ const NewComplaintForm = ({ category, subCategory, onBack }) => {
                                 <option value="06:00 - 08:00 PM">06:00 - 08:00 PM</option>
                             </select>
                             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <svg
+                                    className="fill-current h-4 w-4"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                >
                                     <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                                 </svg>
                             </div>
@@ -301,12 +296,21 @@ const NewComplaintForm = ({ category, subCategory, onBack }) => {
                                 required
                             >
                                 <option value="">Select Location</option>
-                                {localityOptions.map(option => (
-                                    <option key={option} value={option}>{option}</option>
+                                {localityOptions.map((option) => (
+                                    <option
+                                        key={option}
+                                        value={option}
+                                    >
+                                        {option}
+                                    </option>
                                 ))}
                             </select>
                             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <svg
+                                    className="fill-current h-4 w-4"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                >
                                     <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                                 </svg>
                             </div>
@@ -328,37 +332,44 @@ const NewComplaintForm = ({ category, subCategory, onBack }) => {
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Upload Images 
-                        <span className="text-xs font-normal text-gray-500 ml-1">
-                            (Optional, max 5 files)
-                        </span>
+                        Upload Images
+                        <span className="text-xs font-normal text-gray-500 ml-1">(Optional, max 5 files)</span>
                     </label>
-                    <div 
+                    <div
                         ref={dropZoneRef}
-                        className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 ${
-                            isDragging 
-                                ? 'border-blue-400 bg-blue-50' 
-                                : 'border-gray-300 border-dashed'
-                        } rounded-lg transition-all duration-200`}
+                        className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 ${isDragging ? "border-blue-400 bg-blue-50" : "border-gray-300 border-dashed"} rounded-lg transition-all duration-200`}
                         onDragEnter={handleDragEnter}
                         onDragOver={handleDragOver}
                         onDragLeave={handleDragLeave}
                         onDrop={handleDrop}
                     >
                         <div className="space-y-1 text-center pointer-events-none">
-                            <svg className={`mx-auto h-12 w-12 ${isDragging ? 'text-blue-500' : 'text-gray-400'}`} stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" 
-                                    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            <svg
+                                className={`mx-auto h-12 w-12 ${isDragging ? "text-blue-500" : "text-gray-400"}`}
+                                stroke="currentColor"
+                                fill="none"
+                                viewBox="0 0 48 48"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
                             </svg>
                             <div className="flex text-sm text-gray-600">
-                                <label htmlFor="file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none pointer-events-auto">
+                                <label
+                                    htmlFor="file-upload"
+                                    className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none pointer-events-auto"
+                                >
                                     <span>Upload images</span>
-                                    <input 
+                                    <input
                                         ref={fileInputRef}
-                                        id="file-upload" 
-                                        name="file-upload" 
-                                        type="file" 
-                                        className="sr-only" 
+                                        id="file-upload"
+                                        name="file-upload"
+                                        type="file"
+                                        className="sr-only"
                                         accept=".jpg,.jpeg,.JPG"
                                         multiple
                                         onChange={handleFileChange}
@@ -366,14 +377,8 @@ const NewComplaintForm = ({ category, subCategory, onBack }) => {
                                 </label>
                                 <p className="pl-1">or drag and drop</p>
                             </div>
-                            <p className="text-xs text-gray-500">
-                                JPG format only, max 200KB each
-                            </p>
-                            {isDragging && (
-                                <p className="text-sm text-blue-600 animate-pulse font-medium">
-                                    Drop files here...
-                                </p>
-                            )}
+                            <p className="text-xs text-gray-500">JPG format only, max 200KB each</p>
+                            {isDragging && <p className="text-sm text-blue-600 animate-pulse font-medium">Drop files here...</p>}
                         </div>
                     </div>
                 </div>
@@ -384,7 +389,10 @@ const NewComplaintForm = ({ category, subCategory, onBack }) => {
                         <h3 className="text-sm font-medium text-gray-700 mb-2">Uploaded Images ({files.length}/5):</h3>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                             {files.map((file, index) => (
-                                <div key={index} className="relative group">
+                                <div
+                                    key={index}
+                                    className="relative group"
+                                >
                                     <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-lg bg-gray-100 shadow-sm">
                                         <img
                                             src={URL.createObjectURL(file)}
@@ -397,8 +405,19 @@ const NewComplaintForm = ({ category, subCategory, onBack }) => {
                                         onClick={() => removeFile(index)}
                                         className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 focus:outline-none"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            className="h-4 w-4"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M6 18L18 6M6 6l12 12"
+                                            />
                                         </svg>
                                     </button>
                                     <p className="mt-1 text-xs text-gray-500 truncate">
@@ -414,20 +433,47 @@ const NewComplaintForm = ({ category, subCategory, onBack }) => {
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className={`flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg shadow-md transition-colors duration-300 flex items-center justify-center ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+                        className={`flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg shadow-md transition-colors duration-300 flex items-center justify-center ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""}`}
                     >
                         {isSubmitting ? (
                             <>
-                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                <svg
+                                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <circle
+                                        className="opacity-25"
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        strokeWidth="4"
+                                    ></circle>
+                                    <path
+                                        className="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                    ></path>
                                 </svg>
                                 Submitting...
                             </>
                         ) : (
                             <>
-                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                <svg
+                                    className="w-5 h-5 mr-2"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    ></path>
                                 </svg>
                                 Submit Complaint
                             </>
@@ -437,7 +483,7 @@ const NewComplaintForm = ({ category, subCategory, onBack }) => {
                         type="button"
                         onClick={handleClear}
                         disabled={isSubmitting}
-                        className={`flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 px-4 rounded-lg transition-colors duration-300 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+                        className={`flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 px-4 rounded-lg transition-colors duration-300 ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""}`}
                     >
                         Clear Form
                     </button>
