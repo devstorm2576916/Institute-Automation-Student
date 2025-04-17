@@ -24,7 +24,7 @@ function FacultyCourses() {
         courseName: course.name,
         department: course.department
       }
-    });
+    }); 
   };
 
   // Get userId from localStorage
