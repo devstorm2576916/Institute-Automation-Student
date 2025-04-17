@@ -30,29 +30,29 @@ const ComplaintsController = {
   createComplaint: async (req, res) => {
     const { title, date, description, phoneNumber, timeAvailability, address, locality, category, subCategory, images } = req.body;
     const imageUrls = [];
-    
+
     try {
       // Upload images to Supabase if any are provided
       if (images && images.length > 0) {
         for (let i = 0; i < images.length; i++) {
           const image = images[i];
-          
+
           // Ensure the image is a valid Base64 string
           if (typeof image !== 'string') {
             continue; // Skip invalid entries
           }
-          
+
           // Remove data:image/jpeg;base64, prefix if present
-          const base64Data = image.includes('base64,') 
+          const base64Data = image.includes('base64,')
             ? image.split('base64,')[1]
             : image;
-          
+
           // Convert base64 to buffer
           const buffer = Buffer.from(base64Data, 'base64');
-          
+
           // Generate a unique file name
           const fileName = `${req.user.userId}_${Date.now()}_${i}.jpg`;
-          
+
           // Upload to Supabase Storage
           const { data, error } = await supabase
             .storage
@@ -61,38 +61,38 @@ const ComplaintsController = {
               contentType: 'image/jpeg',
               upsert: false
             });
-            
+
           if (error) {
             console.error(`Failed to upload image ${i}:`, error);
             continue;
           }
-          
+
           // Get public URL
           const { data: urlData } = supabase
             .storage
             .from(supabaseBucket)
             .getPublicUrl(`complaints/${fileName}`);
-            
+
           imageUrls.push(urlData.publicUrl);
           console.log(`Uploaded image ${i} to Supabase: ${fileName}`);
         }
       }
-      
+
       // Create and save the new complaint
-      const complaint = new Complaint({ 
-        title, 
-        date, 
-        description, 
-        phoneNumber, 
-        timeAvailability, 
-        address, 
-        locality, 
-        category, 
-        subCategory, 
-        userId: req.user.userId, 
-        imageUrls: imageUrls 
+      const complaint = new Complaint({
+        title,
+        date,
+        description,
+        phoneNumber,
+        timeAvailability,
+        address,
+        locality,
+        category,
+        subCategory,
+        userId: req.user.userId,
+        imageUrls: imageUrls
       });
-      
+
       await complaint.save();
       console.log(`Complaint created successfully: ${complaint._id}`);
       res.status(201).json({
@@ -228,7 +228,7 @@ const ComplaintsController = {
           message: "User don't have access to this complaint",
         });
       }
-      
+
       // Check if complaint is resolved, and if so, prevent deletion
       if (complaint.status === 'Resolved') {
         return res.status(403).json({
@@ -236,7 +236,7 @@ const ComplaintsController = {
           error: "Resolved complaints are permanently stored in the system"
         });
       }
-      
+
       // Delete associated images from Supabase
       if (complaint.imageUrls && complaint.imageUrls.length > 0) {
         for (const imageUrl of complaint.imageUrls) {
@@ -316,7 +316,7 @@ const ComplaintsController = {
         status: updatedStatus,
         updatedAt: Date.now(),
       };
-      
+
       const updatedComplaint = await Complaint.findByIdAndUpdate(complaintId, patch, { new: true });
 
       // If the status is changed to "Resolved" and the complaint has an assigned staff member
@@ -324,7 +324,7 @@ const ComplaintsController = {
         // Add to resolved complaints and remove from assigned complaints
         await SupportStaff.findByIdAndUpdate(
           complaint.assignedStaffId,
-          { 
+          {
             $pull: { assignedComplaints: complaintId },
             $addToSet: { resolvedComplaints: complaintId }
           }
@@ -365,7 +365,7 @@ const ComplaintsController = {
           message: "You are not authorised to assign complaints",
         });
       }
-      
+
       const { complaintId, supportStaffId } = req.body;
       if (!complaintId || !supportStaffId) {
         return res.status(400).json({
@@ -396,7 +396,7 @@ const ComplaintsController = {
           message: "Complaint not found!",
         });
       }
-      
+
       // If complaint is already assigned to someone else, remove it from their list
       if (complaint.assignedStaffId) {
         await SupportStaff.findByIdAndUpdate(
@@ -407,14 +407,14 @@ const ComplaintsController = {
 
       // Update complaint with staff info
       const updatedComplaint = await Complaint.findByIdAndUpdate(
-        complaintId, 
-        { 
+        complaintId,
+        {
           assignedName: supportStaff.name,
           assignedContact: supportStaff.phone,
           assignedStaffId: supportStaffId,
           status: "In Progress",
           updatedAt: Date.now(),
-        }, 
+        },
         { new: true }
       );
 
@@ -567,42 +567,35 @@ const ComplaintsController = {
           message: "You are not authorised to fetch support staff",
         });
       }
-      
-      const { category, subCategory } = req.query;
-      
+      console.log(`BODY: ${req.body}`);
+      const { category, subCategory } = req.body;
+
       if (!category || !subCategory) {
         return res.status(400).json({
           error: "Missing query parameters",
           message: "Required query parameters: 'category' and 'subCategory'",
         });
       }
-      
-      // Find staff who either:
-      // 1. Have the matching category and subcategory, or
-      // 2. Don't have any category/subcategory specified (generalists)
-      // And have fewer than 5 assigned complaints
+
+      console.log(`Searching for staff with category: "${category}" and subCategory: "${subCategory}"`);
+
+      // Find staff who:
+      // 1. Match the specified category and subcategory
+      // 2. Have fewer than 5 assigned complaints
       const supportStaff = await SupportStaff.find({
-        $and: [
-          // Staff who have fewer than 5 active complaints
-          { $expr: { $lt: [{ $size: { $ifNull: ["$assignedComplaints", []] } }, 5] } },
-          {
-        // Staff who specialize in both the category and subcategory
-        $and: [
-          { categories: { $in: [category] } },
-          { subCategories: { $in: [subCategory] } }
-        ]
-          }
-        ]
+        categories: { $in: [category] },
+        subCategories: { $in: [subCategory] },
       });
-      
-      // Sort the results in memory after retrieving them from the database
-      // This avoids the MongoDB sort expression issue
+
+      console.log(`Found ${supportStaff.length} matching staff members`);
+
+      // Sort the results in memory by number of assigned complaints (ascending)
       const sortedStaff = supportStaff.sort((a, b) => {
         const aCount = a.assignedComplaints ? a.assignedComplaints.length : 0;
         const bCount = b.assignedComplaints ? b.assignedComplaints.length : 0;
         return aCount - bCount; // Sort by number of complaints (ascending)
       });
-      
+
       return res.status(200).json({
         message: "Support staff fetched successfully!",
         supportStaff: sortedStaff,
@@ -659,7 +652,7 @@ const ComplaintsController = {
         .skip(skip)
         .limit(limit)
         .sort({ createdAt: -1 });
-      
+
       return res.send({
         data: complaints,
         pagination: {
@@ -689,7 +682,7 @@ const ComplaintsController = {
   getComplaintById: async (req, res) => {
     try {
       const complaintId = req.params.id;
-      
+
       if (!complaintId) {
         return res.status(400).json({
           error: "Missing complaint ID",
@@ -698,7 +691,7 @@ const ComplaintsController = {
       }
 
       const complaint = await Complaint.findById(complaintId);
-      
+
       if (!complaint) {
         return res.status(404).json({
           message: "Complaint not found!"
@@ -713,6 +706,50 @@ const ComplaintsController = {
       console.error(`ERROR: Fetching complaint details by ID: ${e}`);
       return res.status(500).json({
         message: "Something went wrong while fetching complaint details."
+      });
+    }
+  },
+
+  /**
+   * Get multiple complaints by their IDs (Admin only).
+   * 
+   * Input:
+   * - Body: { complaintIds: [String] }
+   * - User: { email } (from `req.user`)
+   * 
+   * Output:
+   * - Success: { complaints: [Complaint] }
+   * - Error: { message: "Something went wrong while fetching complaints." }
+   */
+  getComplaintsByIds: async (req, res) => {
+    try {
+      const admin = await Admin.findOne({ email: req.user.email });
+      if (!admin) {
+        console.log(`ERROR: Unauthorized access to fetch complaints by IDs by user with email: ${req.user.email}`);
+        return res.status(403).json({
+          error: "User is not authorized for this action",
+          message: "You are not authorized to view these complaints",
+        });
+      }
+
+      const { complaintIds } = req.body;
+
+      if (!complaintIds || !Array.isArray(complaintIds) || complaintIds.length === 0) {
+        return res.status(400).json({
+          error: "Invalid request",
+          message: "A non-empty array of complaintIds is required",
+        });
+      }
+
+      const complaints = await Complaint.find({ _id: { $in: complaintIds } });
+
+      return res.status(200).json({
+        complaints: complaints,
+      });
+    } catch (error) {
+      console.error("ERROR: Fetching complaints by IDs:", error);
+      return res.status(500).json({
+        message: "Something went wrong while fetching complaints."
       });
     }
   },
