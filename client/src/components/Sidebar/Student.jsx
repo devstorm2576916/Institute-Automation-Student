@@ -45,7 +45,7 @@ const Student = () => {
                                 {expandedSections.activeCourses && (
                                 <ul className="pl-5">
                                     <li>
-                                    <Link to="/assigngmentlanding" className="text-gray-700 hover:text-gray-900">
+                                    <Link to="/assignmentlanding" className="text-gray-700 hover:text-gray-900">
                                         Assignment
                                     </Link>
                                     </li>

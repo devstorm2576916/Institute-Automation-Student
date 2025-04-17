@@ -773,6 +773,7 @@ export const updateStudentProfile = async (req, res) => {
                 }
             );
         }
+        // console.log(updateData.hostel);
 
         // Update student data
         const student = await Student.findOneAndUpdate(
@@ -787,6 +788,8 @@ export const updateStudentProfile = async (req, res) => {
             },
             { new: true }
         ).populate('userId');
+
+        // console.log(studentId);
 
         if (!student) {
             return res.status(404).json({ message: 'Student not found' });
@@ -883,3 +886,23 @@ export const getPendingRequests = async (req, res) => {
 };
 
 
+// get userId of student by rollNo
+export const getStudentFromRollNumber = async (req, res) => {
+    try {
+        const rollNo = req.params.id; // Assuming rollNo is passed as a URL parameter
+        // console.log(rollNo);
+
+        // Find the student by roll number
+        const student = await Student.findOne({ rollNo: rollNo });
+
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+
+        // Return the userId of the found student
+        res.status(200).json({ userId: student.userId });
+    } catch (error) {
+        console.error('Error fetching student by rollNo:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
