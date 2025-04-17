@@ -21,7 +21,6 @@ export const studentLeave = async (req, res) => {
     const end = new Date(ey, em - 1, ed, 12, 0, 0, 0);   // 12:00 local time
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    console.log(today, start, end);
 
     // Validate dates
     if (start < today) {

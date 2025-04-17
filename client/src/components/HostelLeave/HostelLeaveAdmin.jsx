@@ -14,7 +14,7 @@ const PendingRequests = ({ requests, handleAction }) => {
   return (
     <div className="card bg-base-100 shadow border border-base-200 p-6 rounded-lg">
       {requests.map((req) => (
-        <div key={req.id} className="border rounded-lg shadow-sm mb-4 p-4 bg-yellow-50">
+        <div key={req.id || req._id} className="border rounded-lg shadow-sm mb-4 p-4 bg-yellow-50">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1">
             <div className="flex items-center space-x-3 py-2">
               <div className="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center border border-indigo-200 shadow-sm">
@@ -41,7 +41,7 @@ const PendingRequests = ({ requests, handleAction }) => {
               <div>
                 <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-0.5">Start Date</div>
                 <div className="text-sm font-semibold text-gray-800">
-                  {req.startDate ? adjustNoonDate(req.startDate) : ''}
+                  {req.startDate ? new Date(req.startDate).toLocaleDateString() : ''}
                 </div>
               </div>
             </div>
@@ -52,7 +52,7 @@ const PendingRequests = ({ requests, handleAction }) => {
               <div>
                 <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-0.5">End Date</div>
                 <div className="text-sm font-semibold text-gray-800">
-                  {req.endDate ? adjustNoonDate(req.endDate) : ''}
+                  {req.endDate ? new Date(req.endDate).toLocaleDateString() : ''}
                 </div>
               </div>
             </div>
@@ -97,7 +97,7 @@ const ApprovedRequests = ({ requests }) => {
   return (
     <div className="card bg-base-100 shadow border border-base-200 p-6 rounded-lg">
       {requests.map((req) => (
-        <div key={req.id} className="mb-4 shadow-sm p-4 border rounded bg-green-100">
+        <div key={req.id || req._id} className="border rounded-lg shadow-sm mb-4 p-4 bg-green-50">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1">
             <div className="flex items-center space-x-3 py-2">
               <div className="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center border border-indigo-200 shadow-sm">
@@ -124,7 +124,7 @@ const ApprovedRequests = ({ requests }) => {
               <div>
                 <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-0.5">Start Date</div>
                 <div className="text-sm font-semibold text-gray-800">
-                  {req.startDate ? adjustNoonDate(req.startDate) : ''}
+                  {req.startDate ? new Date(req.startDate).toLocaleDateString() : ''}
                 </div>
               </div>
             </div>
@@ -135,7 +135,7 @@ const ApprovedRequests = ({ requests }) => {
               <div>
                 <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-0.5">End Date</div>
                 <div className="text-sm font-semibold text-gray-800">
-                  {req.endDate ? adjustNoonDate(req.endDate) : ''}
+                  {req.endDate ? new Date(req.endDate).toLocaleDateString() : ''}
                 </div>
               </div>
             </div>
@@ -166,7 +166,7 @@ const RejectedRequests = ({ requests }) => {
   return (
     <div className="card bg-base-100 shadow border border-base-200 p-6 rounded-lg">
       {requests.map((req) => (
-        <div key={req.id} className="mb-4 shadow-sm p-4 border rounded bg-red-100">
+        <div key={req.id || req._id} className="border rounded-lg shadow-sm mb-4 p-4 bg-red-50">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1">
             <div className="flex items-center space-x-3 py-2">
               <div className="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center border border-indigo-200 shadow-sm">
@@ -193,7 +193,7 @@ const RejectedRequests = ({ requests }) => {
               <div>
                 <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-0.5">Start Date</div>
                 <div className="text-sm font-semibold text-gray-800">
-                  {req.startDate ? adjustNoonDate(req.startDate) : ''}
+                  {req.startDate ? new Date(req.startDate).toLocaleDateString() : ''}
                 </div>
               </div>
             </div>
@@ -204,7 +204,7 @@ const RejectedRequests = ({ requests }) => {
               <div>
                 <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-0.5">End Date</div>
                 <div className="text-sm font-semibold text-gray-800">
-                  {req.endDate ? adjustNoonDate(req.endDate) : ''}
+                  {req.endDate ? new Date(req.endDate).toLocaleDateString() : ''}
                 </div>
               </div>
             </div>
@@ -274,40 +274,43 @@ const HostelLeaveAdmin = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <div className="flex justify-around mb-6 p-1 space-x-1">
-        <button
-          onClick={() => setActiveTab('pending')}
-          className={`flex items-center px-5 py-2.5 shadow rounded-md text-sm font-medium transition-all duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-50 ${activeTab === 'pending' ? 'bg-indigo-700' : 'bg-gray-200'} ${activeTab === 'pending' ? 'text-white' : 'text-indigo-700'}`}
-          style={activeTab === 'pending' ? { color: '#fff', fontWeight: 600 } : {}}
-        >
-          Pending
-        </button>
-        <button
-          onClick={() => setActiveTab('approved')}
-          className={`flex items-center px-5 py-2.5 shadow rounded-md text-sm font-medium transition-all duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-50 ${activeTab === 'approved' ? 'bg-indigo-700' : 'bg-gray-200'} ${activeTab === 'approved' ? 'text-white' : 'text-indigo-700'}`}
-          style={activeTab === 'approved' ? { color: '#fff', fontWeight: 600 } : {}}
-        >
-          Approved
-        </button>
-        <button
-          onClick={() => setActiveTab('rejected')}
-          className={`flex items-center px-5 py-2.5 shadow rounded-md text-sm font-medium transition-all duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-50 ${activeTab === 'rejected' ? 'bg-indigo-700' : 'bg-gray-200'} ${activeTab === 'rejected' ? 'text-white' : 'text-indigo-700'}`}
-          style={activeTab === 'rejected' ? { color: '#fff', fontWeight: 600 } : {}}
-        >
-          Rejected
-        </button>
-      </div>
+    <div className="w-full min-h-screen bg-gray-100 flex flex-col items-center">
+      {/* Add a gap between navbar and main content */}
+      <div className="mt-10 max-w-3xl w-full mx-auto p-6 bg-white rounded-lg shadow-md">
+        <div className="flex justify-around mb-6 p-1 space-x-1">
+          <button
+            onClick={() => setActiveTab('pending')}
+            className={`flex items-center px-5 py-2.5 shadow rounded-md text-sm font-medium transition-all duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-50 ${activeTab === 'pending' ? 'bg-indigo-700' : 'bg-gray-200'} ${activeTab === 'pending' ? 'text-white' : 'text-indigo-700'}`}
+            style={activeTab === 'pending' ? { color: '#fff', fontWeight: 600 } : {}}
+          >
+            Pending
+          </button>
+          <button
+            onClick={() => setActiveTab('approved')}
+            className={`flex items-center px-5 py-2.5 shadow rounded-md text-sm font-medium transition-all duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-50 ${activeTab === 'approved' ? 'bg-indigo-700' : 'bg-gray-200'} ${activeTab === 'approved' ? 'text-white' : 'text-indigo-700'}`}
+            style={activeTab === 'approved' ? { color: '#fff', fontWeight: 600 } : {}}
+          >
+            Approved
+          </button>
+          <button
+            onClick={() => setActiveTab('rejected')}
+            className={`flex items-center px-5 py-2.5 shadow rounded-md text-sm font-medium transition-all duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-50 ${activeTab === 'rejected' ? 'bg-indigo-700' : 'bg-gray-200'} ${activeTab === 'rejected' ? 'text-white' : 'text-indigo-700'}`}
+            style={activeTab === 'rejected' ? { color: '#fff', fontWeight: 600 } : {}}
+          >
+            Rejected
+          </button>
+        </div>
 
-      {activeTab === 'pending' && (
-        <PendingRequests requests={pendingRequests} handleAction={handleAction} />
-      )}
-      {activeTab === 'approved' && (
-        <ApprovedRequests requests={approvedRequests} />
-      )}
-      {activeTab === 'rejected' && (
-        <RejectedRequests requests={rejectedRequests} />
-      )}
+        {activeTab === 'pending' && (
+          <PendingRequests requests={pendingRequests} handleAction={handleAction} />
+        )}
+        {activeTab === 'approved' && (
+          <ApprovedRequests requests={approvedRequests} />
+        )}
+        {activeTab === 'rejected' && (
+          <RejectedRequests requests={rejectedRequests} />
+        )}
+      </div>
     </div>
   );
 };
