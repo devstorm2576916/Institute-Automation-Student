@@ -3,6 +3,8 @@ import { Faculty } from '../models/faculty.model.js';
 import { Student } from '../models/student.model.js';
 import { StudentCourse } from '../models/course.model.js';
 import { User } from '../models/user.model.js';
+import { CourseApprovalRequest } from "../models/course.model.js";
+import { GlobalFeedbackConfig } from '../models/feedback.model.js';
 
 
 // Get basic faculty info
@@ -131,7 +133,9 @@ try {
     );
     
     // Get feedback availability status (could be from settings or config)
-    const feedbackOpen = currentMonth >= 3 && currentMonth <= 5; // Open during April-June
+    // const feedbackOpen = currentMonth >= 3 && currentMonth <= 5; // Open during April-June
+    const globalConfig = await GlobalFeedbackConfig.getConfig();
+    const feedbackOpen = globalConfig.isActive;
     
     return res.status(200).json({
         courses: coursesWithDetails,
@@ -166,7 +170,6 @@ export const getCourseStudents = async (req, res) => {
     // });
 
     const students = course.students || [];
-
     console.log("Student registrations found:", students);
     if (!students || students.length === 0) {
       return res.status(200).json({
@@ -274,3 +277,157 @@ export const getCourseStudents = async (req, res) => {
     });
   }
 };  
+
+
+export const getPendingRequestsFaculty = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if the faculty exists
+    const faculty = await Faculty.findOne({ userId: id });
+    if(!faculty){console.log("Faculty not found");}
+    // Get pending requests for faculty's courses
+
+    const facultyCourses = Array.isArray(faculty.courses) ? faculty.courses : [];
+    const requests = await CourseApprovalRequest.find({
+      status: 'Pending',
+      courseCode: { $in: facultyCourses.map(c => c.courseCode) }
+    });
+    
+    // Fetch student details for each request
+    const studentIds = requests.map(request => request.studentId);
+    const students = await Student.find({ userId: { $in: studentIds } });
+
+    console.log("Pending requests found:", requests);
+
+    // Transform data for frontend
+    const formattedRequests = requests.map(request => {
+      const student = students.find(student => student.userId.toString() === request.studentId.toString());
+      return {
+      id: request._id,
+      rollNo: student ? student.rollNo : 'Unknown',
+      program: student ? student.program : 'Unknown',
+      semester: student ? student.semester : 'Unknown',
+      courseCode: request.courseCode,
+      courseType: request.courseType,
+      createdAt: request.createdAt
+      };
+    });
+
+    res.status(200).json(formattedRequests);
+  } catch (error) {
+    console.error("Error fetching pending requests:", error);
+    res.status(500).json({ message: "Failed to fetch requests" });
+  }
+};
+
+export const handleRequestApprovalFaculty = async (req, res) => {
+  try {
+    console.log("I am here mf");
+    const { requestId } = req.params;
+    const { status } = req.body;
+
+    // Validate status
+    if (!['Approved', 'Rejected'].includes(status)) {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
+
+    // const updatedRequest = await CourseApprovalRequest.findById(requestId);
+    // console.log("Updated request found:", updatedRequest);
+    // Update request status and get populated student data
+    const updatedRequest = await CourseApprovalRequest.findByIdAndUpdate(
+      requestId,
+      { status },
+      { new: true }
+    );
+    
+    if (!updatedRequest) {
+      return res.status(404).json({ message: "Registration request not found" });
+    }
+    
+    if (status === 'Approved') {
+      const student = updatedRequest.studentId;
+      // console.log("Student ID:", student);
+      const courseCode = updatedRequest.courseCode;
+
+      console.log(student);
+      const mystudent = await Student.findOne({userId:student._id});
+      console.log("Student found:", mystudent);
+      // Check if the course is already registered
+      const existingRegistration = await StudentCourse.findOne({
+        rollNo: mystudent.rollNo,
+        courseId: courseCode,
+        status: 'Approved'
+      });
+
+      if(existingRegistration) {
+        // alert("You have already registered for this course.");
+        return res.status(400).json({ message: "Course already registered" });
+      }else{
+        // alert("You have not yet registered for this course. Do you want register?");
+      }
+      // 1. Create StudentCourse entry
+      const newStudentCourse = new StudentCourse({
+        rollNo: mystudent.rollNo,
+        courseId: courseCode,
+        creditOrAudit: updatedRequest.courseType === 'Audit' ? 'Audit' : 'Credit',
+        semester: String(mystudent.semester),
+        status: 'Approved',
+        isCompleted: false,
+      });
+      await newStudentCourse.save();
+
+      // console.log("StudentCourse entry created:", newStudentCourse);
+
+      // 2. Update Course's student list with ObjectId reference
+      // Yahaan ki wajah se tere students list mein kuch kuch chizein aa nahi rahi hai
+      // check kar le
+      console.log("Student ID:", student);
+      await Course.findOneAndUpdate(
+        { courseCode },
+        { $addToSet: { students: student } },
+        { new: true }
+      );
+    }
+
+    console.log("ALLDONE");
+    res.status(200).json({
+      success: true,
+      message: `Request ${status.toLowerCase()} successfully`,
+      updatedRequest
+    });
+
+  } catch (error) {
+    console.error("Approval processing error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Internal server error"
+    });
+  }
+};
+
+
+// Add this function to get faculty courses for dashboard
+export const getFacultyDashboardCourses = async (req, res) => {
+  try {
+    console.log("Fetching dashboard courses for faculty ID:", req.params);
+    const userId  = req.params.id;
+    const faculty = await Faculty.findOne({userId})
+
+    if (!faculty) {
+      return res.status(404).json({ message: 'Faculty not found' });
+    }
+
+    const formattedCourses = faculty.courses
+      .filter(course => course.status === 'Ongoing')
+      .map(course => ({
+        code: course.courseCode,
+        name: course.courseName
+      }));
+
+    res.status(200).json(formattedCourses);
+  } catch (error) {
+    console.error('Error fetching faculty courses:', error);
+    res.status(500).json({ message: 'Error fetching courses' });
+  }
+};
