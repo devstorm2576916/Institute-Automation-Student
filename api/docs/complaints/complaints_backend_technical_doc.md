@@ -147,7 +147,6 @@ The complaint system is managed by `ComplaintsController`, which provides the fo
 - `deleteSupportStaff`: Removes a support staff member
 - `getAllSupportStaff`: Retrieves all support staff
 - `getFilteredSupportStaff`: Gets support staff filtered by category and subcategory
-- `updateSupportStaffAvailability`: Updates a staff member's availability status
 
 ### Routes
 
