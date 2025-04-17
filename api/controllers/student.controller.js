@@ -221,6 +221,7 @@ export const getStudentCourses = async (req, res) => {
                     announcements: course.announcements.length,
                     attendance: 85, // Placeholder
                     feedbackOpen: feedbackOpen
+                    slot: course.slot,
                 };
             })
         );

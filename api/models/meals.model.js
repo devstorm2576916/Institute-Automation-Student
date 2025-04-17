@@ -35,10 +35,11 @@
 // export const MealSubscription = mongoose.model('MealSubscription', mealSubscriptionSchema);
 
 
+
 import mongoose from "mongoose";
 
 const mealPlanRequestSchema = new mongoose.Schema({
-    studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Student', required: true, index: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     rollNo: { type: String, required: true }, 
     currentPlan: { type: String, enum: ['None', 'Basic', 'Premium', 'Unlimited'], required: true }, 
     newPlan: { type: String, enum: ['None', 'Basic', 'Premium', 'Unlimited'], required: true },
@@ -48,18 +49,15 @@ const mealPlanRequestSchema = new mongoose.Schema({
     processedAt: { type: Date },
 }, { timestamps: true }); 
 
-mealPlanRequestSchema.index({ status: 1, createdAt: -1 });
-
-
 const mealSubscriptionSchema = new mongoose.Schema({
-    studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Student', required: true, unique: true }, 
-    rollNo: { type: String, required: true, unique: true }, 
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true }, 
+    rollNo: { type: String, required: true, unique: true },
+    subscriptionId: { type: String, unique: true, sparse: true },
     currentPlan: { type: String, enum: ['None', 'Basic', 'Premium', 'Unlimited'], required: true, default: 'None' },
     startDate: { type: Date },
     endDate: { type: Date },
     isActive: { type: Boolean, default: false, required: true }, 
-}, { timestamps: true }); 
-
+}, { timestamps: true });
 
 
 export const MealPlanRequest = mongoose.model('MealPlanRequest', mealPlanRequestSchema);
