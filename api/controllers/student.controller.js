@@ -1,9 +1,10 @@
 import { Student } from '../models/student.model.js';
-import { Course, StudentCourse, FacultyCourse } from '../models/course.model.js';
+import { Course, StudentCourse, FacultyCourse,ProgramCourseMapping,CourseApprovalRequest } from '../models/course.model.js';
 import { ApplicationDocument, Bonafide, Passport } from '../models/documents.models.js';
 import { Faculty } from '../models/faculty.model.js';
 import { CourseDropRequest } from '../models/courseDropRequest.model.js';
 import { User } from '../models/user.model.js';
+import { Feedback , GlobalFeedbackConfig } from '../models/feedback.model.js';
 
 // Get basic student info
 export const getStudent = async (req, res) => {
@@ -132,6 +133,7 @@ export const getStudentCourses = async (req, res) => {
         
         // First get the student record to get the roll number
         const student = await Student.findOne({ userId: studentId });
+        console.log("fjshkjfhkjsfkjsdkjf",student);
 
          if (!student) {
             console.log("Student not found for ID:", studentId);
@@ -168,6 +170,11 @@ export const getStudentCourses = async (req, res) => {
             });
         }
 
+        // // Get global feedback status
+        const globalConfig = await GlobalFeedbackConfig.getConfig();
+        const globalFeedbackActive = globalConfig.isActive;
+
+
         // console.log(`Courses enrolled by student:`, studentCourses);
         
         // Get course details and faculty information
@@ -186,6 +193,24 @@ export const getStudentCourses = async (req, res) => {
                 console.log("Faculty course details fetched:", facultyCourse);
                 // .populate('facultyId', 'name');
                 
+                                // Added feedback active logic here
+                let feedbackOpen = false;
+                if (globalFeedbackActive && facultyCourse && facultyCourse.facultyId) {
+                    // Get the faculty document to use the correct ObjectId
+                    const faculty = await Faculty.findById(facultyCourse.facultyId);
+                    if (faculty) {
+                        // Check if feedback already exists for this student-course-faculty combination
+                        const feedbackExists = await Feedback.findOne({
+                            student: student._id,
+                            course: course._id,
+                            faculty: faculty._id
+                        });
+                        // Set feedbackOpen to true if feedback doesn't exist
+                        feedbackOpen = !feedbackExists;
+                        console.log("already submitted",feedbackExists);
+                    }
+                }
+
                 // Use placeholder values for some fields
                 return {
                     id: course.courseCode,
@@ -195,6 +220,7 @@ export const getStudentCourses = async (req, res) => {
                     assignments: 8, // Placeholder
                     announcements: course.announcements.length,
                     attendance: 85, // Placeholder
+                    feedbackOpen: feedbackOpen
                     slot: course.slot,
                 };
             })
@@ -210,8 +236,7 @@ export const getStudentCourses = async (req, res) => {
         const isFeedbackAvailable = false; // Placeholder
         
         res.status(200).json({
-            courses: validCourses,
-            feedbackOpen: isFeedbackAvailable
+            courses: validCourses
         });
         
     } catch (error) {
@@ -311,6 +336,7 @@ export const getCourseAnnouncements = async (req, res) => {
 // Drop a course for a student
 export const dropCourse = async (req, res, next) => {
     try {
+        console.log("I am here in drop course");
       const { studentId, courseId } = req.params;
       
       // Find the student
@@ -331,10 +357,11 @@ export const dropCourse = async (req, res, next) => {
       
       // Find the course and update its enrolled students
       const course = await Course.findById(courseId);
+      console.log("Course found:", course);
       if (course) {
-        const studentIndex = course.enrolledStudents.findIndex(id => id.toString() === studentId);
+        const studentIndex = course.students.findIndex(id => id.toString() === studentId);
         if (studentIndex !== -1) {
-          course.enrolledStudents.splice(studentIndex, 1);
+          course.students.splice(studentIndex, 1);
           await course.save();
         }
       }
@@ -773,6 +800,89 @@ export const updateStudentProfile = async (req, res) => {
     } catch (error) {
         console.error('Error updating student profile:', error);
         res.status(500).json({ message: error.message });
+    }
+};
+
+
+export const getAvailableCourses = async (req, res) => {
+    try {
+        console.log("fetching available courses for student ID:", req.params.id);
+        const { id } = req.params;  
+        
+        console.log("1", id);
+        // Fetch student details
+        const student = await Student.findOne({ userId:id });
+        if (!student) {
+            return res.status(404).json({ message: "Student not found" });
+        }
+
+        console.log("2", student.program);
+        console.log("2", student.department);
+
+        // Retrieve courses for the student's program and semester
+        const courses = await ProgramCourseMapping.find({
+            // program: student.program,
+            // department: student.department,
+        });
+
+        console.log("3", courses);
+
+        res.status(200).json(courses);
+    } catch (error) {
+        console.error("Error fetching available courses:", error);
+        res.status(500).json({ message: "Failed to fetch available courses" });
+    }
+};
+
+// Submit course approval request
+export const submitCourseApprovalRequest = async (req, res) => {
+    try {
+        const { id } = req.params; // Student ID
+        const { courseCode, courseType } = req.body;
+
+        // Check if a similar request already exists
+        const existingRequest = await CourseApprovalRequest.findOne({
+            studentId: id,
+            courseCode,
+            status: 'Pending',
+        });
+
+        if (existingRequest) {
+            return res.status(200).json({ message: "A request for this course is already pending." });
+        }
+
+        // Fetch student details
+        const student = await Student.findOne({ userId: id }).lean();
+        if (!student) {
+            return res.status(404).json({ message: "Student not found" });
+        }
+        // Create a new approval request
+        const approvalRequest = new CourseApprovalRequest({
+            studentId: id,
+            courseCode,
+            courseType, 
+        });
+
+        await approvalRequest.save();
+        res.status(200).json({ message: "Course approval request submitted successfully." });
+    } catch (error) {
+        console.error("Error submitting course approval request:", error);
+        res.status(500).json({ message: "Failed to submit course approval request." });
+    }
+};
+
+export const getPendingRequests = async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log("Fetching pending requests for student ID:", id);   
+        const requests = await CourseApprovalRequest.find({ 
+            studentId: id, 
+            status: 'Pending'
+        })
+        res.status(200).json(requests);
+    } catch (error) {
+        console.error("Error fetching pending requests:", error);
+        res.status(500).json({ message: "Failed to fetch pending requests." });
     }
 };
 
