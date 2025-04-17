@@ -311,6 +311,7 @@ export const getCourseAnnouncements = async (req, res) => {
 // Drop a course for a student
 export const dropCourse = async (req, res, next) => {
     try {
+        console.log("I am here in drop course");
       const { studentId, courseId } = req.params;
       
       // Find the student
@@ -331,10 +332,11 @@ export const dropCourse = async (req, res, next) => {
       
       // Find the course and update its enrolled students
       const course = await Course.findById(courseId);
+      console.log("Course found:", course);
       if (course) {
-        const studentIndex = course.enrolledStudents.findIndex(id => id.toString() === studentId);
+        const studentIndex = course.students.findIndex(id => id.toString() === studentId);
         if (studentIndex !== -1) {
-          course.enrolledStudents.splice(studentIndex, 1);
+          course.students.splice(studentIndex, 1);
           await course.save();
         }
       }

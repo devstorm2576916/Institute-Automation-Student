@@ -309,33 +309,27 @@ export const handleRequestApprovalFaculty = async (req, res) => {
       return res.status(400).json({ message: "Invalid status value" });
     }
 
+    // const updatedRequest = await CourseApprovalRequest.findById(requestId);
+    // console.log("Updated request found:", updatedRequest);
     // Update request status and get populated student data
     const updatedRequest = await CourseApprovalRequest.findByIdAndUpdate(
       requestId,
       { status },
       { new: true }
     );
-
-    // console.log("uwuwuwuwuwuwuwu");
-    // console.log(updatedRequest);
-
+    
     if (!updatedRequest) {
       return res.status(404).json({ message: "Registration request not found" });
     }
-
+    
     if (status === 'Approved') {
       const student = updatedRequest.studentId;
+      // console.log("Student ID:", student);
       const courseCode = updatedRequest.courseCode;
 
-      console.log(student._id);
+      console.log(student);
       const mystudent = await Student.findOne({userId:student._id});
-      // console.log("Student:", mystudent);  
-      // console.log(mystudent.rollNo);
-      // console.log(courseCode);
-      // console.log(updatedRequest.courseType);
-      // console.log(mystudent.semester);
-      // console.log("passed 0");
-
+      console.log("Student found:", mystudent);
       // Check if the course is already registered
       const existingRegistration = await StudentCourse.findOne({
         rollNo: mystudent.rollNo,
@@ -355,7 +349,8 @@ export const handleRequestApprovalFaculty = async (req, res) => {
         courseId: courseCode,
         creditOrAudit: updatedRequest.courseType === 'Audit' ? 'Audit' : 'Credit',
         semester: String(mystudent.semester),
-        status: 'Approved'
+        status: 'Approved',
+        isCompleted: false,
       });
       await newStudentCourse.save();
 
@@ -367,7 +362,7 @@ export const handleRequestApprovalFaculty = async (req, res) => {
       console.log("Student ID:", student);
       await Course.findOneAndUpdate(
         { courseCode },
-        { $addToSet: { students: student._id } },
+        { $addToSet: { students: student } },
         { new: true }
       );
     }
@@ -393,9 +388,8 @@ export const handleRequestApprovalFaculty = async (req, res) => {
 export const getFacultyDashboardCourses = async (req, res) => {
   try {
     console.log("Fetching dashboard courses for faculty ID:", req.params);
-    const { userId: facultyId } = req.params;
-    console.log("Fetching dashboard courses for faculty ID:", facultyId);
-    const faculty = await Faculty.findOne({facultyId})
+    const userId  = req.params.id;
+    const faculty = await Faculty.findOne({userId})
 
     if (!faculty) {
       return res.status(404).json({ message: 'Faculty not found' });

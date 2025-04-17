@@ -5,11 +5,11 @@ import newRequest from "../../utils/newRequest";
 
 function FacultyDashboard(){
     const {data:userData} = JSON.parse(localStorage.getItem("currentUser"));
-    const {facultyId} = userData.user;
-    
-  const { isLoading, error, data: courses } = useQuery({
-    queryKey: ["facultyCourses", facultyId],
-    queryFn: () => newRequest.get(`/faculty/${facultyId}/dashboard-courses`)
+    const {userId} = userData.user;
+
+    const { isLoading, error, data: courses } = useQuery({
+    queryKey: ["facultyCourses", userId],
+    queryFn: () => newRequest.get(`/faculty/${userId}/dashboard-courses`)
   });
 
   if (isLoading) return <div className="p-5">Loading courses...</div>;

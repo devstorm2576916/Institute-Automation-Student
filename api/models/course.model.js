@@ -77,7 +77,7 @@ const courseApprovalRequestSchema = new mongoose.Schema({
     status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
     createdAt: { type: Date, default: Date.now },
 });
-
+    
 
 
 export const Course = mongoose.model('Course', courseSchema);
