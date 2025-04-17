@@ -1,6 +1,6 @@
 import express from "express";
 import { getCourseAnnouncements, addCourseAnnouncement, deleteCourseAnnouncement, updateCourseAnnouncement } from "../controllers/announcements.controller.js";
-import { getFaculty, getCourseStudents, getFacultyCourses, handleRequestApprovalFaculty,getPendingRequestsFaculty, getFacultyDashboardCourses } from "../controllers/faculty.controller.js";
+import { getCourseStudents, getFacultyCourses, handleRequestApprovalFaculty,getPendingRequestsFaculty, getFacultyDashboardCourses, getFaculty } from "../controllers/faculty.controller.js";
 
 
 const router = express.Router();
