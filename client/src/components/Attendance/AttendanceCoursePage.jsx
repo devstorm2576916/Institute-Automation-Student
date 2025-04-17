@@ -12,7 +12,6 @@ function AttendanceCoursePage() {
         <div className="course-page">
             <div className="div">
                 {<CourseStats />}
-                {/* {role === "faculty" && <AddOrUpdate/>} */}
             </div>
         </div>
     );

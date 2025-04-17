@@ -28,7 +28,7 @@ export const CourseStats = () => {
   const { role } = useContext(RoleContext);  
   const navigateTo = useNavigate();
 
-  const [courseName, setCourseName] = useState(0);
+  const [courseName, setCourseName] = useState();
   const [courseId, setCourseId] = useState(id);
 
   const [attendanceAll, setAttendanceAll] = useState(0);
@@ -212,7 +212,7 @@ export const CourseStats = () => {
       <div className="frame">
         <div className="overlap-group">
           <div className="text-wrapper">{courseId}</div>
-          <div className="div">{courseName}</div>
+          {courseName && <div className="div">{courseName}</div>}
         </div>
       </div>
 

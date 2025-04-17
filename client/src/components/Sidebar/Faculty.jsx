@@ -45,7 +45,10 @@ const Faculty = () => {
                                 </Link>
                             </li>
 
-                            <li>Grades Submission</li>
+                            
+                            <li><Link to="/gradeLanding" className="text-gray-700 hover:text-gray-900">
+                            Grades Submission
+                            </Link></li>
                             <li><Link to="/assignmentlanding" className="text-gray-700 hover:text-gray-900">
                                 Assignment
                                 </Link></li>

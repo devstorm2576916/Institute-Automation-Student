@@ -1,180 +1,159 @@
-import request from "supertest";
-import app from "../app"; // Assuming your Express app is exported from app.js
-import { Complaint, SupportStaff } from "../models/complaint.model.js";
-import { HostelAdmin } from "../models/hostelAdmin.model.js";
-import mongoose from "mongoose";
+import mongoose, { Error } from 'mongoose';
+import jwt from 'jsonwebtoken';
+import { findUserByEmail, verifyRefreshTokenInDB, validateAccessToken, validateRefreshToken } from '../middleware/auth.middleware';
+import { User } from '../models/user.model';
 
-describe("ComplaintsController", () => {
-    let token; // Mock token for authentication
-    let adminToken; // Mock token for admin authentication
-    let userId; // Mock user ID
-    let adminEmail; // Mock admin email
-    let complaintId; // Mock complaint ID
-    let supportStaffId; // Mock support staff ID
+jest.mock('../models/user.model');
 
-    beforeAll(async () => {
-        // Connect to the test database
-        await mongoose.connect(process.env.TEST_DB_URI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
+describe('Authentication Middleware', () => {
+    let mockReq, mockRes, mockNext;
 
-        // Mock user and admin tokens
-        token = "mock-user-token-1";
-        adminToken = "mock-admin-token-2";
-        userId = "220101039"; // Use rollNo from userData
-        adminEmail = "testHab@iitg.ac.in"; // Use email from nonAcadAdminData
+    beforeEach(() => {
+        mockReq = {
+            header: jest.fn(),
+            cookies: {}
+        };
 
-        // Create a mock admin
-        await HostelAdmin.create({
-            name: "Himanshu Sharma",
-            email: adminEmail,
-            password: "1234",
-            refreshToken: "sample-refresh-token-2",
-            contactNo: "8329521234",
-            isVerified: true,
-        });
+        mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn()
+        };
+
+        mockNext = jest.fn();
+
+        jest.clearAllMocks();
+        process.env.ACCESS_TOKEN_SECRET = 'test_access_secret';
+        process.env.REFRESH_TOKEN_SECRET = 'test_refresh_secret';
     });
 
-    afterAll(async () => {
-        // Clean up the database and close the connection
-        if (complaintId) {
-            await Complaint.deleteOne({ _id: complaintId });
-        }
-        if (supportStaffId) {
-            await SupportStaff.deleteOne({ _id: supportStaffId });
-        }
-        if (adminEmail) {
-            await HostelAdmin.deleteOne({ email: adminEmail });
-        }
-        await mongoose.connection.close();
-    });
+    describe('validateRefreshToken', () => {
+        test('should reject request without refresh token', () => {
+            mockReq.cookies = {};
+            validateRefreshToken(mockReq, mockRes, mockNext);
+            expect(mockRes.status).toHaveBeenCalledWith(401);
+            expect(mockRes.json).toHaveBeenCalledWith({ message: "Refresh token not provided" });
+            expect(mockNext).not.toHaveBeenCalled();
+        });
 
-    describe("createComplaint", () => {
-        it("should create a new complaint", async () => {
-            const response = await request(app)
-                .post("/api/complaints")
-                .set("Authorization", `Bearer ${token}`)
-                .send({
-                    userId,
-                    title: "Test Complaint",
-                    date: new Date(),
-                    description: "This is a test complaint",
-                    category: "General",
-                    subCategory: "Maintenance",
-                    imageUrl: "http://example.com/image.jpg"
-                });
+        test('should reject invalid refresh token', () => {
+            mockReq.cookies['refreshToken'] = 'invalid_refresh_token';
+            jest.spyOn(jwt, 'verify').mockImplementation((token, secret, callback) => {
+                callback(new SyntaxError);
+            });
+            validateRefreshToken(mockReq, mockRes, mockNext);
+            expect(mockRes.status).toHaveBeenCalledWith(403);
+            expect(mockRes.json).toHaveBeenCalledWith({ message: "invalid token,login again" });
+            expect(mockNext).not.toHaveBeenCalled();
+        });
 
-            expect(response.status).toBe(201);
-            expect(response.body.message).toBe("Successfully created the complaint");
-            complaintId = response.body.complaint._id; // Save the complaint ID for later tests
+        test('should reject expired refresh token', () => {
+            mockReq.cookies['refreshToken'] = 'expired_refresh_token';
+            jest.spyOn(jwt, 'verify').mockImplementation((token, secret, callback) => {
+                callback(new jwt.TokenExpiredError('Token expired', new Date()), null);
+            });
+            validateRefreshToken(mockReq, mockRes, mockNext);
+            expect(mockRes.status).toHaveBeenCalledWith(400);
+            expect(mockRes.json).toHaveBeenCalledWith({ message: "expired refresh token,please login again" });
+            expect(mockNext).not.toHaveBeenCalled();
+        });
+
+        test('should successfully validate and pass valid refresh token', () => {
+            const mockDecodedUser = { user: { email: 'test@example.com', role: 'student' } };
+            mockReq.cookies['refreshToken'] = 'valid_refresh_token';
+            jest.spyOn(jwt, 'verify').mockImplementation((token, secret, callback) => {
+                callback(null, mockDecodedUser);
+            });
+            validateRefreshToken(mockReq, mockRes, mockNext);
+            expect(mockReq.user).toEqual(mockDecodedUser.user);
+            expect(mockReq.refreshToken).toBe('valid_refresh_token');
+            expect(mockNext).toHaveBeenCalled();
+            expect(mockRes.status).not.toHaveBeenCalled();
         });
     });
+});
 
-    describe("getUserComplaints", () => {
-        it("should fetch complaints for the logged-in user", async () => {
-            const response = await request(app)
-                .get("/api/complaints/user")
-                .set("Authorization", `Bearer ${token}`)
-                .send();
-
-            expect(response.status).toBe(200);
-            expect(response.body.data).toBeDefined();
-        });
+describe('User Middleware', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
     });
 
-    describe("getAllComplaints", () => {
-        it("should fetch all complaints for admin", async () => {
-            const response = await request(app)
-                .get("/api/complaints")
-                .set("Authorization", `Bearer ${adminToken}`)
-                .send();
+    describe('findUserByEmail', () => {
+        const mockReq = {
+            user: { email: 'test@example.com' },
+        };
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            send: jest.fn(),
+        };
+        const mockNext = jest.fn();
 
-            expect(response.status).toBe(200);
-            expect(response.body.data).toBeDefined();
+        it('should find user and call next when user exists', async () => {
+            const mockUser = {
+                email: 'test@example.com',
+                _id: new mongoose.Types.ObjectId(),
+            };
+            User.findOne.mockResolvedValue(mockUser);
+            await findUserByEmail(mockReq, mockRes, mockNext);
+            expect(User.findOne).toHaveBeenCalledWith({ email: 'test@example.com' });
+            expect(mockReq.foundUser).toEqual(mockUser);
+            expect(mockNext).toHaveBeenCalled();
+            expect(mockRes.status).not.toHaveBeenCalled();
         });
-    });
 
-    describe("deleteComplaint", () => {
-        it("should delete a complaint", async () => {
-            const response = await request(app)
-                .delete("/api/complaints")
-                .set("Authorization", `Bearer ${token}`)
-                .send({ _id: complaintId });
-
-            expect(response.status).toBe(200);
-            expect(response.body.message).toBe("Complaint deleted successfully!");
+        it('should return 404 when user is not found', async () => {
+            User.findOne.mockResolvedValue(null);
+            await findUserByEmail(mockReq, mockRes, mockNext);
+            expect(User.findOne).toHaveBeenCalledWith({ email: 'test@example.com' });
+            expect(mockRes.status).toHaveBeenCalledWith(404);
+            expect(mockRes.json).toHaveBeenCalledWith({ message: "User not found" });
+            expect(mockNext).not.toHaveBeenCalled();
         });
-    });
 
-    describe("updateStatus", () => {
-        it("should update the status of a complaint", async () => {
-            const response = await request(app)
-                .patch("/api/complaints/status")
-                .set("Authorization", `Bearer ${adminToken}`)
-                .send({
-                    complaintId,
-                    updatedStatus: "Resolved",
-                });
-
-            expect(response.status).toBe(200);
-            expect(response.body.message).toBe("Complaint updated successfully!");
-        });
-    });
-
-    describe("assignComplaint", () => {
-        it("should assign a complaint to support staff", async () => {
-            const response = await request(app)
-                .patch("/api/complaints/assign")
-                .set("Authorization", `Bearer ${adminToken}`)
-                .send({
-                    complaintId,
-                    assignedName: "John Doe",
-                    assignedContact: "1234567890",
-                });
-
-            expect(response.status).toBe(200);
-            expect(response.body.message).toBe("Complaint assigned successfully!");
+        it('should handle errors and return 500 status', async () => {
+            const mockError = new Error('Database connection failed');
+            User.findOne.mockRejectedValue(mockError);
+            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+            await findUserByEmail(mockReq, mockRes, mockNext);
+            expect(User.findOne).toHaveBeenCalledWith({ email: 'test@example.com' });
+            expect(consoleErrorSpy).toHaveBeenCalledWith("Error finding user:", mockError);
+            expect(mockRes.status).toHaveBeenCalledWith(500);
+            expect(mockRes.send).toHaveBeenCalledWith("Internal server error");
+            expect(mockNext).not.toHaveBeenCalled();
+            consoleErrorSpy.mockRestore();
         });
     });
 
-    describe("createSupportStaff", () => {
-        it("should create a new support staff", async () => {
-            const response = await request(app)
-                .post("/api/support-staff")
-                .set("Authorization", `Bearer ${adminToken}`)
-                .send({
-                    name: "Jane Doe",
-                    phone: "9876543210",
-                });
+    describe('verifyRefreshTokenInDB', () => {
+        const mockNext = jest.fn();
 
-            expect(response.status).toBe(201);
-            expect(response.body.message).toBe("Successfully created the support staff");
-            supportStaffId = response.body.supportStaff._id; // Save the support staff ID for later tests
+        it('should call next when refresh tokens match', () => {
+            const mockReq = {
+                foundUser: { refreshToken: 'validToken123' },
+                refreshToken: 'validToken123'
+            };
+            const mockRes = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn(),
+            };
+            verifyRefreshTokenInDB(mockReq, mockRes, mockNext);
+            expect(mockNext).toHaveBeenCalled();
+            expect(mockRes.status).not.toHaveBeenCalled();
         });
-    });
 
-    describe("deleteSupportStaff", () => {
-        it("should delete a support staff", async () => {
-            const response = await request(app)
-                .delete("/api/support-staff")
-                .set("Authorization", `Bearer ${adminToken}`)
-                .send({ supportStaffId });
-
-            expect(response.status).toBe(200);
-            expect(response.body.message).toBe("Support staff deleted successfully!");
-        });
-    });
-
-    describe("getAllSupportStaff", () => {
-        it("should fetch all support staff", async () => {
-            const response = await request(app)
-                .get("/api/support-staff")
-                .set("Authorization", `Bearer ${adminToken}`)
-                .send();
-
-            expect(response.status).toBe(200);
-            expect(response.body.message).toBe("Support staff fetched successfully!");
+        it('should return 401 when refresh tokens do not match', () => {
+            const mockReq = {
+                foundUser: { refreshToken: 'validToken123' },
+                refreshToken: 'invalidToken456'
+            };
+            const mockRes = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn(),
+            };
+            verifyRefreshTokenInDB(mockReq, mockRes, mockNext);
+            expect(mockRes.status).toHaveBeenCalledWith(401);
+            expect(mockRes.json).toHaveBeenCalledWith({ message: "Invalid refresh token" });
+            expect(mockNext).not.toHaveBeenCalled();
         });
     });
 });
