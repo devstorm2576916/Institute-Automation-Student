@@ -53,14 +53,13 @@ const AdminSubscriptionRequests = () => {
   });
 
   // Filter based on search term locally
-  const filteredRequests = requests.filter(request => {
-    const studentInfo = request.studentId || {};
-    const matchesSearch =
-      (studentInfo.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (studentInfo.studentId || '').toString().includes(searchTerm);
-    return matchesSearch;
-  });
-
+const filteredRequests = requests.filter(request => {
+  // Change from studentId to userId
+  const matchesSearch =
+    (request.studentName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (request.studentRollNo || '').toString().includes(searchTerm);
+  return matchesSearch;
+});
   // Handle Approve/Reject button clicks
   const handleRequestAction = (requestId, status, event) => {
     if (event) {
@@ -191,9 +190,9 @@ const AdminSubscriptionRequests = () => {
                           <FaUser className="text-blue-600" />
                         </div>
                         <div>
-                          <h3 className="font-medium text-gray-900">{request.studentId?.name || 'N/A'}</h3>
-                          <p className="text-sm text-gray-500">ID: {request.rollNo || request.studentId?.studentId || 'N/A'}</p>
-                        </div>
+  <h3 className="font-medium text-gray-900">{request.studentName || 'N/A'}</h3>
+  <p className="text-sm text-gray-500">ID: {request.studentRollNo || 'N/A'}</p>
+</div>
                       </div>
                       {/* Status Badge */}
                       {getStatusBadge(request.status)}
