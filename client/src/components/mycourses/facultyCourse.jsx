@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import newRequest from '../../utils/newRequest';
 import { useQuery } from '@tanstack/react-query';
@@ -13,6 +13,20 @@ import {
 } from "react-icons/fa";
 
 function FacultyCourses() {
+
+  const navigate = useNavigate();
+  const handleViewFeedback = (course) => {
+    console.log("Course ID:", course.id);
+    // Use course.id as courseCode if that's what your backend returns
+    navigate("/faculty/feedback/view", {
+      state: {
+        courseCode: course.id,
+        courseName: course.name,
+        department: course.department
+      }
+    }); 
+  };
+
   // Get userId from localStorage
   const {data:userData} = JSON.parse(localStorage.getItem("currentUser"));
   const {userId} = userData.user;
@@ -144,16 +158,16 @@ function FacultyCourses() {
                 
                 {isFeedbackAvailable && (
                   <div className="mt-4">
-                    <Link 
-                      to={`/faculty/course/${course.id}/feedback`}
-                      className="flex items-center justify-center gap-2 w-full bg-blue-50 text-blue-600 border border-blue-200 rounded-md p-2 text-sm font-medium hover:bg-blue-100 transition duration-200"
+                    <button
+                      onClick={() => handleViewFeedback(course)}
+                      className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
                     >
-                      <FaChartBar className="text-blue-500" />
-                      <span>View Feedback Reports</span>
-                    </Link>
+                      <FaChartBar className="text-white" />
+                      View Feedback Report
+                    </button>
                   </div>
                 )}
-                
+
                 <div className="mt-4">
                   <Link 
                     to={`/faculty/course/${course.id}`}

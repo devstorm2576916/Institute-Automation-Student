@@ -466,50 +466,69 @@ const seedStudentCourses = async () => {
     }
   };
 
-  const seedFacultyCourses = async () => {
+  const removeAllStudentsFromCourse = async () => {
     try {
       // Connect to MongoDB
       await connectDB();
-      console.log("Connected to MongoDB, starting faculty courses seed process...");
+      console.log("Connected to MongoDB, starting student removal process...");
       
-      // Get the faculty userId from the email to link courses properly
-      const faculty = await Faculty.findOne({ email: facultyData.email });
+      // Find the course with code CS101
+      const course = await Course.findOne({ courseCode: "CS101" });
       
-      if (!faculty) {
-        console.error("Faculty not found! Run seedDatabase first.");
+      if (!course) {
+        console.log("Course CS101 not found!");
         process.exit(1);
       }
       
-      console.log("Faculty found:", faculty.name, "with ID:", faculty._id);
-      console.log("Faculty : ", faculty);
-      // Update facultyId in the data
-      const facultyCoursesWithCorrectId = facultyCoursesData.map(course => ({
-        ...course,
-        facultyId: faculty.userId.toString() // Use the actual faculty ID
-      }));
-
-      // Add the faculty courses to the faculty document
-      const updatedFaculty = await Faculty.findByIdAndUpdate(
-        faculty.userId,
-        { courses: facultyCoursesWithCorrectId },
+      console.log(`Found course: ${course.courseName} with ${course.students.length} students enrolled`);
+      
+      // Update the course to have an empty students array
+      const updatedCourse = await Course.findByIdAndUpdate(
+        course._id,
+        { students: [] },
         { new: true }
       );
-
       
-      console.log(`Successfully added ${updatedFaculty.courses.length} courses to faculty ${updatedFaculty.email}:`);
-      updatedFaculty.courses.forEach(course => {
-        console.log(`- ${course.courseCode} (${course.session}, ${course.year}) - Status: ${course.status}`);
-      });
+      console.log(`Successfully removed all students from ${updatedCourse.courseCode} - ${updatedCourse.courseName}`);
+      console.log(`Current student count: ${updatedCourse.students.length}`);
       
-      console.log("Faculty courses seeded successfully!");
+      console.log("Student removal completed successfully!");
       process.exit(0);
     } catch (error) {
-      console.error("Error seeding faculty courses:", error);
+      console.error("Error removing students from course:", error);
       process.exit(1);
     }
   };
-  // Run the seeding function
-  // seedDatabase();
-  // seedStudentCourses();
-  
-  export { seedDatabase, seedStudentCourses, seedCourses, seedFacultyCourses };
+
+  const removeStudentCouse = async () => {
+    try {
+      // Connect to MongoDB
+      await connectDB();
+      console.log("Connected to MongoDB, starting student course removal process...");
+      
+      // Find the student course entry
+      const studentCourse = await StudentCourse.findOne({
+        rollNo: "220101039",
+        courseId: "CS101"
+      });
+      
+      if (!studentCourse) {
+        console.log(`Student course entry not found for rollNo: 220101039 and courseId: CS101`);
+        process.exit(1);
+      }
+      
+      // Remove the student from the course
+      await StudentCourse.deleteOne({
+        rollNo: "220101039",
+        courseId: "CS101"
+      });
+      
+      console.log(`Successfully removed student from course CS101`);
+      process.exit(0);
+    } catch (error) {
+      console.error("Error removing student from course:", error);
+      process.exit(1);
+    }
+  };
+    
+  export { seedDatabase, seedStudentCourses, seedCourses, removeAllStudentsFromCourse };
