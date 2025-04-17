@@ -194,7 +194,8 @@ export const getStudentCourses = async (req, res) => {
                     credits: course.credits,
                     assignments: 8, // Placeholder
                     announcements: course.announcements.length,
-                    attendance: 85 // Placeholder
+                    attendance: 85, // Placeholder
+                    slot: course.slot,
                 };
             })
         );
