@@ -2,20 +2,101 @@ import mongoose from "mongoose";
 
 // Complaint Model
 const complaintSchema = new mongoose.Schema({
-  complaintId: { type: mongoose.Schema.Types.ObjectId, required: true, unique: true },
-  userId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
-  title: { type: String },
-  date: { type: Date, required: true, default: Date.now },
-  status: { type: String, required: true, enum: ['Under Review', 'Resolved'], default: 'Under Review' },
-  description: { type: String },
-  images: {type: String },
-//   address: { type: String },
-  category: { type: String, required: true }, // enum?
-  subCategory: { type: String, required: true }, // enum?
-  assignedName: { type: String },
-  assignedContact: { type: Number },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: "User"
+  },
+  title: {
+    type: String,
+    required: true
+  },
+  date: {
+    type: Date,
+    required: true,
+  },
+  status: {
+    type: String,
+    required: true,
+    enum: ['Pending', 'In Progress', 'Resolved'],
+    default: 'Pending'
+  },
+  description: {
+    type: String,
+    required: true
+  },
+  imageUrls: {
+    type: [String],
+    required: false,
+    default: []
+  },
+  category: {
+    type: String,
+    required: true
+  },
+  subCategory: {
+    type: String,
+    required: true
+  },
+  assignedName: {
+    type: String,
+    required: false,
+    default: null
+  },
+  assignedContact: {
+    type: String,
+    required: false,
+    default: null
+  },
+  assignedStaffId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "SupportStaff",
+    required: false,
+    default: null
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  },
 });
 
-export const Complaint = mongoose.model('Complaint', complaintSchema);
+const SupportStaffSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  phone: { type: String, required: true },
+  categories: [{ 
+    type: String,
+    required: false 
+  }],
+  subCategories: [{ 
+    type: String,
+    required: false 
+  }],
+  assignedComplaints: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Complaint"
+  }],
+  isAvailable: {
+    type: Boolean,
+    default: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+// Virtual property to calculate availability based on assigned complaints
+SupportStaffSchema.virtual('isBusy').get(function() {
+  return this.assignedComplaints && this.assignedComplaints.length >= 5; // Staff is busy if they have 5 or more active complaints
+});
+
+// Set toJSON option to include virtuals
+SupportStaffSchema.set('toJSON', { virtuals: true });
+SupportStaffSchema.set('toObject', { virtuals: true });
+
+export const Complaint = mongoose.model("Complaint", complaintSchema);
+export const SupportStaff = mongoose.model("SupportStaff", SupportStaffSchema);

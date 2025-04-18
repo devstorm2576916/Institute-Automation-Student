@@ -1,25 +1,49 @@
 import express from "express";
-import {
-  getStudent,
-  getStudentCourses,
-  dropCourse,
-  getStudentBonafideDetails,
-  createBonafideApplication,
-  getBonafideApplications,
-  getStudentPassportDetails,
-  submitPassportApplication,
-  getPassportApplications,
-  updateStudentProfile,
-  getStudentFeeDetails,
-  recordFeePayment,
-  getFeePaymentHistory,
+import { 
+    getStudent, 
+    getStudentCourses,
+    dropCourse,
+    getStudentBonafideDetails, 
+    createBonafideApplication,
+    getBonafideApplications,
+    getStudentPassportDetails,
+    submitPassportApplication,
+    getPassportApplications,
+    updateStudentProfile,
+    getCourseAnnouncements,
+    createCourseDropRequest,
+    getStudentDropRequests,
+    cancelDropRequest,
+    getCompletedCourses,
+    updateStudentProfile,
+    getAvailableCourses,
+    submitCourseApprovalRequest,
+    getPendingRequests,
+    getStudentFromRollNumber,
+    getStudentFeeDetails,
+    recordFeePayment,
+    getFeePaymentHistory,
 } from "../controllers/student.controller.js";
+
 
 const router = express.Router();
 router.get("/:id", getStudent);
 router.get("/:id/courses", getStudentCourses);
-router.delete("/:id/courses/:courseId", dropCourse);
+
+// router.delete("/:id/courses/:courseId", dropCourse);
+router.get('/courses/:courseId', getCourseAnnouncements);
+router.get("/:id/completed-courses", getCompletedCourses); 
+
+
+// Course drop request routes
+router.post("/:id/drop-requests", createCourseDropRequest);
+router.get("/:id/drop-requests", getStudentDropRequests);
+router.delete("/:id/drop-requests/:requestId", cancelDropRequest);
+
+// router.delete("/:id/courses/:courseId",  dropCourse);
 router.put("/:id/profile", updateStudentProfile);
+router.get("/:id/rollno",getStudentFromRollNumber);
+
 
 // Bonafide routes
 router.get("/:id/bonafide", getStudentBonafideDetails);
@@ -30,6 +54,18 @@ router.get("/:id/bonafide/applications", getBonafideApplications);
 router.get("/:id/passport", getStudentPassportDetails);
 router.post("/:id/passport/apply", submitPassportApplication);
 router.get("/:id/passport/applications", getPassportApplications);
+
+
+// Course approval request routes
+
+// Fetch available courses
+router.get("/:id/available-courses", getAvailableCourses);
+
+// Submit a course approval request
+router.post("/:id/course-approval", submitCourseApprovalRequest);
+
+// Fetch pending requests
+router.get("/:id/pending-requests", getPendingRequests);
 
 // Fee routes
 router.get("/:id/fees", getStudentFeeDetails);

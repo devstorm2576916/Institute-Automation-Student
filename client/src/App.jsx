@@ -4,19 +4,21 @@ import ComplaintSection from './components/complaintSection';
 import HostelLeave from './components/HostelLeave/HostelLeave';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar/Sidebar';
-import CourseRegistration from './components/CourseRegistration';
+import CourseRegistration from './components/registration/courseRegistration';
 import AttendanceLandingPage from './components/Attendance/AttendanceLandingPage';
 import AttendanceCoursePage from './components/Attendance/AttendanceCoursePage';
-import CourseFeedbackSelection from './components/courseFeedback/courseFeedbackSelection.jsx';
-import CourseFeedbackForm from './components/courseFeedback/courseFeedbackForm.jsx';
-import FeedbackConfiguration from './components/courseFeedback/feedbackConfiguration.jsx';
-import FeedbackReports from './components/courseFeedback/feedbackReports.jsx';
+import FeedbackAdmin from './components/courseFeedback/feedbackadmin.jsx';
+import FeedbackFaculty from './components/courseFeedback/feedbackfaculty.jsx';
+import FeedbackStudent from './components/courseFeedback/feedbackstudent.jsx';
+import FeedbackAdminSelect from './components/courseFeedback/feedbackadminSelect.jsx';
+import FeedbackFacultySelect from './components/courseFeedback/feedbackfacultySelect.jsx';
+import FeedbackStudentSelect from './components/courseFeedback/feedbackstudentSelect.jsx';
 import Mess from './components/HostelMess/Mess.jsx';
 import StudentSubscriptionForm from './components/HostelMess/StudentSubscriptionForm.jsx';
 import AdminSubscriptionRequests from './components/HostelMess/AdminSubscriptionRequests.jsx';
 import { Navigate } from "react-router-dom";
-import CourseRegistrationFaculty from './components/registration/faculty_reg_dashboard.jsx';
-
+import FacultyDashboard from './components/registration/faculty_reg_dashboard.jsx';
+import CourseRegistrationFaculty from './components/registration/faculty_registration_page.jsx';
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -36,7 +38,7 @@ import EditAssignment from "./components/Assignment/EditAssignment.jsx";
 import FacultyAssignmentSubmissions from "./components/Assignment/FacultyAssignmentSubmissions.jsx";
 import LoginPage from "./components/LoginPage/Login.jsx";
 import DropCourse from "./components/dropCourse/drop.jsx";
-import CourseAnnouncements from "./components/Announcements/CourseAnnouncements.jsx";
+import CourseAnnouncements from "./components/Announcements/studentAnnouncements.jsx";
 import MyCourses from "./components/mycourses/myCourse.jsx";
 import DocumentManager from "./pages/Documents/admin/DocumentManager.jsx";
 import DocumentAccessControl from "./pages/Documents/admin/DocumentAccessControl.jsx";
@@ -45,13 +47,19 @@ import AdminFeeControl from "./pages/Documents/admin/AdminFeeControl.jsx";
 import { RoleProvider } from './context/Rolecontext.jsx';
 import StudentProfile from './pages/ProfilePage.jsx';
 import TimeTable from './components/TimeTable/timetable.jsx';
-import FacultyDashboard from "./components/registration/faculty_registration_page.jsx";  // New Course Selection Page
 import HostelTransfer from './components/HostelTransfer/HostelTransfer.jsx';
 //import CourseRegistration from "./pages/CourseRegistration";  // New Registration Page
 import { Toaster } from 'react-hot-toast';
 
 import AdminRegistration from './components/registration/admin_reg.jsx';
-import AdminDropCourseApproval from './components/dropCourse/dropCourseAdmin.jsx';
+import AdminDropRequests from './components/dropCourse/dropCourseAdmin.jsx';
+import CourseWrapper from './components/mycourses/courseWrapper.jsx';
+import FacultyCourseAnnouncements from './components/Announcements/facultyAnnouncements.jsx';
+import AnnouncementWrapper from './components/Announcements/announcementWrapper.jsx';
+import FacultyCourseStudents from './components/courseStudents/courseStudent.jsx';
+// import CourseStudents from './components/courseStudents/courseStudent.jsx';
+import CompletedCourses from './components/mycourses/CompletedCourses.jsx';
+import DropCourseWrapper from './components/dropCourse/dropCourseWrapper.jsx';
 
 const queryClient = new QueryClient()
 function App() {
@@ -137,7 +145,7 @@ function App() {
                   element:<FacultyDashboard/>  
                 },
                 {
-                    path:'facultyregistration/:id',
+                    path:'facultyregistration/:courseCode',
                     element:<CourseRegistrationFaculty/>
                 },
                 {
@@ -145,11 +153,11 @@ function App() {
                     element:<AdminRegistration/>
                 },
                 {
-                    path:"/assigngmentlanding",
+                    path:"/assignmentlanding",
                     element: <AssignmentLanding/>
                 },
                 {
-                    path:"/course/:courseId/assignment/",
+                    path:"/course/:courseId/assignments/",
                     element: <AssignmentList/>
                 },
                 {
@@ -168,6 +176,10 @@ function App() {
                     path:"/course/:courseId/assignment/:assignmentId/submissions",
                     element: <FacultyAssignmentSubmissions/>
                 },
+                {   
+                    path:"/completed-courses",
+                    element: <CompletedCourses/>
+                },
 
                 {
                     path:"/attendancelanding",
@@ -175,19 +187,23 @@ function App() {
                 },
                 {
                     path:"/dropcourse",
-                    element: <DropCourse/>
+                    element: <DropCourseWrapper/>
                 },
                 {
                     path:"/dropcourseApprovals",
-                    element: <AdminDropCourseApproval/>
+                    element: <AdminDropRequests/>
                 },
                 {
                     path:"/course/:courseId/announcements",
-                    element: <CourseAnnouncements/>
+                    element: <AnnouncementWrapper/>
                 },
                 {
-                    path:"/my-courses",
-                    element: <MyCourses/>
+                    path:"/courses",
+                    element: <CourseWrapper/>
+                },
+                {
+                    path: "/course/:courseId/students",
+                    element: <FacultyCourseStudents />
                 },
                 {
                     path:"/attendancelanding/:id",
@@ -228,20 +244,28 @@ function App() {
                     ]
                 },
                 {
-                    path: "/courseFeedback",
-                    element: <CourseFeedbackSelection/>
+                    path: "/student/feedback",
+                    element: <FeedbackStudentSelect/>
                 },
                 {
-                    path: "/courseFeedback/selectedCourse",
-                    element: <CourseFeedbackForm/>
+                    path: "/student/feedback/submit",
+                    element: <FeedbackStudent/>
                 },
                 {
-                    path: "/feedbackConfiguration",
-                    element: <FeedbackConfiguration/>
+                    path: "/acadAdmin/feedback",
+                    element: <FeedbackAdminSelect/>
                 },
                 {
-                    path: "/feedbackReports",
-                    element: <FeedbackReports/>
+                    path: "/acadAdmin/feedback/view",
+                    element: <FeedbackAdmin/>
+                },
+                {
+                    path: "/faculty/feedback",
+                    element: <FeedbackFacultySelect/>
+                },
+                {
+                    path: "/faculty/feedback/view",
+                    element: <FeedbackFaculty/>
                 },
                 {
                     path: "/profile",
