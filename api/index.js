@@ -13,7 +13,7 @@ import acadAdminRoute from "../api/routes/acadAdmin.route.js";
 import facultyRoute from "../api/routes/faculty.route.js";
 import feedbackRoute from "../api/routes/feedback.route.js";
 // import { seedDatabase, seedStudentCourses, seedCourses, removeAllStudentsFromCourse } from "../api/scripts/seedDb.js";
-// import {fixFeedbackIndexes, seedDatabase, seedStudentCourses, seedCourses, seedFacultyCourses, fillFacultyCourse } from "../api/scripts/seedDb.js";
+// import {fillFacultyCourse, seedDatabase, seedStudentCourses, seedCourses, seedFacultyCourses, fillFacultyCourse } from "../api/scripts/seedDb.js";
 import seedSupportStaff from "./scripts/seedSupportStaff.js";
 import attendanceRoute from "../api/routes/attendance.route.js"
 import assignmentRoute from "../api/routes/assignment.route.js"

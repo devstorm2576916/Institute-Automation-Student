@@ -264,6 +264,15 @@ const facultyCoursesData = [
   },
   {
     facultyId: "67fb92cbabe317891d8c0c11", // Will be replaced with actual facultyId
+    courseCode: "EE204",
+    year: 2025,
+    session: "Spring Semester",
+    status: "Ongoing",
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    facultyId: "67fb92cbabe317891d8c0c11", // Will be replaced with actual facultyId
     courseCode: "CS201",
     year: 2025,
     session: "Spring Semester",
@@ -541,10 +550,10 @@ const seedStudentCourses = async () => {
       // Check if faculty courses already exist
       const existingFacultyCourses = await FacultyCourse.find({});
       console.log("Existing faculty courses found:", existingFacultyCourses);
-      if (existingFacultyCourses) {
-        console.log(`Found existing faculty courses. Deleting them before re-seeding.`);
-        await FacultyCourse.deleteMany({});
-      }
+      // if (existingFacultyCourses) {
+      //   console.log(`Found existing faculty courses. Deleting them before re-seeding.`);
+      //   await FacultyCourse.deleteMany({});
+      // }
       
       // Insert the faculty courses
       const result = await FacultyCourse.insertMany(facultyCoursesData);
@@ -567,7 +576,10 @@ const seedStudentCourses = async () => {
       // Connect to MongoDB
       await connectDB();
       console.log("Connected to MongoDB, starting faculty course filling process...");
-      
+      const result = await Faculty.updateMany(
+        {}, // Empty filter means select all documents
+        { $set: { courses: [] } } // Set courses to an empty array
+      );
       // Find the faculty with ID 67fb92cbabe317891d8c0c11
       const facultyCourses = await FacultyCourse.find({});
       console.log("Faculty courses found:", facultyCourses);
@@ -609,7 +621,6 @@ const seedStudentCourses = async () => {
     }
   }
 
-
   // const deleteAllFeedback = async () => {
   //   try {
   //     // Connect to MongoDB
@@ -626,6 +637,28 @@ const seedStudentCourses = async () => {
   //     process.exit(1);
   //   }
   // }
+
+  const clearAllCourseAnnouncements = async () => {
+    try {
+      // Connect to MongoDB
+      await connectDB();
+      console.log("Connected to MongoDB, starting announcement clearing process...");
+      
+      // Update all course documents by setting their announcements array to empty
+      const result = await Course.updateMany(
+        {}, // Empty filter means select all documents
+        { $set: { announcements: [] } } // Set announcements to an empty array
+      );
+      
+      console.log(`Successfully cleared announcements for ${result.modifiedCount} course documents.`);
+      process.exit(0);
+    } catch (error) {
+      console.error("Error clearing course announcements:", error);
+      process.exit(1);
+    }
+  }
+  
+  // Execute the function
 
   const checkFeedBackExists = async () => {
     try {
@@ -708,4 +741,4 @@ const seedStudentCourses = async () => {
   }
 }
 
-  export {fixFeedbackIndexes, seedDatabase, seedStudentCourses, seedCourses, removeAllStudentsFromCourse, seedFacultyCourses, fillFacultyCourse };
+  export {clearAllCourseAnnouncements, seedDatabase, seedStudentCourses, seedCourses, removeAllStudentsFromCourse, seedFacultyCourses, fillFacultyCourse };
