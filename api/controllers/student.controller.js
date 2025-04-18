@@ -140,114 +140,117 @@ export const getStudentCourses = async (req, res) => {
     console.log("fjshkjfhkjsfkjsdkjf", student);
 
     if (!student) {
-      console.log("Student not found for ID:", studentId);
-      return res.status(404).json({ message: "Student not found" });
-    }
-
-    console.log("Found student with roll number:", student.rollNo);
-
-    // Get current academic session
-    const now = new Date();
-    const year = now.getFullYear();
-    let session;
-
-    if (now.getMonth() >= 0 && now.getMonth() <= 4) {
-      session = "Spring Semester";
-    } else if (now.getMonth() >= 5 && now.getMonth() <= 7) {
-      session = "Summer Course";
-    } else {
-      session = "Winter Semester";
-    }
-
-    const semester = `${session} ${year}`;
-    // console.log("Current academic session:", semester);
-    // console.log(student.rollNo);
-
-    // Find approved courses for this student
-    const studentCourses = await StudentCourse.find({
-      rollNo: student.rollNo,
-      status: "Approved",
-    });
-    // console.log(`Found ${studentCourses.length} enrolled courses for student`);
-
-    if (!studentCourses || studentCourses.length === 0) {
-      return res.status(200).json({
-        courses: [],
-        feedbackOpen: false,
-      });
-    }
-
-    // // Get global feedback status
-    const globalConfig = await GlobalFeedbackConfig.getConfig();
-    const globalFeedbackActive = globalConfig.isActive;
-
-    // console.log(`Courses enrolled by student:`, studentCourses);
-
-    // Get course details and faculty information
-    const courses = await Promise.all(
-      studentCourses.map(async (sc) => {
-        const course = await Course.findOne({ courseCode: sc.courseId });
-        console.log("Course details fetched:", course);
-        if (!course) {
-          console.log(`Course not found for ID: ${sc.courseId}`);
-          return null;
+        console.log("Student not found for ID:", studentId);
+        return res.status(404).json({ message: "Student not found" });
         }
 
-        const facultyCourse = await FacultyCourse.findOne({
-          courseCode: sc.courseId,
-        });
-        console.log("Faculty course details fetched:", facultyCourse);
-        // .populate('facultyId', 'name');
-
-        // Added feedback active logic here
-        let feedbackOpen = false;
-        if (globalFeedbackActive && facultyCourse && facultyCourse.facultyId) {
-          // Get the faculty document to use the correct ObjectId
-          const faculty = await Faculty.findById(facultyCourse.facultyId);
-          if (faculty) {
-            // Check if feedback already exists for this student-course-faculty combination
-            const feedbackExists = await Feedback.findOne({
-              student: student._id,
-              course: course._id,
-              faculty: faculty._id,
+        console.log("Found student with roll number:", student.rollNo);
+  
+        // Get current academic session
+        const now = new Date();
+        const year = now.getFullYear();
+        let session;
+        
+        if (now.getMonth() >= 0 && now.getMonth() <= 4) {
+            session = 'Spring Semester';
+        } else if (now.getMonth() >= 5 && now.getMonth() <= 7) {
+            session = 'Summer Course';
+        } else {
+            session = 'Winter Semester';
+        }
+        
+        const semester = `${session} ${year}`;
+        // console.log("Current academic session:", semester);
+        // console.log(student.rollNo);
+        
+        // Find approved courses for this student
+        const studentCourses = await StudentCourse.find({rollNo: student.rollNo, status: 'Approved', isCompleted: false})
+        // console.log(`Found ${studentCourses.length} enrolled courses for student`);
+        
+        if (!studentCourses || studentCourses.length === 0) {
+            return res.status(200).json({ 
+                courses: [],
+                feedbackOpen: false
             });
-            // Set feedbackOpen to true if feedback doesn't exist
-            feedbackOpen = !feedbackExists;
-            console.log("already submitted", feedbackExists);
-          }
         }
 
-        // Use placeholder values for some fields
-        return {
-          id: course.courseCode,
-          name: course.courseName,
-          // instructor: facultyCourse?.facultyId?.name || 'TBA',
-          credits: course.credits,
-          assignments: 8, // Placeholder
-          announcements: course.announcements.length,
-          attendance: 85, // Placeholder
-          feedbackOpen: feedbackOpen,
-          slot: course.slot,
-        };
-      })
-    );
-    console.log("Hehehhe", courses);
-    // console.log(`Fetched course details for ${courses.length} courses`);
-    // console.log(courses);
-    // Filter out null values (courses that weren't found)
-    const validCourses = courses.filter((course) => course !== null);
-    console.log(`Returning ${validCourses.length} valid courses`);
+        // // Get global feedback status
+        const globalConfig = await GlobalFeedbackConfig.getConfig();
+        const globalFeedbackActive = globalConfig.isActive;
+        console.log("Global feedback active status:", globalFeedbackActive);
 
-    // Determine if feedback is available (implement your logic)
-    const isFeedbackAvailable = false; // Placeholder
+        // console.log(`Courses enrolled by student:`, studentCourses);
+        
+        // Get course details and faculty information
+        const courses = await Promise.all(
+            studentCourses.map(async (sc) => {
+                const course = await Course.findOne({ courseCode: sc.courseId });
+                // console.log("Course details fetched:", course);
+                if (!course) {
+                    console.log(`Course not found for ID: ${sc.courseId}`);
+                    return null;
+                }
+                // console.log("Course details:", sc);
+                const facultyCourse = await FacultyCourse.findOne({
+                    courseCode: sc.courseId
+                });
+                console.log("Faculty course details fetched:", facultyCourse);
+                // .populate('facultyId', 'name');
+                
+                                // Added feedback active logic here
+                let feedbackOpen = false;
+                
+                if (globalFeedbackActive && facultyCourse && facultyCourse.facultyId) {
+                    // Get the faculty document to use the correct ObjectId
+                    const faculty = await Faculty.findOne({userId: facultyCourse.facultyId});
+                    console.log("Facccc", faculty);
+                    console.log("Coursss", course);
+                    console.log("Studd", student);
+                    if (faculty) {
+                        const feedbackExists = await Feedback.exists({
+                            student: student._id.toString(),
+                            course: course._id.toString(),
+                            faculty: faculty._id.toString()
+                        });
+                        console.log("Feedback exists:", feedbackExists);
+                        // Set feedbackOpen to true if feedback doesn't exist
+                        feedbackOpen = !feedbackExists;
+                        console.log("already submitted",feedbackExists);
+                    }
+                }
 
-    res.status(200).json({
-      courses: validCourses,
-    });
-  } catch (error) {
-    console.error("Error fetching student courses:", error);
-    res.status(500).json({ message: "Failed to fetch courses" });
-  }
+                // Use placeholder values for some fields
+                return {
+                    id: course.courseCode,
+                    name: course.courseName,
+                    // instructor: facultyCourse?.facultyId?.name || 'TBA',
+                    credits: course.credits,
+                    assignments: 8, // Placeholder
+                    announcements: course.announcements.length,
+                    attendance: 85, // Placeholder
+                    feedbackOpen: feedbackOpen,
+                    slot: course.slot,
+                };
+            })
+        );
+        console.log("Hehehhe", courses);
+        // console.log(`Fetched course details for ${courses.length} courses`);
+        // console.log(courses);
+        // Filter out null value    s (courses that weren't found)
+        const validCourses = courses.filter(course => course !== null);
+        console.log(`Returning ${validCourses.length} valid courses`);
+        
+        // Determine if feedback is available (implement your logic)
+        const isFeedbackAvailable = false; // Placeholder
+        
+        res.status(200).json({
+            courses: validCourses
+        });
+        
+    } catch (error) {
+        console.log("Error fetching student courses:", error);
+        res.status(500).json({ message: "Failed to fetch courses" });
+    }
 };
 
 export const getCourseAnnouncements = async (req, res) => {

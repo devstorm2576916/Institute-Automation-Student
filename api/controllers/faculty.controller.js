@@ -57,7 +57,7 @@ try {
 
     // Check if the faculty exists
     const faculty = await Faculty.findOne({ userId: id });
-    // console.log("Faculty found:", faculty);
+    console.log("Faculty found:", faculty);
     if (!faculty) {
         return res.status(404).json({ message: 'Faculty not found' });
     }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import newRequest from '../../utils/newRequest';
+import { FaArrowLeft, FaStar, FaRegStar, FaBook, FaChalkboardTeacher, FaCalendarAlt } from 'react-icons/fa';
 import './feedback.css';
 
 const FeedbackStudent = () => {
@@ -21,7 +22,7 @@ const FeedbackStudent = () => {
   const [year, setYear] = useState('');
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState('');
-
+  const [facId, setFacId] = useState('');
   // Feedback form state
   const [feedbackData, setFeedbackData] = useState({
     ratings: {},
@@ -39,22 +40,18 @@ const FeedbackStudent = () => {
         const courseRes = await newRequest.get(`feedback/course/${courseId}/details`);
         const course = courseRes.data;
         setCourseDetails(course);
-
-        console.log(course);
-
-
-
         // 2. Get faculty assignment (FacultyCourse) for this course
-        const facultyCourseRes = await newRequest.get(`/feedback/course/${courseId}/faculty`);
-        const facultyCourse = facultyCourseRes.data;
+        // const facultyCourseRes = await newRequest.get(`/feedback/course/${courseId}/faculty`);
+        // const facultyCourse = facultyCourseRes.data;
 
-        // console.log("jdfhkjfhdkjfhkdjf");
         // console.log(facultyCourse);
-
-
-        setSession(facultyCourse.session);
-        setYear(facultyCourse.year);
-        setFacultyName(facultyCourse.facultyId);
+        // console.log(courseDetails);
+        
+        setSession(course.session);
+        setYear(course.year);
+        setFacultyName(course.facultyName);
+        setFacId(course.facultyId);
+        console.log(course);
 
         setLoading(false);
       } catch (err) {
@@ -132,11 +129,11 @@ const FeedbackStudent = () => {
       questionId,
       rating
     }));
-
+    console.log("hehe ", courseDetails.facultyId);
     try {
       await newRequest.post('/feedback/submit', {
         student: studentId,
-        faculty: courseDetails ? courseDetails.facultyId : '',
+        faculty: courseDetails.facultyId,
         course: courseId,
         isActive: true,
         ratings: formattedRatings,
@@ -153,6 +150,31 @@ const FeedbackStudent = () => {
     navigate('/courses');
   };
 
+  // Rating display component
+  const RatingOption = ({ rating, isSelected, onClick }) => {
+    const labels = ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+    
+    return (
+      <label 
+        className={`flex flex-col items-center cursor-pointer transition-all px-3 py-2 rounded-lg ${isSelected ? 'bg-pink-100 ring-2 ring-pink-400' : 'hover:bg-gray-50'}`}
+        onClick={onClick}
+      >
+        <div className="flex items-center justify-center w-8 h-8 mb-1 rounded-full bg-gradient-to-r from-pink-400 to-pink-600 text-white font-bold">
+          {rating}
+        </div>
+        <input
+          type="radio"
+          className="hidden"
+          checked={isSelected}
+          onChange={() => {}}
+        />
+        <span className={`text-xs font-medium ${isSelected ? 'text-pink-700' : 'text-gray-500'}`}>
+          {labels[rating-1]}
+        </span>
+      </label>
+    );
+  };
+
   // UI
   if (loading) {
     return (
@@ -165,85 +187,147 @@ const FeedbackStudent = () => {
 
   if (fetchError || !courseDetails) {
     return (
-      <div className="feedback-container">
-        <div className="error-message">
-          {fetchError || "Missing required information to submit feedback."}
-          <div className="form-actions">
-            <button type="button" className="back-btn" onClick={handleCancel}>
-              Back to Feedback List
-            </button>
-          </div>
+      <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-8 mt-8 mb-8">
+        <Link to="/courses" className="inline-flex items-center text-pink-600 hover:text-pink-800 mb-6 font-medium">
+          <FaArrowLeft className="mr-2" />
+          Back to Courses
+        </Link>
+        <div className="bg-red-50 border border-red-200 text-red-700 p-6 rounded-lg text-center">
+          <h3 className="text-xl font-semibold mb-3">Error</h3>
+          <p>{fetchError || "Missing required information to submit feedback."}</p>
+          <button 
+            className="mt-4 bg-pink-600 text-white px-6 py-2 rounded-lg hover:bg-pink-700 transition-colors"
+            onClick={handleCancel}
+          >
+            Back to Feedback List
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-8 mt-8 mb-8">
-      <h1 className="text-3xl font-bold mb-6 text-pink-700">Course Feedback Form</h1>
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center bg-pink-50 rounded-lg p-4 mb-6">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-800">{courseDetails.courseName}</h2>
-          <p className="text-gray-600">Course Code: <span className="font-medium">{courseDetails.courseCode}</span></p>
-          <p className="text-gray-600">Department: <span className="font-medium">{courseDetails.department}</span></p>
-          <p className="text-gray-600">Credits: <span className="font-medium">{credits}</span></p>
-        </div>
-        <div className="mt-4 md:mt-0">
-          <p className="text-gray-700 font-medium">Faculty: <span className="font-semibold">{facultyName}</span></p>
-          <p className="text-gray-600">Session: <span className="font-medium">{session} {year}</span></p>
+    <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8 mt-8 mb-8">
+      <Link to="/courses" className="inline-flex items-center text-pink-600 hover:text-pink-800 mb-6 font-medium">
+        <FaArrowLeft className="mr-2" />
+        Back to Courses
+      </Link>
+      
+      <h1 className="text-3xl font-bold mb-2 text-gray-800">Course Feedback</h1>
+      <p className="text-gray-500 mb-6">Your feedback helps us improve our academic programs</p>
+      
+      <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-6 mb-8 shadow-sm">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+          <div className="flex-1">
+            <div className="flex items-start">
+              <FaBook className="text-pink-500 mt-1 mr-3 text-xl" />
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">{courseDetails.courseName}</h2>
+                <p className="text-gray-600 font-medium">{courseDetails.courseCode}</p>
+              </div>
+            </div>
+            <div className="mt-3 text-gray-600 ml-8">
+              <p>Department: <span className="font-medium">{courseDetails.department}</span></p>
+              <p>Credits: <span className="font-medium">{credits}</span></p>
+            </div>
+          </div>
+          
+          <div className="flex-1">
+            <div className="flex items-start">
+              <FaChalkboardTeacher className="text-pink-500 mt-1 mr-3 text-xl" />
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800">Faculty</h3>
+                <p className="text-gray-700 font-medium">{facultyName}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start mt-3">
+              <FaCalendarAlt className="text-pink-500 mt-1 mr-3 text-xl" />
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800">Session</h3>
+                <p className="text-gray-700">{session} {year}</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      {validationError && <div className="error-message mb-4">{validationError}</div>}
-      {error && <div className="error-message mb-4">{error}</div>}
+      
+      {validationError && (
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded">
+          <div className="flex">
+            <div className="ml-3">
+              <p className="text-red-700">{validationError}</p>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {error && (
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded">
+          <div className="flex">
+            <div className="ml-3">
+              <p className="text-red-700">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <form onSubmit={handleSubmit} className="space-y-8">
-        {feedbackSections.map(section => (
-          <div key={section.id} className="feedback-section">
-            <h3 className="section-title text-lg font-semibold text-pink-600 mb-2">{section.title}</h3>
-            {section.questions.map(question => (
-              <div key={question.id} className="question-item mb-4">
-                <p className="question-text text-gray-800 mb-2">{question.text}</p>
-                <div className="flex gap-4">
+        {feedbackSections.map((section, sectionIndex) => (
+          <div key={section.id} className={`p-6 rounded-lg border ${sectionIndex % 2 === 0 ? 'border-pink-200 bg-pink-50' : 'border-purple-200 bg-purple-50'}`}>
+            <h3 className={`text-xl font-bold mb-4 ${sectionIndex % 2 === 0 ? 'text-pink-700' : 'text-purple-700'}`}>{section.title}</h3>
+            
+            {section.questions.map((question, qIndex) => (
+              <div key={question.id} className={`mb-6 ${qIndex !== section.questions.length - 1 ? 'pb-6 border-b border-gray-200' : ''}`}>
+                <p className="font-medium text-gray-800 mb-3">{question.text}</p>
+                <div className="flex justify-between gap-2">
                   {[1, 2, 3, 4, 5].map(rating => (
-                    <label key={rating} className="flex items-center gap-1 cursor-pointer">
-                      <input
-                        type="radio"
-                        name={question.id}
-                        value={rating}
-                        checked={feedbackData.ratings[question.id] === rating}
-                        onChange={() => handleRatingChange(question.id, rating)}
-                        className="accent-pink-500"
-                      />
-                      <span className="rating-circle bg-pink-100 text-pink-700 rounded-full px-2 py-1 text-xs font-medium">{rating}</span>
-                      <span className="text-xs text-gray-500">
-                        {rating === 1 ? 'Poor' :
-                         rating === 2 ? 'Fair' :
-                         rating === 3 ? 'Good' :
-                         rating === 4 ? 'Very Good' : 'Excellent'}
-                      </span>
-                    </label>
+                    <RatingOption 
+                      key={rating}
+                      rating={rating}
+                      isSelected={feedbackData.ratings[question.id] === rating}
+                      onClick={() => handleRatingChange(question.id, rating)}
+                    />
                   ))}
                 </div>
               </div>
             ))}
           </div>
         ))}
-        <div className="comments-section">
-          <h3 className="section-title text-lg font-semibold text-pink-600 mb-2">Additional Comments</h3>
+        
+        <div className="p-6 rounded-lg border border-gray-200 bg-gray-50">
+          <h3 className="text-xl font-bold mb-4 text-gray-700">Additional Comments</h3>
           <textarea
-            className="comments-input w-full border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-pink-400"
+            className="w-full border border-gray-300 rounded-lg p-4 focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all"
             rows={5}
             placeholder="Please provide any additional feedback or suggestions for improvement..."
             value={feedbackData.comments}
             onChange={handleCommentsChange}
           />
         </div>
-        <div className="form-actions flex justify-end gap-4">
-          <button type="button" className="cancel-btn bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300" onClick={handleCancel}>
-            Cancel
-          </button>
-          <button type="submit" className="submit-btn bg-pink-600 text-white px-6 py-2 rounded hover:bg-pink-700" disabled={submitting}>
-            {submitting ? 'Submitting...' : 'Submit Feedback'}
-          </button>
+        
+        <div className="flex justify-between items-center pt-4">
+          <Link to="/courses" className="inline-flex items-center text-gray-600 hover:text-gray-800">
+            <FaArrowLeft className="mr-2" />
+            Back to Courses
+          </Link>
+          
+          <div className="flex gap-4">
+            <button 
+              type="button" 
+              className="px-6 py-3 rounded-lg font-medium border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors"
+              onClick={handleCancel}
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              className="px-8 py-3 rounded-lg font-medium bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:from-pink-600 hover:to-purple-700 transition-colors shadow-md disabled:opacity-70"
+              disabled={submitting}
+            >
+              {submitting ? 'Submitting...' : 'Submit Feedback'}
+            </button>
+          </div>
         </div>
       </form>
     </div>

@@ -18,10 +18,8 @@ export const getFacultyCourses = async (req, res) => {
         message: 'User ID is required in headers'
       });
     }
-
     // Step 1: Find the faculty using the userId
     const faculty = await Faculty.findOne({ userId });
-
     if (!faculty) {
       return res.status(404).json({
         success: false,
