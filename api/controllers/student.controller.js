@@ -1,20 +1,12 @@
-import { Student } from "../models/student.model.js";
-import {
-  Course,
-  StudentCourse,
-  FacultyCourse,
-  ProgramCourseMapping,
-  CourseApprovalRequest,
-} from "../models/course.model.js";
-import {
-  ApplicationDocument,
-  Bonafide,
-  Passport,
-} from "../models/documents.models.js";
-import { Faculty } from "../models/faculty.model.js";
-import { CourseDropRequest } from "../models/courseDropRequest.model.js";
-import { User } from "../models/user.model.js";
-import { Feedback, GlobalFeedbackConfig } from "../models/feedback.model.js";
+import { Student } from '../models/student.model.js';
+import { Course, StudentCourse, FacultyCourse,ProgramCourseMapping,CourseApprovalRequest } from '../models/course.model.js';
+import { ApplicationDocument, Bonafide, Passport } from '../models/documents.models.js';
+import { Faculty } from '../models/faculty.model.js';
+import { CourseDropRequest } from '../models/courseDropRequest.model.js';
+import { User } from '../models/user.model.js';
+import { FeeBreakdown, FeeDetails } from "../models/fees.model.js";
+import mongoose from "mongoose";
+import { Feedback , GlobalFeedbackConfig } from '../models/feedback.model.js';
 
 // Get basic student info
 export const getStudent = async (req, res) => {
@@ -625,11 +617,9 @@ export const createBonafideApplication = async (req, res) => {
     });
   } catch (error) {
     console.error("Error creating bonafide application:", error);
-    res
-      .status(500)
-      .json({
-        message: error.message || "Error submitting bonafide application",
-      });
+    res.status(500).json({
+      message: error.message || "Error submitting bonafide application",
+    });
   }
 };
 
@@ -763,11 +753,9 @@ export const submitPassportApplication = async (req, res) => {
     });
   } catch (error) {
     console.error("Error creating passport application:", error);
-    res
-      .status(500)
-      .json({
-        message: error.message || "Error submitting passport application",
-      });
+    res.status(500).json({
+      message: error.message || "Error submitting passport application",
+    });
   }
 };
 
@@ -831,6 +819,18 @@ export const updateStudentProfile = async (req, res) => {
     const studentId = req.params.id;
     const updateData = req.body;
 
+        // Update user data
+        if (updateData.userData) {
+            await User.findByIdAndUpdate(
+                updateData.userData.userId,
+                {
+                    name: updateData.userData.name,
+                    email: updateData.userData.email,
+                    contactNo: updateData.userData.contact
+                }
+            );
+        }
+        // console.log(updateData.hostel);
     // Update user data
     if (updateData.userData) {
       await User.findByIdAndUpdate(updateData.userData.userId, {
@@ -839,7 +839,6 @@ export const updateStudentProfile = async (req, res) => {
         contactNo: updateData.userData.contact,
       });
     }
-    // console.log(updateData.hostel);
 
     // Update student data
     const student = await Student.findOneAndUpdate(
@@ -864,6 +863,335 @@ export const updateStudentProfile = async (req, res) => {
     res.status(200).json(student);
   } catch (error) {
     console.error("Error updating student profile:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get student fee details
+export const getStudentFeeDetails = async (req, res) => {
+  try {
+    const studentId = req.params.id;
+
+    // Find the student with populated user data
+    const student = await Student.findOne({ userId: studentId }).populate(
+      "userId",
+      "name email contactNo"
+    );
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    // Calculate next semester and its parity
+    const currentSemester = parseInt(student.semester) || 1;
+    const nextSemester = currentSemester + 1;
+
+    // Check if student has reached maximum semesters based on program
+    const maxSemesters = {
+      BTech: 8,
+      MTech: 4,
+      PhD: 10,
+      BDes: 8,
+      MDes: 4,
+    };
+
+    const programMaxSemesters = maxSemesters[student.program] || 8; // Default to 8 if program not found
+
+    // If next semester exceeds maximum, return with appropriate message
+    if (nextSemester > programMaxSemesters) {
+      return res.status(200).json({
+        message: `You have completed the maximum number of semesters (${programMaxSemesters}) for your program.`,
+        isMaxSemesterReached: true,
+        student: {
+          name: student.userId.name,
+          rollNo: student.rollNo,
+          program: student.program,
+          department: student.department,
+          semester: currentSemester,
+          nextSemester: null,
+          email: student.userId.email,
+          contact: student.userId.contactNo,
+        },
+      });
+    }
+
+    const nextSemesterParity = nextSemester % 2; // 0 for even, 1 for odd
+
+    // Get ACTIVE fee structure for student's program and next semester parity
+    const feeBreakdown = await FeeBreakdown.findOne({
+      program: student.program,
+      semesterParity: nextSemesterParity,
+      isActive: true, // Only get active fee structure
+    });
+
+    if (!feeBreakdown) {
+      return res.status(404).json({
+        message: "Fee payment is not yet enabled for the next semester",
+        isActive: false,
+      });
+    }
+
+    // Check if student has already paid
+    const feeDetails = await FeeDetails.findOne({
+      rollNo: student.rollNo,
+      semester: nextSemester,
+      "feeBreakdownData.program": student.program,
+      "feeBreakdownData.semesterParity": nextSemesterParity,
+    });
+
+    const isPaid = !!feeDetails?.isPaid;
+
+    // Format fee data for response
+    const feeData = {
+      student: {
+        name: student.userId.name,
+        rollNo: student.rollNo,
+        program: student.program,
+        department: student.department,
+        semester: currentSemester,
+        nextSemester: nextSemester,
+        email: student.userId.email,
+        contact: student.userId.contactNo,
+      },
+      feeBreakdown: {
+        ...feeBreakdown.toObject(),
+        totalAmount: calculateTotalAmount(feeBreakdown),
+      },
+      feeStatus: {
+        isPaid,
+        semester: nextSemester,
+        feeDetailsId: feeDetails?._id,
+        semesterParity: nextSemesterParity,
+      },
+    };
+
+    res.status(200).json(feeData);
+  } catch (error) {
+    console.error("Error fetching student fee details:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Helper function to calculate total amount
+const calculateTotalAmount = (feeBreakdown) => {
+  return (
+    feeBreakdown.tuitionFees +
+    feeBreakdown.examinationFees +
+    feeBreakdown.registrationFee +
+    feeBreakdown.gymkhanaFee +
+    feeBreakdown.medicalFee +
+    feeBreakdown.hostelFund +
+    feeBreakdown.hostelRent +
+    feeBreakdown.elecAndWater +
+    feeBreakdown.messAdvance +
+    feeBreakdown.studentsBrotherhoodFund +
+    feeBreakdown.acadFacilitiesFee +
+    feeBreakdown.hostelMaintenance +
+    feeBreakdown.studentsTravelAssistance
+  );
+};
+
+// Helper function to get current academic year
+const getCurrentAcademicYear = () => {
+  const today = new Date();
+  const month = today.getMonth();
+  const year = today.getFullYear();
+  return month < 6 ? `${year - 1}-${year}` : `${year}-${year + 1}`;
+};
+
+export const recordFeePayment = async (req, res) => {
+  try {
+    const studentId = req.params.id;
+    const {
+      semester,
+      feeBreakdownId, // We'll use this to get the fee breakdown data
+      transactionId,
+      paymentDetails,
+      academicYear,
+      paidAt,
+    } = req.body;
+
+    // Debug logging
+    console.log("Request body:", req.body);
+
+    // Find student and validate rollNo
+    const student = await Student.findOne({ userId: studentId });
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+    if (!student.rollNo) {
+      return res
+        .status(400)
+        .json({ message: "Student record missing roll number" });
+    }
+
+    // Get fee breakdown data to embed in fee details
+    const feeBreakdown = await FeeBreakdown.findById(feeBreakdownId);
+    if (!feeBreakdown) {
+      return res.status(400).json({ message: "Invalid fee breakdown ID" });
+    }
+
+    // Calculate total amount
+    const totalAmount = calculateTotalAmount(feeBreakdown);
+
+    // Create the fee details document with embedded fee breakdown data
+    const feeDetailsData = {
+      rollNo: student.rollNo,
+      semester: Number(semester),
+      // Store complete fee breakdown data for historical record
+      feeBreakdownData: {
+        tuitionFees: feeBreakdown.tuitionFees,
+        examinationFees: feeBreakdown.examinationFees,
+        registrationFee: feeBreakdown.registrationFee,
+        gymkhanaFee: feeBreakdown.gymkhanaFee,
+        medicalFee: feeBreakdown.medicalFee,
+        hostelFund: feeBreakdown.hostelFund,
+        hostelRent: feeBreakdown.hostelRent,
+        elecAndWater: feeBreakdown.elecAndWater,
+        messAdvance: feeBreakdown.messAdvance,
+        studentsBrotherhoodFund: feeBreakdown.studentsBrotherhoodFund,
+        acadFacilitiesFee: feeBreakdown.acadFacilitiesFee,
+        hostelMaintenance: feeBreakdown.hostelMaintenance,
+        studentsTravelAssistance: feeBreakdown.studentsTravelAssistance,
+        program: feeBreakdown.program,
+        semesterParity: feeBreakdown.semesterParity,
+        totalAmount: totalAmount,
+      },
+      isPaid: true,
+      transactionId: transactionId,
+      paymentDetails: {
+        razorpayOrderId: paymentDetails.razorpayOrderId,
+        razorpayPaymentId: paymentDetails.razorpayPaymentId,
+        razorpaySignature: paymentDetails.razorpaySignature,
+        amount: Number(paymentDetails.amount),
+        currency: paymentDetails.currency,
+      },
+      academicYear: academicYear || getCurrentAcademicYear(),
+      viewableDocumentId: new mongoose.Types.ObjectId(),
+      paidAt: paidAt ? new Date(paidAt) : new Date(),
+    };
+
+    // Create and save the document
+    const feeDetails = new FeeDetails(feeDetailsData);
+
+    // Validate the document before saving
+    const validationError = feeDetails.validateSync();
+    if (validationError) {
+      console.error("Validation error:", validationError);
+      return res.status(400).json({
+        message: "Validation failed",
+        errors: Object.values(validationError.errors).map((err) => err.message),
+      });
+    }
+
+    // Save the document
+    const savedFeeDetails = await feeDetails.save();
+    console.log("Successfully saved FeeDetails:", savedFeeDetails);
+
+    return res.status(200).json({
+      message: "Fee payment recorded successfully",
+      feeDetails: savedFeeDetails,
+    });
+  } catch (error) {
+    console.error("Error recording fee payment:", error);
+    return res.status(500).json({
+      message: "Failed to record fee payment",
+      error: error.message,
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+    });
+  }
+};
+
+// Update the fee payment history endpoint to use stored fee breakdown data only
+export const getFeePaymentHistory = async (req, res) => {
+  try {
+    const studentId = req.params.id;
+    console.log("Fetching fee history for student ID:", studentId);
+
+    // Find student
+    const student = await Student.findOne({ userId: studentId }).populate(
+      "userId",
+      "name email contactNo"
+    );
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    console.log("Found student for fee history:", {
+      rollNo: student.rollNo,
+      name: student.userId?.name,
+      program: student.program,
+    });
+
+    // Get all fee payments for this student
+    const feePayments = await FeeDetails.find({
+      rollNo: student.rollNo,
+      isPaid: true, // Only get payments that are marked as paid
+    }).sort({ semester: 1 });
+
+    console.log(
+      `Found ${feePayments.length} fee payments for student ${student.rollNo}`
+    );
+
+    // Transform payment data for the response, using only stored feeBreakdownData
+    const payments = feePayments.map((payment) => {
+      // Ensure all fee breakdown numeric values are properly converted to numbers
+      const feeBreakdown = payment.feeBreakdownData
+        ? {
+            tuitionFees: Number(payment.feeBreakdownData.tuitionFees),
+            examinationFees: Number(payment.feeBreakdownData.examinationFees),
+            registrationFee: Number(payment.feeBreakdownData.registrationFee),
+            gymkhanaFee: Number(payment.feeBreakdownData.gymkhanaFee),
+            medicalFee: Number(payment.feeBreakdownData.medicalFee),
+            hostelFund: Number(payment.feeBreakdownData.hostelFund),
+            hostelRent: Number(payment.feeBreakdownData.hostelRent),
+            elecAndWater: Number(payment.feeBreakdownData.elecAndWater),
+            messAdvance: Number(payment.feeBreakdownData.messAdvance),
+            studentsBrotherhoodFund: Number(
+              payment.feeBreakdownData.studentsBrotherhoodFund
+            ),
+            acadFacilitiesFee: Number(
+              payment.feeBreakdownData.acadFacilitiesFee
+            ),
+            hostelMaintenance: Number(
+              payment.feeBreakdownData.hostelMaintenance
+            ),
+            studentsTravelAssistance: Number(
+              payment.feeBreakdownData.studentsTravelAssistance
+            ),
+            program: payment.feeBreakdownData.program,
+            semesterParity: Number(payment.feeBreakdownData.semesterParity),
+            totalAmount: Number(payment.feeBreakdownData.totalAmount),
+          }
+        : null;
+
+      return {
+        semester: payment.semester,
+        academicYear: payment.academicYear,
+        transactionId: payment.transactionId,
+        paidAt: payment.paidAt,
+        viewableDocumentId: payment.viewableDocumentId,
+        // Use the embedded fee breakdown data
+        feeBreakdown,
+        isPaid: payment.isPaid,
+        paymentDetails: payment.paymentDetails,
+      };
+    });
+
+    res.status(200).json({
+      student: {
+        name: student.userId?.name || "Unknown",
+        rollNo: student.rollNo,
+        program: student.program,
+        department: student.department,
+        email: student.userId?.email,
+        contact: student.userId?.contactNo,
+      },
+      payments,
+    });
+  } catch (error) {
+    console.error("Error fetching fee payment history:", error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -1106,3 +1434,4 @@ export const getPerformance = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
