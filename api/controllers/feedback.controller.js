@@ -2,6 +2,7 @@ import { Feedback , GlobalFeedbackConfig } from '../models/feedback.model.js';
 import { Course, FacultyCourse } from '../models/course.model.js';
 import { Faculty } from '../models/faculty.model.js';
 import { Student } from '../models/student.model.js';
+import { User } from '../models/user.model.js';
 
 // Feedback section structure (corrected typo)
 const feedback_section = [
@@ -37,30 +38,25 @@ const initializeStatistics = () => ({
 export const getFeedback = async (req, res) => {
     try {
         const { facultyId,courseCode } = req.params;
-        console.log("1coursecode", facultyId);
-        // const facultyId = req.user.id; // Get from authenticated user
-        // console.log("2facultyId", facultyId);
-        // console.log(`Fetching feedback for course: ${courseCode}, facultyId: ${facultyId}`);
-
+        console.log("facultyId", facultyId);
+        console.log("courseCode", courseCode);
         // Validate course using correct field name
         const course = await Course.findOne({ courseCode });
         if (!course) return res.status(404).json({ error: 'Course not found' });
-        // console.log("3courfdsfsdfdsvfvse", course);
-        console.log("3")
 
         // Validate faculty using user reference
         const faculty = await Faculty.findOne({ userId: facultyId });
         if (!faculty) return res.status(404).json({ error: 'Faculty not found' });
-
+        
+        console.log("faculty", faculty);
+        console.log("course", course);
         // Fetch feedback with proper population
         const feedbacks = await Feedback.find({
             faculty: faculty,
             course: course,
             isActive: true
         });
-
-        console.log("4feedbacks", feedbacks.length);
-
+        console.log("feedbacks", feedbacks);
         // Calculate statistics
         const statistics = initializeStatistics();
         statistics.totalFeedbacks = feedbacks.length;
@@ -145,72 +141,192 @@ export const checkFeedbackStatus = async (req, res) => {
     }
 };
 
+// export const submitFeedback = async (req, res) => {
+//     console.log("submitFeedback", req.body);
+//     try {
+//         const { student, faculty, course, ratings, comments } = req.body;
+//         console.log(req.body);
+//         // Validate course
+//         const courseDoc = await Course.findOne({ courseCode: course });
+//         // if (!courseDoc) return res.status(400).json({ error: 'Invalid course code' });
+
+//         console.log("courseDoc", courseDoc);
+//         // Validate faculty
+//         const facultyDoc = await Faculty.findOne({ userId: faculty });
+//         // if (!facultyDoc) return res.status(400).json({ error: 'Invalid faculty' });
+//         // console.log("facultyDoc", facultyDoc);
+//         console.log("facultyDoc", facultyDoc);
+//         // Validate student
+//         const studentDoc = await Student.findOne({ userId: student });
+//         // if (!studentDoc) return res.status(400).json({ error: 'Invalid student' });
+
+//         console.log("studentDoc", studentDoc);
+//         // Create/update feedback
+//         // const feedback = await Feedback.create(
+//         //     { 
+//         //         student: studentDoc._id,
+//         //         faculty: facultyDoc._id,  
+//         //         course: courseDoc._id 
+//         //     },
+//         //     {
+//         //         ratings: ratings.map(r => ({
+//         //             questionId: r.questionId,
+//         //             rating: Math.min(Math.max(Number(r.rating), 1), 5)
+//         //         })),
+//         //         comments: comments?.trim(),
+//         //         isActive: true,
+//         //         updatedAt: new Date()
+//         //     },
+//         //     { 
+//         //         upsert: true,
+//         //         new: true,
+//         //         runValidators: true 
+//         //     }
+//         // );
+
+//         // console.log("feedback", feedback);
+
+//         // Insert into the feedback table
+//         const feedbackEntry = new Feedback({
+//             student: studentDoc._id,
+//             faculty: facultyDoc._id,
+//             course: courseDoc._id,
+//             ratings: ratings.map(r => ({
+//                 questionId: r.questionId,
+//                 rating: Math.min(Math.max(Number(r.rating), 1), 5)
+//             })),
+//             comments: comments?.trim(),
+//             isActive: true
+//         });
+//         console.log("feedbackEntry", feedbackEntry);
+//         await feedbackEntry.save();
+//         res.status(201).json({
+//             message: 'Feedback submitted successfully',
+//             feedback: {
+//                 id: feedbackEntry._id,
+//                 updatedAt: feedbackEntry.updatedAt
+//             }
+//         });
+
+//     } catch (err) {
+//         if (err.name === 'ValidationError') {
+//             return res.status(400).json({
+//                 error: 'Invalid feedback data',
+//                 details: Object.values(err.errors).map(e => e.message)
+//             });
+//         }
+//         if (err.code === 11000) {
+//             return res.status(409).json({ 
+//                 error: 'Feedback already exists for this course and faculty' 
+//             });
+//         }
+//         res.status(500).json({ 
+//             error: 'Failed to submit feedback',
+//             details: err.message 
+//         });
+//     }
+// };
 export const submitFeedback = async (req, res) => {
+    console.log("submitFeedback", req.body);
     try {
-        const { student, faculty, course, ratings, comments } = req.body;
+      // Add this temporary code to check all indexes
+      const indexes = await Feedback.collection.indexes();
+      console.log("All indexes:", indexes);
+      const { student, faculty, course, ratings, comments } = req.body;
+      
+      // Validate course
+      const courseDoc = await Course.findOne({ courseCode: course });
+      if (!courseDoc) return res.status(400).json({ error: 'Invalid course code' });
+      
+      // Validate faculty
+      const facultyDoc = await Faculty.findOne({ userId: faculty });
+      if (!facultyDoc) return res.status(400).json({ error: 'Invalid faculty' });
+      
+      // Validate student
+      const studentDoc = await Student.findOne({ userId: student });
+      if (!studentDoc) return res.status(400).json({ error: 'Invalid student' });
+      
+      // Validate ratings
+      if (!Array.isArray(ratings) || ratings.length === 0) {
+        return res.status(400).json({ error: 'Ratings are required' });
+      }
+      
+      // console.log("studentDoc._id:", studentDoc._id);
+      // console.log("facultyDoc._id:", facultyDoc._id);
+      // console.log("courseDoc._id:", courseDoc._id);
+      
+      // Then check if there's existing data
+      const exists = await Feedback.exists({
+        student: studentDoc._id.toString(),
+        faculty: facultyDoc._id.toString(),
+        course: courseDoc._id.toString()
+      });
+      
+      if(exists) {
+        return res.status(409).json({ error: 'Feedback already exists for this course and faculty' });
+      }
+      // Insert into the feedback table
+      // const feedbackEntry = new Feedback({
+      //   student: studentDoc._id.toString(),
+      //   faculty: facultyDoc._id.toString(),
+      //   course: courseDoc._id.toString(),
+      //   ratings: ratings.map(r => ({
+      //     questionId: r.questionId,
+      //     rating: Math.min(Math.max(Number(r.rating), 1), 5)
+      //   })),
+      //   comments: comments ? comments.trim() : '',
+      //   isActive: true
+      // });
+      const result = await Feedback.updateOne(
+        {
+          student: studentDoc._id,
+          faculty: facultyDoc._id,
+          course: courseDoc._id
+        },
+        {
+          $set: {
+            ratings: ratings.map(r => ({
+              questionId: r.questionId,
+              rating: Math.min(Math.max(Number(r.rating), 1), 5)
+            })),
+            comments: comments ? comments.trim() : '',
+            isActive: true,
+            updatedAt: new Date()
+          }
+        },
+        { upsert: true }
+      );
 
-        // Validate course
-        const courseDoc = await Course.findOne({ courseCode: course });
-        // if (!courseDoc) return res.status(400).json({ error: 'Invalid course code' });
-
-        // Validate faculty
-        const facultyDoc = await Faculty.findOne({ userId: faculty });
-        // if (!facultyDoc) return res.status(400).json({ error: 'Invalid faculty' });
-
-        // Validate student
-        const studentDoc = await Student.findOne({ userId: student });
-        // if (!studentDoc) return res.status(400).json({ error: 'Invalid student' });
-
-        // Create/update feedback
-        const feedback = await Feedback.findOneAndUpdate(
-            { 
-                student: studentDoc.id,
-                // faculty: facultyDoc.id,  
-                course: courseDoc.id 
-            },
-            {
-                ratings: ratings.map(r => ({
-                    questionId: r.questionId,
-                    rating: Math.min(Math.max(Number(r.rating), 1), 5)
-                })),
-                comments: comments?.trim(),
-                isActive: true,
-                updatedAt: new Date()
-            },
-            { 
-                upsert: true,
-                new: true,
-                runValidators: true 
-            }
-        );
-
-        res.status(201).json({
-            message: 'Feedback submitted successfully',
-            feedback: {
-                id: feedback.id,
-                updatedAt: feedback.updatedAt
-            }
-        });
-
+      console.log("feedbackEntry", result);
+      // await result.save();
+      
+      res.status(201).json({
+        message: 'Feedback submitted successfully',
+        feedback: {
+          id: result._id,
+          updatedAt: result.updatedAt
+        }
+      });
     } catch (err) {
-        if (err.name === 'ValidationError') {
-            return res.status(400).json({
-                error: 'Invalid feedback data',
-                details: Object.values(err.errors).map(e => e.message)
-            });
-        }
-        if (err.code === 11000) {
-            return res.status(409).json({ 
-                error: 'Feedback already exists for this course and faculty' 
-            });
-        }
-        res.status(500).json({ 
-            error: 'Failed to submit feedback',
-            details: err.message 
+      if (err.name === 'ValidationError') {
+        return res.status(400).json({
+          error: 'Invalid feedback data',
+          details: Object.values(err.errors).map(e => e.message)
         });
+      }
+      if (err.code === 11000) {
+        console.log('Duplicate feedback error:', err);
+        return res.status(409).json({
+          error: 'Feedback already exists for this course and faculty'
+        });
+      }
+      console.error('Feedback submission error:', err);
+      res.status(500).json({
+        error: 'Failed to submit feedback',
+        details: err.message
+      });
     }
-};
-
+  };
 export const getCourseFacultyDetails = async (req, res) => {
     try {
         const { courseCode } = req.params;
@@ -246,16 +362,30 @@ export const getCourseDetails = async (req, res) => {
         const { courseCode } = req.params;
         
         const course = await Course.findOne({ courseCode });
-
         if (!course) {
             return res.status(404).json({ error: 'Course not found' });
         }
+        const facultyCourse = await FacultyCourse.findOne({courseCode: courseCode});
+        if(!facultyCourse) {
+            return res.status(404).json({ error: 'Faculty not found' });
+        }
+        const faculty = await Faculty.findOne({ userId: facultyCourse.facultyId });
+        const user = await User.findOne({ _id: faculty.userId });
+
+        // console.log("user", user);
+        // console.log("course", course);
+        // console.log("faculty", faculty);
+        // console.log("facultyCourse", facultyCourse);
 
         res.json({
             courseCode: course.courseCode,
             courseName: course.courseName,
             department: course.department,
-            credits: course.credits
+            credits: course.credits,
+            facultyName: user.name,
+            session: facultyCourse.session,
+            year: facultyCourse.year,  
+            facultyId: facultyCourse.facultyId, 
         });
 
     } catch (err) {

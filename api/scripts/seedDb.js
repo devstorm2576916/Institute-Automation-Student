@@ -7,7 +7,8 @@ import { AcadAdmin } from "../models/acadAdmin.model.js";
 import { Faculty } from "../models/faculty.model.js";
 import { StudentCourse } from "../models/course.model.js";
 import { Course } from "../models/course.model.js";
-
+import { FacultyCourse } from "../models/course.model.js";
+import { Feedback } from "../models/feedback.model.js";
 // Sample user data
 const userData = {
   name: "John Doe",
@@ -93,6 +94,7 @@ const studentCoursesData = [
   }
 ];
 
+// 67fb92cbabe317891d8c0c11
 const coursesData = [
   {
       courseCode: "CS101",
@@ -252,7 +254,7 @@ const coursesData = [
 
 const facultyCoursesData = [
   {
-    facultyId: "FACULTY001", // Will be replaced with actual facultyId
+    facultyId: "67fb92cbabe317891d8c0c11", // Will be replaced with actual facultyId
     courseCode: "CS101",
     year: 2025,
     session: "Spring Semester",
@@ -261,7 +263,7 @@ const facultyCoursesData = [
     updatedAt: new Date()
   },
   {
-    facultyId: "FACULTY001", // Will be replaced with actual facultyId
+    facultyId: "67fb92cbabe317891d8c0c11", // Will be replaced with actual facultyId
     courseCode: "CS201",
     year: 2025,
     session: "Spring Semester",
@@ -270,7 +272,7 @@ const facultyCoursesData = [
     updatedAt: new Date()
   },
   {
-    facultyId: "FACULTY001", // Will be replaced with actual facultyId
+    facultyId: "67fb92cbabe317891d8c0c11", // Will be replaced with actual facultyId
     courseCode: "HS103",
     year: 2024,
     session: "Winter Semester",
@@ -279,7 +281,7 @@ const facultyCoursesData = [
     updatedAt: new Date()
   },
   {
-    facultyId: "FACULTY001", // Will be replaced with actual facultyId
+    facultyId: "67fb92cbabe317891d8c0c11", // Will be replaced with actual facultyId
     courseCode: "MA102",
     year: 2024,
     session: "Summer Course",
@@ -301,14 +303,12 @@ const seedDatabase = async () => {
     // Generate a salt
     const saltRounds = 10; // You can adjust this number for more or less security (higher is more secure but slower)
     const hashedPassword = await bcrypt.hash(facultyData.password, saltRounds);
-    
     // Create user with the hashed password
-    const createdFacultyUser = await User.create({
-      ...facultyData, // Spread the existing facultyData
-      password: hashedPassword, // Override the plain text password with the hashed one
-    });
-    console.log("User created:", createdFacultyUser.name, "with email:", createdFacultyUser.email);
-    
+    // const createdFacultyUser = await User.create({
+    //   ...facultyData, // Spread the existing facultyData
+    //   password: hashedPassword, // Override the plain text password with the hashed one
+    // });
+    // console.log("User created:", createdFacultyUser.name, "with email:", createdFacultyUser.email);
     // Create a faculty with the same email
     const faculty = await Faculty.create({
       userId: createdFacultyUser._id,
@@ -531,4 +531,181 @@ const seedStudentCourses = async () => {
     }
   };
     
-  export { seedDatabase, seedStudentCourses, seedCourses, removeAllStudentsFromCourse };
+  // add faculty courses, if already present, remove all
+  const seedFacultyCourses = async () => {
+    try {
+      // Connect to MongoDB
+      await connectDB();
+      console.log("Connected to MongoDB, starting faculty courses seed process...");
+      
+      // Check if faculty courses already exist
+      const existingFacultyCourses = await FacultyCourse.find({});
+      console.log("Existing faculty courses found:", existingFacultyCourses);
+      if (existingFacultyCourses) {
+        console.log(`Found existing faculty courses. Deleting them before re-seeding.`);
+        await FacultyCourse.deleteMany({});
+      }
+      
+      // Insert the faculty courses
+      const result = await FacultyCourse.insertMany(facultyCoursesData);
+      
+      console.log(`Successfully added ${result.length} faculty courses for ${facultyData.facultyId}:`);
+      result.forEach(course => {
+        console.log(`- ${course.courseCode} (${course.year}, ${course.session}) - Status: ${course.status}`);
+      });
+      
+      console.log("Faculty courses seeded successfully!");
+      process.exit(0);
+    } catch (error) {
+      console.error("Error seeding faculty courses:", error);
+      process.exit(1);
+    }
+  }
+
+  const fillFacultyCourse = async () => {
+    try {
+      // Connect to MongoDB
+      await connectDB();
+      console.log("Connected to MongoDB, starting faculty course filling process...");
+      
+      // Find the faculty with ID 67fb92cbabe317891d8c0c11
+      const facultyCourses = await FacultyCourse.find({});
+      console.log("Faculty courses found:", facultyCourses);
+      
+      // map through all the FacultyCourses, through the facultyId find the faculty and put the id in the faculty course array
+      for (const course of facultyCourses) {
+        // Find the faculty by facultyId
+        const faculty = await Faculty.findOne({ userId: course.facultyId });
+        
+        if (faculty) {
+          console.log(`Updating faculty ${faculty.email} with course ${course.courseCode}`);
+          
+          // Check if the course already exists in faculty's courses array
+          const courseExists = faculty.courses.some(existingCourse => 
+            existingCourse._id.toString() === course._id.toString()
+          );
+          
+          if (!courseExists) {
+            // Add the course to faculty's courses array
+            faculty.courses.push(course);
+            faculty.updatedAt = Date.now();
+            
+            // Save the faculty document
+            await faculty.save();
+            console.log(`Added course ${course.courseCode} to faculty ${faculty.email}`);
+          } else {
+            console.log(`Course ${course.courseCode} already exists for faculty ${faculty.email}`);
+          }
+        } else {
+          console.log(`Faculty not found for course ${course.courseCode} with faculty ID ${course.facultyId}`);
+        }
+      }
+      // Update the faculty's courses
+      
+      process.exit(0);
+    } catch (error) {
+      console.error("Error filling faculty courses:", error);
+      process.exit(1);
+    }
+  }
+
+
+  // const deleteAllFeedback = async () => {
+  //   try {
+  //     // Connect to MongoDB
+  //     await connectDB();
+  //     console.log("Connected to MongoDB, starting feedback deletion process...");
+      
+  //     // Delete all feedback documents
+  //     const result = await Feedback.deleteMany({});
+      
+  //     console.log(`Successfully deleted ${result.deletedCount} feedback documents.`);
+  //     process.exit(0);
+  //   } catch (error) {
+  //     console.error("Error deleting feedback:", error);
+  //     process.exit(1);
+  //   }
+  // }
+
+  const checkFeedBackExists = async () => {
+    try {
+      // Connect to MongoDB
+      await connectDB();
+      console.log("Connected to MongoDB, checking feedback existence...");
+      
+      // Check if feedback exists for the course CS101
+      const feedbackExists = await Feedback.exists({ 
+        student: "67fb82e1fd693835a24dd232",
+        faculty: "6800f94ff45d8abf4fb94ba9",
+        course: "67fe39a36530a0d8bd12cfa4"
+       });
+      
+      if (feedbackExists) {
+        console.log("Feedback exists for course CS101.");
+      } else {
+        console.log("No feedback found for course CS101.");
+      }
+      
+      process.exit(0);
+    } catch (error) {
+      console.error("Error checking feedback existence:", error);
+      process.exit(1);
+    }
+  }
+
+  const completeCourse = async () => {
+    try {
+      // Connect to MongoDB
+      await connectDB();
+      console.log("Connected to MongoDB, starting course completion process...");
+      
+      // Find the course with code CS101
+      const course = await StudentCourse.findOne({ courseId: "CS101" });
+      console.log("Course found:", course);
+      if (!course) {
+        console.log("Course CS101 not found!");
+        process.exit(1);
+      }
+      
+      // console.log(`Found course: ${course.courseName} with ${course.students.length} students enrolled`);
+      
+      // Update the course to be completed
+      const updatedCourse = await StudentCourse.findByIdAndUpdate(
+        course._id,
+        { isCompleted: true },
+        { new: true }
+      );
+      
+      console.log(`Successfully marked ${updatedCourse.courseCode} - ${updatedCourse.courseName} as completed`);
+      
+      console.log("Course completion process completed successfully!");
+      process.exit(0);
+    } catch (error) {
+      console.error("Error completing course:", error);
+      process.exit(1);
+    }
+  }
+
+
+  const fixFeedbackIndexes = async () => {
+  try {
+    // Connect to MongoDB
+    await connectDB();
+    console.log("Connected to MongoDB, starting feedback index fix process...");
+    
+    // Drop the problematic index
+    await Feedback.collection.dropIndex("feedbackId_1");
+    console.log("Successfully dropped the feedbackId index");
+    
+    // Verify indexes
+    const indexes = await Feedback.collection.indexes();
+    console.log("Updated indexes:", indexes);
+    
+    process.exit(0);
+  } catch (error) {
+    console.error("Error fixing feedback indexes:", error);
+    process.exit(1);
+  }
+}
+
+  export {fixFeedbackIndexes, seedDatabase, seedStudentCourses, seedCourses, removeAllStudentsFromCourse, seedFacultyCourses, fillFacultyCourse };
