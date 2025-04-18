@@ -5,13 +5,27 @@ import { RoleContext } from "../../../context/Rolecontext";
 import SearchableStudentDropdown from "./SearchableStudentDropdown";
 import AttendanceApprovalDashboard from "./AttendanceApprovalDashboard";
 import SiteAlert from "./siteAlert";
+import { useQuery } from "@tanstack/react-query";
+import newRequest from "../../../utils/newRequest";
 
 function MyCourses() {
+    const {data:userData} = JSON.parse(localStorage.getItem("currentUser"));
+    const {email, userId} = userData.user;
+    console.log(email);
+    console.log(userData);
+
+    const { isLoading, error, data } = useQuery({
+        queryKey: [`${userId}`],
+        queryFn: () =>
+            newRequest.get(`/student/${userId}`).then((res) => {
+                return res.data;
+            }),
+    });
     const navigateTo = useNavigate();
     const { role } = useContext(RoleContext);
+    
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [overall, setOverall] = useState(true); // true means safe, false means alert
 
     const [selectedStudent, setSelectedStudent] = useState("");
@@ -26,6 +40,7 @@ function MyCourses() {
     };
 
     const fetchStudentCourses = async (rollNo) => {
+
         try {
             const response = await fetch("http://localhost:8000/api/attendancelanding/student", {
                 method: "GET",
@@ -38,16 +53,14 @@ function MyCourses() {
             if (!response.ok) {
                 throw new Error(`Server responded with status: ${response.status}`);
             }
+            const dataReceived = await response.json();
     
-            const data = await response.json();
-    
-            const formattedCourses = data.attendance.map(course => ({
+            const formattedCourses = dataReceived.attendance.map(course => ({
                 courseId: course.courseCode,
                 courseName: course.courseName,
                 attendance: `${course.percentage}%`,
                 percentage: course.percentage
             }));
-            
             setCourses(formattedCourses);
             //turn formattedCourses;
         } catch (error) {
@@ -55,25 +68,14 @@ function MyCourses() {
             throw error; // Re-throw for caller to handle
         }
     };
-
-    useEffect(() => {
-        // Set user data in localStorage for testing
-        if (role === "student") {
-            localStorage.setItem("currentUser", JSON.stringify({ user: { rollNo: "2" } }));
-        } else if (role === "faculty") {
-            localStorage.setItem("currentUser", JSON.stringify({ user: { userId: "F1" } }));
-        }
-    }, [role]);
-
     useEffect(() => {
         const fetchCourses = async () => {
             try {
                 setLoading(true);
 
                 if (role === "student") {
-                    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-                    const rollNo = currentUser?.user?.rollNo;
-
+                    const rollNo =  data?.rollNo;
+                    console.log("Roll no." + rollNo);
                     if (!rollNo) {
                         throw new Error("Roll number not found in localStorage.");
                     }
@@ -90,9 +92,9 @@ function MyCourses() {
                         throw new Error(`Server responded with status: ${response.status}`);
                     }
 
-                    const data = await response.json();
+                    const dataReceived = await response.json();
 
-                    const formattedCourses = data.attendance.map(course => ({
+                    const formattedCourses = dataReceived.attendance.map(course => ({
                         courseId: course.courseCode,
                         courseName: course.courseName,
                         attendance: `${course.percentage}%`,
@@ -102,13 +104,16 @@ function MyCourses() {
                     // Check for any course with attendance below 75%
                     const hasLowAttendance = formattedCourses.some(course => course.percentage < 75);
                     setOverall(!hasLowAttendance);
-
+                    console.log("Savar");
+                    console.log(formattedCourses);
                     setCourses(formattedCourses);
                 } else if (role === "faculty") {
                     // Fetch faculty courses from the backend
-                    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-                    const userId = currentUser?.user?.userId;
-
+                    // const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+        
+                    console.log("Savar");
+                    //console.log(currentUser);
+                    console.log(userId);
                     if (!userId) {
                         throw new Error("Faculty ID not found in localStorage.");
                     }
@@ -125,14 +130,14 @@ function MyCourses() {
                         throw new Error(`Server responded with status: ${response.status}`);
                     }
 
-                    const data = await response.json();
+                    const dataReceived = await response.json();
 
-                    if (!data.success) {
-                        throw new Error(data.message || "Failed to fetch faculty courses");
+                    if (!dataReceived.success) {
+                        throw new Error(dataReceived.message || "Failed to fetch faculty courses");
                     }
 
                     // Format the courses for display
-                    const formattedCourses = data.data.map(course => ({
+                    const formattedCourses = dataReceived.data.map(course => ({
                         courseId: course.courseCode,
                         courseName: course.courseName || `Course ${course.courseCode}`,
                         averageAttendance: `${course.attendancePercentage}%`,
@@ -143,7 +148,6 @@ function MyCourses() {
                 }
             } catch (error) {
                 console.error("Error fetching courses:", error);
-                setError(error.message);
             } finally {
                 setLoading(false);
             }
@@ -165,9 +169,9 @@ function MyCourses() {
                     throw new Error(`Server responded with status: ${response.status}`);
                 }
 
-                const data = await response.json();
+                const dataReceived = await response.json();
 
-                const formattedCourses = data.attendance.map(course => ({
+                const formattedCourses = dataReceived.attendance.map(course => ({
                     courseId: course.courseCode,
                     courseName: course.courseName,
                     attendance: `${course.percentage}%`,
@@ -181,7 +185,6 @@ function MyCourses() {
                 setShowStats(true);
             } catch (error) {
                 console.error("Error fetching student data:", error);
-                setError(error.message);
             } finally {
                 setLoading(false);
             }
@@ -205,8 +208,6 @@ function MyCourses() {
 
             {loading ? (
                 <p>Loading courses...</p>
-            ) : error ? (
-                <p>Error loading courses: {error}</p>
             ) : courses.length > 0 ? (
                 role === "student" || (role === "acadAdmin" && showStats) ? (
                     <Course courses={courses} />

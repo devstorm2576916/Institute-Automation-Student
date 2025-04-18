@@ -22,7 +22,10 @@ const Faculty = () => {
             <ul className="list-none pl-5 mt-5">
                 <li>
                     <span className="font-bold text-gray-800 cursor-pointer flex items-center" onClick={() => toggleSection('course')}>
-                        {expandedSections.course ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} Course
+                        {expandedSections.course ? <IoMdArrowDropdown /> : <IoMdArrowDropright />} 
+                        <Link to="/courses" className="text-gray-700 hover:text-gray-900">
+                                Course
+                        </Link>
                     </span>
                     {expandedSections.course && (
                         <ul className="pl-5">
@@ -33,9 +36,9 @@ const Faculty = () => {
 
                             </li>
 
-                            <li>
-                                <Link to="/feedbackReports" className="text-gray-700 hover:text-gray-900">Feedback</Link>
-                            </li>
+                            {/* <li>
+                                <Link to="/faculty/feedback" className="text-gray-700 hover:text-gray-900">Feedback</Link>
+                            </li> */}
                             <li>
                                 <Link to="/attendancelanding" className="text-gray-700 hover:text-gray-900">
                                 Attendance Tracking
@@ -43,7 +46,7 @@ const Faculty = () => {
                             </li>
 
                             <li>Grades Submission</li>
-                            <li><Link to="/assigngmentlanding" className="text-gray-700 hover:text-gray-900">
+                            <li><Link to="/assignmentlanding" className="text-gray-700 hover:text-gray-900">
                                 Assignment
                                 </Link></li>
                         </ul>
@@ -55,7 +58,11 @@ const Faculty = () => {
                 </span>
                 {expandedSections.complaint && (
                     <ul className="pl-5">
-                        <li>Complaint Form</li>
+                        <li>
+                            <Link to="/complaint" className="text-gray-700 hover:text-gray-900">
+                                Complaint Form
+                            </Link>
+                        </li>
                     </ul>
                 )}
                 </li>
@@ -65,7 +72,11 @@ const Faculty = () => {
                 </span>
                 {expandedSections.profile && (
                     <ul className="pl-5">
-                        <li>View Profile</li>
+                        <li>
+                            <Link to="/profile" className="text-gray-700 hover:text-gray-900">
+                                View Profile
+                            </Link>
+                        </li>
                     </ul>
                 )}
                 </li>

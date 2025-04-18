@@ -1,11 +1,9 @@
 import mongoose from "mongoose";
-import {
-  ApplicationDocument,
-  Bonafide,
-  Passport,
-} from "../models/documents.models.js";
-import { Student } from "../models/student.model.js";
-import { User } from "../models/user.model.js";
+import { ApplicationDocument, Bonafide, Passport } from '../models/documents.models.js';
+import { Student } from '../models/student.model.js';
+import { User } from '../models/user.model.js';
+import { CourseDropRequest } from '../models/courseDropRequest.model.js';
+import { Course, StudentCourse} from '../models/course.model.js';
 import { FeeBreakdown } from "../models/fees.model.js";
 
 // Get all applications with pagination
@@ -429,6 +427,139 @@ export const updateFeeBreakdown = async (req, res) => {
     });
   }
 };
+
+
+export const getDropRequests = async (req, res) => {
+    try {
+        // console.log('[1] Starting to fetch drop requests...');
+        
+        // Fetch all requests without filtering
+        const requests = await CourseDropRequest.find({})
+            .sort({ requestDate: -1 })
+            .lean();
+
+        // console.log('[2] Raw database results:', requests);
+
+        // Process requests with proper error handling
+        const formattedRequests = await Promise.all(
+            requests.map(async (request) => {
+                try {
+                    // console.log(`[3] Processing request ${request._id}`);
+                    // console.log(request.rollNo, request.courseId, request.studentId);
+                    const student = await Student.findOne({ rollNo: request.rollNo })
+
+                    // console.log(`[4] Student data for ${request._id}:`, student);
+                    const user = await User.findById(student.userId);
+
+                    return {
+                        _id: request._id,
+                        studentName: user.name || 'Unknown',
+                        rollNo: student?.rollNo || 'N/A',
+                        courseName: request.courseName,
+                        courseId: request.courseCode,
+                        requestDate: request.requestDate,
+                        status: request.status,
+                        remarks: request.remarks
+                    };
+                } catch (error) {
+                    console.error(`[!] Error processing request ${request._id}:`, error);
+                    return null;
+                }
+            })
+        );
+
+        // Filter out any failed requests
+        const validRequests = formattedRequests.filter(req => req !== null);
+        
+        // console.log('[5] Final formatted requests:', validRequests);
+        
+        res.status(200).json(validRequests);
+    } catch (error) {
+        console.error('[!] Critical error in getDropRequests:', error);
+        res.status(500).json({ 
+            message: 'Failed to fetch drop requests',
+            error: error.message 
+        });
+    }
+};
+
+export const updateDropRequestStatus = async (req, res) => {
+    try {
+        const { requestId } = req.params;
+        const { status, remarks } = req.body;
+        console.log("Step 1: Received params:", { requestId, status, remarks });
+
+        const request = await CourseDropRequest.findById(requestId);
+        console.log("Step 2: Fetched drop request:", request);
+
+        if (!request) {
+            console.log("Step 2.1: Drop request not found");
+            return res.status(404).json({ message: 'Drop request not found' });
+        }
+
+        request.status = status;
+        request.remarks = remarks;
+        await request.save();
+        console.log("Step 3: Updated request status and remarks, saved request");
+
+        if (status === 'Approved') {
+            // Get student's rollNo from the request
+            const student = await Student.findOne({ rollNo: request.rollNo })
+            console.log("Step 4: Fetched student:", student);
+
+            if (!student) {
+                console.log("Step 4.1: Student not found");
+                return res.status(404).json({ message: 'Student not found' });
+            }
+
+            // Get course code from the course ID
+            const course = await Course.findOne({ courseCode: request.courseId });
+            console.log("Step 5: Fetched course:", course);
+
+            if (!course) {
+                console.log("Step 5.1: Course not found");
+                return res.status(404).json({ message: 'Course not found' });
+            }
+
+            // Delete the specific student-course relationship
+            const deletionResult = await StudentCourse.deleteOne({
+                rollNo: student.rollNo,
+                courseId: course.courseCode
+            });
+            console.log("Step 6: StudentCourse deletion result:", deletionResult);
+
+            if (deletionResult.deletedCount === 0) {
+                console.log("Step 6.1: Student course enrollment not found");
+                return res.status(404).json({
+                    message: 'Student course enrollment not found'
+                });
+            }
+
+            // delete the student from the student array of course
+            const courseUpdateResult = await Course.updateOne(
+                { courseCode: course.courseCode },
+                { $pull: { students: student.userId } }
+            );
+
+            if(courseUpdateResult.modifiedCount === 0) {
+                console.log("Step 6.2: Course enrollment not found");
+                return res.status(404).json({
+                    message: 'Course enrollment not found'
+                });
+            }
+
+        }
+
+        // console.log("Step 8: Drop request update process completed successfully");
+        res.status(200).json({ message: 'Drop request updated successfully' });
+    } catch (error) {
+        console.error('Error updating drop request:', error);
+        res.status(500).json({ message: 'Failed to update drop request' });
+    }
+};
+
+
+
 
 // Get students with document access info
 export const getStudentsWithDocumentAccess = async (req, res) => {

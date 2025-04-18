@@ -74,7 +74,7 @@ const PendingRequests = ({ requests, handleAction }) => {
             </div>
             <div className='flex justify-left mt-2'>
               <button
-                onClick={() => handleAction(request.id, "Approved", "")}
+                onClick={() => handleAction(request.id, "Approved", "",request.requestedHostel, request.rollNo)}
                 // onClick={() => console.log(request.id)}
                 className="bg-green-500 max-h-10 shadow-sm text-white px-3 py-2 rounded mr-4 hover:scale-105 transition duration-200"
               >
@@ -99,7 +99,7 @@ const PendingRequests = ({ requests, handleAction }) => {
                     onClick={() => {
                       const newReason = rejectionReasons[request.id];
                       // console.log(newReason);
-                      handleAction(request.id, "Rejected", newReason);
+                      handleAction(request.id, "Rejected", newReason, "", request.rollNo);
                     }}
                     className="bg-red-500 shadow-sm text-white px-4 py-2 rounded hover:scale-105 transition duration-200"
                   >
