@@ -6,54 +6,51 @@ import mongoose from "mongoose";
 
 export const studentLeave = async (req, res) => {
   try {
-    const { startDate, endDate, email, reason } = req.body;
+    // console.log("Hello");
     // console.log(req.body);
-    // Validate input
+    const { startDate, endDate, email, reason } = req.body;
+
     if (!startDate || !endDate) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    
-    // const startDate = new Date(leaveStartDate);
-    // const endDate = new Date(leaveEndDate);
+    // Parse as local date (no timezone issues)
+    const [sy, sm, sd] = startDate.split('-').map(Number);
+    const [ey, em, ed] = endDate.split('-').map(Number);
+    const start = new Date(sy, sm - 1, sd, 12, 0, 0, 0); // 12:00 local time
+    const end = new Date(ey, em - 1, ed, 12, 0, 0, 0);   // 12:00 local time
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     // Validate dates
-    if (startDate >= endDate) {
-        return res.status(400).json({ message: "End date must be after start date" });
+    if (start < today) {
+      return res.status(400).json({ message: "Start date cannot be in the past" });
     }
-    if (startDate < new Date()) {
-        return res.status(400).json({ message: "Start date cannot be in the past" });
+    if (end < start) {
+      return res.status(400).json({ message: "End date must be after or equal to start date" });
     }
-
 
     const student = await Student.findOne({ email });
     if (!student) {
-        return res.status(404).json({ message: "Student not found" });
+      return res.status(404).json({ message: "Student not found" });
     }
-    // if (student.rollNo !== studentId) {
-    //     return res.status(400).json({ message: "Student ID does not match email" });
-    // }
-    // Create leave request object
+
     const leaveRequest = {
-        rollNo: student.rollNo,
-        // applicationId,
-        startDate,
-        endDate,
-        reason,
-        status: 'Pending',
+      rollNo: student.rollNo,
+      startDate: start,
+      endDate: end,
+      reason,
+      status: 'Pending',
     };
 
-    // Save to database (assuming you have a LeaveRequest model)
     await HostelLeave.create(leaveRequest);
-    console.log(leaveRequest);
-    // For example, save the leave request to the database
 
     res.status(200).json({ message: "Leave request submitted successfully" });
   } catch (error) {
     console.error("Error in studentLeave:", error);
     res.status(500).json({ message: "Internal server error" });
   }
-}
+};
 
 export const getStudentLeave = async (req, res) => {
     try {

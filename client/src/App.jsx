@@ -19,6 +19,10 @@ import AdminSubscriptionRequests from './components/HostelMess/AdminSubscription
 import { Navigate } from "react-router-dom";
 import FacultyDashboard from './components/registration/faculty_reg_dashboard.jsx';
 import CourseRegistrationFaculty from './components/registration/faculty_registration_page.jsx';
+import FacultyGradeLanding from './components/Grades/facultyGradeLanding.jsx';
+import SubmitGrades from './components/Grades/sumbitGrades.jsx';
+
+
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -60,6 +64,7 @@ import FacultyCourseStudents from './components/courseStudents/courseStudent.jsx
 // import CourseStudents from './components/courseStudents/courseStudent.jsx';
 import CompletedCourses from './components/mycourses/CompletedCourses.jsx';
 import DropCourseWrapper from './components/dropCourse/dropCourseWrapper.jsx';
+import NotFound from './pages/Notfound.jsx';
 
 const queryClient = new QueryClient()
 function App() {
@@ -155,6 +160,14 @@ function App() {
                 {
                     path:"/assignmentlanding",
                     element: <AssignmentLanding/>
+                },
+                {
+                    path:"/gradeLanding",
+                    element: <FacultyGradeLanding/>
+                },
+                {
+                    path: "/course/:courseID/submitGrades",
+                    element: <SubmitGrades/>
                 },
                 {
                     path:"/course/:courseId/assignments/",
@@ -293,6 +306,10 @@ function App() {
                 }
             ],
         },
+        {
+            path: "*",
+            element: <NotFound/>
+        }
     ]);
     return (
         <RoleProvider>
