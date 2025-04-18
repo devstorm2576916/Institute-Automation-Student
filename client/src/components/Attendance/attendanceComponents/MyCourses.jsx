@@ -84,7 +84,8 @@ function MyCourses() {
                         method: "GET",
                         headers: {
                             "Content-Type": "application/json",
-                            "rollno": rollNo
+                            "rollno": rollNo,
+                            "role":role
                         }
                     });
 
