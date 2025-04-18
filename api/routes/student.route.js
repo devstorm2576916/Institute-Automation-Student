@@ -18,10 +18,13 @@ import {
     getAvailableCourses,
     submitCourseApprovalRequest,
     getPendingRequests,
-    getStudentFromRollNumber
+    getStudentFromRollNumber,
+    getStudentFeeDetails,
+    recordFeePayment,
+    getFeePaymentHistory,
 } from "../controllers/student.controller.js";
 
-//courses routes
+
 const router = express.Router();
 router.get("/:id", getStudent);
 router.get("/:id/courses", getStudentCourses);
@@ -36,7 +39,7 @@ router.post("/:id/drop-requests", createCourseDropRequest);
 router.get("/:id/drop-requests", getStudentDropRequests);
 router.delete("/:id/drop-requests/:requestId", cancelDropRequest);
 
-// router.delete("/:id/courses/:courseId", dropCourse);
+// router.delete("/:id/courses/:courseId",  dropCourse);
 router.put("/:id/profile", updateStudentProfile);
 router.get("/:id/rollno",getStudentFromRollNumber);
 
@@ -47,9 +50,9 @@ router.post("/:id/bonafide/apply", createBonafideApplication);
 router.get("/:id/bonafide/applications", getBonafideApplications);
 
 // Passport routes
-router.get('/:id/passport', getStudentPassportDetails);
-router.post('/:id/passport/apply', submitPassportApplication);
-router.get('/:id/passport/applications', getPassportApplications);
+router.get("/:id/passport", getStudentPassportDetails);
+router.post("/:id/passport/apply", submitPassportApplication);
+router.get("/:id/passport/applications", getPassportApplications);
 
 
 // Course approval request routes
@@ -62,5 +65,10 @@ router.post("/:id/course-approval", submitCourseApprovalRequest);
 
 // Fetch pending requests
 router.get("/:id/pending-requests", getPendingRequests);
+
+// Fee routes
+router.get("/:id/fees", getStudentFeeDetails);
+router.post("/:id/fees/payment", recordFeePayment);
+router.get("/:id/fees/history", getFeePaymentHistory); // Add this missing route
 
 export default router;
