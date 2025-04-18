@@ -7,8 +7,10 @@ import { pdf } from "@react-pdf/renderer";
 import { FaExclamationCircle } from "react-icons/fa";
 import { useQuery } from "@tanstack/react-query";
 import newRequest from "../../utils/newRequest";
+import { useSearchParams } from 'react-router-dom';
 
 const FeeReceiptPage = () => {
+  const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [isFeeDataLoading, setIsFeeDataLoading] = useState(false);
   const [pdfUrl, setPdfUrl] = useState(null);
@@ -196,6 +198,14 @@ const FeeReceiptPage = () => {
       setPreparedFeeData(null);
     }
   }, [selectedSemester, feeData]);
+
+  // Update useEffect to set semester from URL param when component mounts
+  useEffect(() => {
+    const semesterFromUrl = searchParams.get('semester');
+    if (semesterFromUrl) {
+      setSelectedSemester(semesterFromUrl);
+    }
+  }, [searchParams]);
 
   // Show loading state while checking access
   if (isQueryLoading) {
