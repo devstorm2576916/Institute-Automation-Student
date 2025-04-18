@@ -302,7 +302,7 @@ const seedDatabase = async () => {
     
     // Generate a salt
     const saltRounds = 10; // You can adjust this number for more or less security (higher is more secure but slower)
-    const hashedPassword = await bcrypt.hash(facultyData.password, saltRounds);
+    // const hashedPassword = await bcrypt.hash(facultyData.password, saltRounds);
     // Create user with the hashed password
     // const createdFacultyUser = await User.create({
     //   ...facultyData, // Spread the existing facultyData
@@ -347,7 +347,7 @@ const seedDatabase = async () => {
             //     console.log("Academic Admin created with designation:", acadAdmin.designation);
             //     console.log("Academic Admin is linked to user with email:", createdAcadAdminUser.email);
             
-            // const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
+            const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
             
             // Create user with the hashed password
             const createdUser = await User.create({
