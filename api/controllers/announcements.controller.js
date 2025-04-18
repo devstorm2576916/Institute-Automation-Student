@@ -86,18 +86,30 @@ export const getCourseAnnouncements = async (req, res) => {
         
         // Find course
         const course = await Course.findOne({ courseCode: courseId });
-        
         if (!course) {
           return res.status(404).json({ success: false, message: 'Course not found' });
         }
         
+        const faculty = await Faculty.findOne({ userId: postedBy });
+        console.log("Faculty:", faculty);
+        if(!faculty) {
+          return res.status(404).json({ success: false, message: 'Faculty not found' });
+        } 
+        const facultyUser = await User.findOne({ _id: postedBy });
+        console.log("Faculty User ID:", postedBy);
+        console.log("Faculty User:", facultyUser);
+        if(!facultyUser) {
+          return res.status(404).json({ success: false, message: 'Faculty user not found' });
+        }
+
+        console.log("Faculty User:", facultyUser);
         // Create new announcement
         const newAnnouncement = {
           title,
           content,
           importance: importance || 'Medium',
           date: new Date(),
-          postedBy
+          postedBy: facultyUser.name
         };
         
         // Add announcement to course
