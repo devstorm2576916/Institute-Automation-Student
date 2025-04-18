@@ -5,6 +5,7 @@ import axios from "axios";
 import newRequest from "../utils/newRequest";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import { useNavigate } from 'react-router-dom';
 
 // Helper function to load Razorpay script
 const loadRazorpayScript = (src) => {
@@ -27,6 +28,7 @@ const getCurrentAcademicYear = () => {
 };
 
 const FeePayment = () => {
+  const navigate = useNavigate();
   // --- Get current user from localStorage ---
   const [userId, setUserId] = useState(null);
 
@@ -79,30 +81,9 @@ const FeePayment = () => {
     onSuccess: (response, paymentData) => {
       console.log("Payment record success response:", response.data);
       toast.success("Payment recorded successfully");
-
-      const feeDetails = response.data.feeDetails;
-
-      // Ensure we have the actual transaction details from the response
-      setPaymentDetails({
-        slNo: 1,
-        feeType: feeSummary.feeType,
-        feeAmount: paymentData.paymentDetails.amount,
-        transactionId: feeDetails.transactionId || paymentData.transactionId,
-        razorpayOrderId:
-          feeDetails.paymentDetails?.razorpayOrderId ||
-          paymentData.paymentDetails.razorpayOrderId,
-        razorpaySignature:
-          feeDetails.paymentDetails?.razorpaySignature ||
-          paymentData.paymentDetails.razorpaySignature,
-        dateTime: new Date(feeDetails.paidAt || new Date()).toLocaleString(
-          "sv-SE"
-        ),
-        status: "Success",
-        viewableDocumentId: feeDetails.viewableDocumentId,
-      });
-
-      // Immediately refetch to update the UI
-      refetch();
+      
+      // Navigate to fee receipt page with the semester
+      navigate(`/documents/feereceipt?semester=${feeData.student.nextSemester}`);
     },
     onError: (error) => {
       console.error("Error recording payment:", error);
@@ -166,10 +147,7 @@ const FeePayment = () => {
   // For production, use calculatedTotal - adjustmentAmount
   // For development, use a small amount for testing
   // For development/testing, force the payable amount to 2 INR:
-  const payableAmount =
-    process.env.NODE_ENV === "development"
-      ? 2
-      : calculatedTotal - adjustmentAmount; // 2 INR for testing
+  const payableAmount = calculatedTotal - adjustmentAmount; // 2 INR for testing
 
   const feeSummary = feeData
     ? {
@@ -662,83 +640,15 @@ const FeePayment = () => {
       {/* Payment History/Confirmation Section */}
       {feeData.feeStatus?.isPaid && (
         <section className="mb-[35px] border border-gray-300 rounded-xl overflow-hidden bg-white shadow-lg transition-shadow duration-300 ease hover:shadow-xl">
-          <h2 className="bg-gradient-to-r from-gray-50 to-gray-100 px-5 py-[15px] text-lg font-semibold text-gray-800 border-b border-gray-300">
-            Payment Confirmation
-          </h2>
-          <div className="overflow-x-auto p-1">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr>
-                  <th
-                    className={`${thBaseClasses} bg-green-100 text-green-800`}
-                  >
-                    Sl. No.
-                  </th>
-                  <th
-                    className={`${thBaseClasses} bg-green-100 text-green-800`}
-                  >
-                    Fee Type
-                  </th>
-                  <th
-                    className={`${thBaseClasses} bg-green-100 text-green-800 text-right font-medium tracking-tight`}
-                  >
-                    Amount Paid
-                  </th>
-                  <th
-                    className={`${thBaseClasses} bg-green-100 text-green-800`}
-                  >
-                    Transaction ID
-                  </th>
-                  <th
-                    className={`${thBaseClasses} bg-green-100 text-green-800`}
-                  >
-                    Date & Time
-                  </th>
-                  <th
-                    className={`${thBaseClasses} bg-green-100 text-green-800`}
-                  >
-                    Status
-                  </th>
-                  <th
-                    className={`${thBaseClasses} bg-green-100 text-green-800`}
-                  >
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="transition-colors duration-250 ease even:bg-gray-50 hover:bg-blue-50">
-                  <td className={cellBaseClasses}>1</td>
-                  <td className={cellBaseClasses}>{feeSummary.feeType}</td>
-                  <td
-                    className={`${cellBaseClasses} text-right font-medium tracking-tight`}
-                  >
-                    {formatCurrency(feeSummary.payableAmount)}
-                  </td>
-                  <td className={cellBaseClasses}>
-                    {paymentDetails?.transactionId || "Transaction ID"}
-                  </td>
-                  <td className={cellBaseClasses}>
-                    {paymentDetails?.dateTime ||
-                      new Date().toLocaleString("sv-SE")}
-                  </td>
-                  <td className={`${cellBaseClasses} text-center`}>
-                    <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border text-green-800 bg-green-100 border-green-200">
-                      Success
-                    </span>
-                  </td>
-                  <td className={`${cellBaseClasses} text-center`}>
-                    <button
-                      onClick={handleDownloadReceipt}
-                      className={`${buttonBaseClasses} bg-gradient-to-r from-green-500 to-green-700 text-white hover:from-green-600 hover:to-green-800`}
-                      disabled={isDownloading}
-                    >
-                      {isDownloading ? "Generating..." : "Download Receipt"}
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <div className="p-6 text-center">
+            <h2 className="text-2xl font-semibold text-green-700 mb-4">Payment Successful!</h2>
+            <p className="text-gray-600 mb-4">Your payment has been processed successfully.</p>
+            <button
+              onClick={() => navigate(`/documents/feereceipt?semester=${feeData.student.nextSemester}`)}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              View Receipt
+            </button>
           </div>
         </section>
       )}
