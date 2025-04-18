@@ -9,7 +9,6 @@ import {
     getStudentPassportDetails,
     submitPassportApplication,
     getPassportApplications,
-    updateStudentProfile,
     getCourseAnnouncements,
     createCourseDropRequest,
     getStudentDropRequests,
