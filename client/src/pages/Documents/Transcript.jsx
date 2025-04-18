@@ -1,5 +1,5 @@
-// First, let's fix the TranscriptPage.jsx component
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import DocumentLayout from "../../components/documentSection/DocumentLayout";
 import PDFPreview from "../../components/documentSection/PDFPreview";
 import TranscriptPDF from "../../components/documentSection/TranscriptPDF";
@@ -18,9 +18,31 @@ const TranscriptPage = () => {
   const [pdfUrl, setPdfUrl] = useState(null);
   const [pdfBlob, setPdfBlob] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  
-  const { data: userData } = JSON.parse(localStorage.getItem("currentUser"));
-  const { userId } = userData.user;
+  const [userId, setUserId] = useState(null);
+  const [hasAccess, setHasAccess] = useState(false);
+
+  useEffect(() => {
+    try {
+      const { data } = JSON.parse(localStorage.getItem("currentUser"));
+      const userId = data.user.userId;
+      setUserId(userId);
+
+      // Fetch student details to check document access
+      const fetchAccess = async () => {
+        try {
+          const response = await newRequest.get(`/student/${userId}`);
+          setHasAccess(response.data.documentAccess?.transcript ?? false);
+        } catch (error) {
+          console.error('Error fetching document access:', error);
+          toast.error('Error checking document access');
+        }
+      };
+      fetchAccess();
+    } catch (error) {
+      console.error('Error getting user data:', error);
+      toast.error('Please log in again');
+    }
+  }, []);
 
   const { isLoading: isStudentLoading, error: studentError, data: studentData } = useQuery({
     queryKey: [`idcard-${userId}`],
@@ -135,6 +157,19 @@ const TranscriptPage = () => {
       setIsLoading(false);
     }
   };
+
+  // If no access, show message
+  if (!hasAccess) {
+    return (
+      <div className="max-w-4xl mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
+        <h2 className="text-2xl font-semibold text-red-600 mb-4">Access Restricted</h2>
+        <p className="text-gray-700">
+          You do not currently have access to view or download your transcript. 
+          Please contact the academic administration office for assistance.
+        </p>
+      </div>
+    );
+  }
   
   return (
     <DocumentLayout title="Transcript">

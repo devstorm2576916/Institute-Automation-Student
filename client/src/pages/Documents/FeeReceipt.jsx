@@ -1,56 +1,64 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "react-hot-toast";
 import DocumentLayout from "../../components/documentSection/DocumentLayout";
 import PDFPreview from "../../components/documentSection/PDFPreview";
 import FeeReceiptPDF from "../../components/documentSection/FeeReceiptPDF";
 import { pdf } from "@react-pdf/renderer";
+import { FaExclamationCircle } from "react-icons/fa";
 import { useQuery } from "@tanstack/react-query";
 import newRequest from "../../utils/newRequest";
-import { toast } from "react-hot-toast";
 
 const FeeReceiptPage = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isFeeDataLoading, setIsFeeDataLoading] = useState(false);
   const [pdfUrl, setPdfUrl] = useState(null);
   const [pdfBlob, setPdfBlob] = useState(null);
   const [selectedSemester, setSelectedSemester] = useState("");
   const [userId, setUserId] = useState(null);
+  const [hasAccess, setHasAccess] = useState(false);
   const [preparedFeeData, setPreparedFeeData] = useState(null);
 
-  // Get user ID from localStorage
-  useEffect(() => {
-    try {
-      const { data: userData } = JSON.parse(
-        localStorage.getItem("currentUser")
-      );
-      const { userId } = userData.user;
-      setUserId(userId);
-    } catch (error) {
-      console.error("Error parsing user data:", error);
-    }
-  }, []);
+  // Get user data first
+  const userData = JSON.parse(localStorage.getItem("currentUser"))?.data;
+  const userIdFromData = userData?.user?.userId;
 
-  // Fetch fee payment history
-  const { data: feeData, isLoading: isFeeDataLoading } = useQuery({
-    queryKey: ["feeHistory", userId],
-    queryFn: async () => {
-      const response = await newRequest.get(`/student/${userId}/fees/history`);
-      console.log("Fee history data:", response.data);
-      return response.data;
-    },
-    enabled: !!userId,
-    onError: (error) => {
-      console.error("Error fetching fee history:", error);
-      toast.error("Failed to fetch fee history");
-    },
+  // Use query hook before any conditionals
+  const { data: feeData, isLoading: isQueryLoading, error } = useQuery({
+    queryKey: [`feereceipt-${userIdFromData}`],
+    queryFn: () => userIdFromData ? newRequest.get(`/student/${userIdFromData}/fees/history`).then((res) => res.data) : null,
+    enabled: !!userIdFromData
   });
 
-  // Add a check for empty fee data
+  // Initial access check effect
+  useEffect(() => {
+    try {
+      if (userData?.user?.userId) {
+        setUserId(userData.user.userId);
+        // Fetch student details to check document access
+        const fetchAccess = async () => {
+          try {
+            const response = await newRequest.get(`/student/${userData.user.userId}`);
+            setHasAccess(response.data.documentAccess?.feeReceipt ?? false);
+          } catch (error) {
+            console.error("Error fetching document access:", error);
+            toast.error("Error checking document access");
+          }
+        };
+        fetchAccess();
+      }
+    } catch (error) {
+      console.error("Error getting user data:", error);
+      toast.error("Please log in again");
+    }
+  }, [userData]);
+
+  // Check for empty fee data
   useEffect(() => {
     if (feeData && (!feeData.payments || feeData.payments.length === 0)) {
-      // Replace toast.info (which doesn't exist) with standard toast()
       toast("You don't have any fee payment records yet.", {
-        icon: "ℹ️", // Information emoji
+        icon: "ℹ️",
         style: {
-          backgroundColor: "#EFF6FF", // Light blue background
+          backgroundColor: "#EFF6FF",
           border: "1px solid #BFDBFE",
           color: "#1E40AF",
         },
@@ -188,6 +196,53 @@ const FeeReceiptPage = () => {
       setPreparedFeeData(null);
     }
   }, [selectedSemester, feeData]);
+
+  // Show loading state while checking access
+  if (isQueryLoading) {
+    return (
+      <DocumentLayout title="Fee Receipt">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading fee information...</p>
+          </div>
+        </div>
+      </DocumentLayout>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <DocumentLayout title="Fee Receipt">
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <FaExclamationCircle className="h-5 w-5 text-red-500" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-red-700">
+                Error loading fee information. Please try again later.
+              </p>
+            </div>
+          </div>
+        </div>
+      </DocumentLayout>
+    );
+  }
+
+  // Show access restricted message
+  if (!hasAccess) {
+    return (
+      <div className="max-w-4xl mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
+        <h2 className="text-2xl font-semibold text-red-600 mb-4">Access Restricted</h2>
+        <p className="text-gray-700">
+          You do not currently have access to view or download fee receipts. 
+          Please contact the academic administration office for assistance.
+        </p>
+      </div>
+    );
+  }
 
   const handleGenerate = async () => {
     if (!selectedSemester || !preparedFeeData) {
