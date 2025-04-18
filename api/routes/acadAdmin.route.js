@@ -14,6 +14,8 @@ import {
   getStudentsWithDocumentAccess,
   updateStudentDocumentAccess,
   bulkUpdateDocumentAccess,
+  addStudents,
+  addFaculty,
 } from "../controllers/acadAdmin.controller.js";
 
 const router = express.Router();
@@ -42,5 +44,9 @@ router.get("/students/document-access", getStudentsWithDocumentAccess);
 router.patch("/students/:id/document-access", updateStudentDocumentAccess);
 router.post("/students/bulk-document-access", bulkUpdateDocumentAccess);
 
+// Student management routes
+router.post("/students/add-students", addStudents);
 
+// Faculty management routes
+router.post("/faculty/add-faculty", addFaculty);
 export default router;
