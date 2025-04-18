@@ -721,3 +721,20 @@ export const bulkUpdateDocumentAccess = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const getAllDepartments = async (req, res) => {
+  try {
+    const students = await Student.find({});
+    const departments = students.map((student) => student.department);
+    const uniqueDepartments = [...new Set(departments)];
+    // console.log(uniqueDepartments);
+    return res.status(200).json({
+      message: "Departments fetched successfully",
+      success: true,
+      departments: uniqueDepartments,
+    });
+  } catch (error) {
+    console.error("Error fetching departments:", error);
+    res.status(500).json({ message: error.message });
+  }
+}

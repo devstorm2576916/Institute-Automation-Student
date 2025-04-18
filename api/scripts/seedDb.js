@@ -254,7 +254,7 @@ const coursesData = [
 
 const facultyCoursesData = [
   {
-    facultyId: "67fb92cbabe317891d8c0c11", // Will be replaced with actual facultyId
+    facultyId: "68027a2d8046282b12c3b3b3", // Will be replaced with actual facultyId
     courseCode: "CS101",
     year: 2025,
     session: "Spring Semester",
@@ -263,7 +263,7 @@ const facultyCoursesData = [
     updatedAt: new Date()
   },
   {
-    facultyId: "67fb92cbabe317891d8c0c11", // Will be replaced with actual facultyId
+    facultyId: "68027a2d8046282b12c3b3b3", // Will be replaced with actual facultyId
     courseCode: "EE204",
     year: 2025,
     session: "Spring Semester",
@@ -272,7 +272,7 @@ const facultyCoursesData = [
     updatedAt: new Date()
   },
   {
-    facultyId: "67fb92cbabe317891d8c0c11", // Will be replaced with actual facultyId
+    facultyId: "68027a2d8046282b12c3b3b3", // Will be replaced with actual facultyId
     courseCode: "CS201",
     year: 2025,
     session: "Spring Semester",
@@ -281,7 +281,7 @@ const facultyCoursesData = [
     updatedAt: new Date()
   },
   {
-    facultyId: "67fb92cbabe317891d8c0c11", // Will be replaced with actual facultyId
+    facultyId: "68027a2d8046282b12c3b3b3", // Will be replaced with actual facultyId
     courseCode: "HS103",
     year: 2024,
     session: "Winter Semester",
@@ -290,7 +290,7 @@ const facultyCoursesData = [
     updatedAt: new Date()
   },
   {
-    facultyId: "67fb92cbabe317891d8c0c11", // Will be replaced with actual facultyId
+    facultyId: "68027a2d8046282b12c3b3b3", // Will be replaced with actual facultyId
     courseCode: "MA102",
     year: 2024,
     session: "Summer Course",
@@ -299,7 +299,6 @@ const facultyCoursesData = [
     updatedAt: new Date()
   }
 ];
-
 
 // Function to seed data
 const seedDatabase = async () => {
@@ -406,7 +405,7 @@ const seedDatabase = async () => {
                     console.error("Error seeding database:", error);
                     process.exit(1);
                   }
-                };
+  };
                 
 const seedStudentCourses = async () => {
     try {
@@ -540,7 +539,6 @@ const seedStudentCourses = async () => {
     }
   };
     
-  // add faculty courses, if already present, remove all
   const seedFacultyCourses = async () => {
     try {
       // Connect to MongoDB
@@ -550,10 +548,10 @@ const seedStudentCourses = async () => {
       // Check if faculty courses already exist
       const existingFacultyCourses = await FacultyCourse.find({});
       console.log("Existing faculty courses found:", existingFacultyCourses);
-      // if (existingFacultyCourses) {
-      //   console.log(`Found existing faculty courses. Deleting them before re-seeding.`);
-      //   await FacultyCourse.deleteMany({});
-      // }
+      if (existingFacultyCourses) {
+        console.log(`Found existing faculty courses. Deleting them before re-seeding.`);
+        await FacultyCourse.deleteMany({});
+      }
       
       // Insert the faculty courses
       const result = await FacultyCourse.insertMany(facultyCoursesData);
@@ -621,22 +619,22 @@ const seedStudentCourses = async () => {
     }
   }
 
-  // const deleteAllFeedback = async () => {
-  //   try {
-  //     // Connect to MongoDB
-  //     await connectDB();
-  //     console.log("Connected to MongoDB, starting feedback deletion process...");
+  const deleteAllFeedback = async () => {
+    try {
+      // Connect to MongoDB
+      await connectDB();
+      console.log("Connected to MongoDB, starting feedback deletion process...");
       
-  //     // Delete all feedback documents
-  //     const result = await Feedback.deleteMany({});
+      // Delete all feedback documents
+      const result = await Feedback.deleteMany({});
       
-  //     console.log(`Successfully deleted ${result.deletedCount} feedback documents.`);
-  //     process.exit(0);
-  //   } catch (error) {
-  //     console.error("Error deleting feedback:", error);
-  //     process.exit(1);
-  //   }
-  // }
+      console.log(`Successfully deleted ${result.deletedCount} feedback documents.`);
+      process.exit(0);
+    } catch (error) {
+      console.error("Error deleting feedback:", error);
+      process.exit(1);
+    }
+  }
 
   const clearAllCourseAnnouncements = async () => {
     try {
@@ -657,8 +655,6 @@ const seedStudentCourses = async () => {
       process.exit(1);
     }
   }
-  
-  // Execute the function
 
   const checkFeedBackExists = async () => {
     try {
@@ -719,7 +715,6 @@ const seedStudentCourses = async () => {
     }
   }
 
-
   const fixFeedbackIndexes = async () => {
   try {
     // Connect to MongoDB
@@ -739,6 +734,6 @@ const seedStudentCourses = async () => {
     console.error("Error fixing feedback indexes:", error);
     process.exit(1);
   }
-}
+  }
 
-  export {clearAllCourseAnnouncements, seedDatabase, seedStudentCourses, seedCourses, removeAllStudentsFromCourse, seedFacultyCourses, fillFacultyCourse };
+export { seedDatabase, seedStudentCourses, seedCourses, removeAllStudentsFromCourse, seedFacultyCourses, fillFacultyCourse };
