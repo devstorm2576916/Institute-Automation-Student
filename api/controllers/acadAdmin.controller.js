@@ -5,6 +5,171 @@ import { User } from '../models/user.model.js';
 import { CourseDropRequest } from '../models/courseDropRequest.model.js';
 import { Course, StudentCourse} from '../models/course.model.js';
 import { FeeBreakdown } from "../models/fees.model.js";
+import bcrypt from "bcrypt";
+import { Faculty } from "../models/faculty.model.js";
+
+// Add new faculty
+export const addFaculty = async (req, res) => {
+  const {
+    name,
+    email,
+    contactNo,
+    address,
+    dateOfBirth,
+    bloodGroup,
+    department,
+    designation,
+    yearOfJoining,
+    specialization,
+    qualifications,
+    experience,
+    publications,
+    achievements,
+    conferences,
+  } = req.body;
+
+  try {
+    // Check for an existing user with this email.
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      throw new Error("User with this email already exists.");
+    }
+
+    const hashedPassword = await bcrypt.hash(email, 10);
+
+    // Create new user document.
+    const newUser = new User({
+      name,
+      email,
+      password: hashedPassword,
+      refreshToken: "abc", // dummy string as a refresh token for testing. 
+      contactNo,
+      address,
+      dateOfBirth,
+      bloodGroup,
+    });
+
+    const savedUser = await newUser.save();
+
+    // Create new faculty document linked to the user.
+    const newFaculty = new Faculty({
+      userId: savedUser._id,
+      email,
+      department,
+      designation,
+      yearOfJoining,
+      specialization,
+      qualifications,
+      experience,
+      publications,
+      achievements,
+      conferences,
+    });
+
+    const savedFaculty = await newFaculty.save();
+
+    return res.status(201).json({
+      message: "Faculty added successfully.",
+    });
+  } catch (error) {
+    console.error("Error in addFaculty:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+// Add students in bulk
+export const addStudents = async (req, res) => {
+  try {
+    const studentsData = req.body;
+
+    if (!Array.isArray(studentsData) || studentsData.length === 0) {
+      return res.status(400).json({ message: 'No student data provided' });
+    }
+
+    const insertedStudents = [];
+
+    for (const student of studentsData) {
+      const {
+        name,
+        email,
+        contactNo,
+        address,
+        dateOfBirth,
+        bloodGroup,
+        rollNo,
+        fatherName,
+        motherName,
+        department,
+        semester,
+        batch,
+        program,
+        hostel,
+        roomNo,
+      } = student;
+
+      // Skip if required fields are missing
+      if (
+        !name || !email || !rollNo || !fatherName || !motherName ||
+        !department || !batch || !program || !hostel || !roomNo
+      ) {
+        console.warn(`Skipping incomplete student entry: ${email || rollNo}`);
+        continue;
+      }
+
+      // Check for existing user/student
+      const existingUser = await User.findOne({ email });
+      const existingStudent = await Student.findOne({ rollNo });
+
+      if (existingUser || existingStudent) {
+        console.warn(`Skipping duplicate student: ${email}`);
+        continue;
+      }
+
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(rollNo, saltRounds);
+
+      // Create user
+      const newUser = new User({
+        name,
+        email,
+        password: hashedPassword,
+        refreshToken: "abc", // dummy string as a refresh token for testing. 
+        contactNo,
+        address,
+        dateOfBirth,
+        bloodGroup,
+      });
+
+      const savedUser = await newUser.save();
+
+      // Create student
+      const newStudent = new Student({
+        userId: savedUser._id,
+        email,
+        rollNo,
+        fatherName,
+        motherName,
+        department,
+        semester,
+        batch,
+        program,
+        hostel,
+        roomNo,
+      });
+
+      const savedStudent = await newStudent.save();
+      insertedStudents.push({ student: savedStudent, user: savedUser });
+    }
+
+    return res.status(201).json({
+      message: `${insertedStudents.length} students added successfully`,
+      data: insertedStudents,
+    });
+  } catch (error) {
+    console.error('Error adding students:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
 
 // Get all applications with pagination
 export const getAllApplications = async (req, res) => {
