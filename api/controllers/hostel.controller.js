@@ -188,7 +188,7 @@ export const updateTransferRequest = async (req, res) => {
     // Make a GET request to fetch the userId using the rollNo
     let userId;
     try {
-      const response = await axios.get(`http://localhost:8000/api/student/${rollNo}/rollno`);
+      const response = await axios.get(`https://ias-server-cpoh.onrender.com/api/student/${rollNo}/rollno`);
       if (response.status === 200) {
         userId = response.data.userId;
       } else {
@@ -204,7 +204,7 @@ export const updateTransferRequest = async (req, res) => {
     if (status === 'Approved') {
       try {
         // Make a PUT request to update the student's profile
-        const response = await axios.put(`http://localhost:8000/api/student/${userId}/profile`, {
+        const response = await axios.put(`https://ias-server-cpoh.onrender.com/api/student/${userId}/profile`, {
           hostel: newHostel
         });
 

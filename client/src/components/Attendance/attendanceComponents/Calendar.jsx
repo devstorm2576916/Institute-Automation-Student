@@ -49,7 +49,7 @@ function MyCalendar({ selectedStudent }) {
 
     const fetchEventData = async (rollNo) => {
         try {
-            const response = await fetch(`http://localhost:8000/api/attendancelanding/student/${courseId}`, {
+            const response = await fetch(`https://ias-server-cpoh.onrender.com/api/attendancelanding/student/${courseId}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",

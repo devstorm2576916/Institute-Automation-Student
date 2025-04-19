@@ -197,7 +197,7 @@ const FeePayment = () => {
         return;
       }
 
-      const backendUrl = "http://localhost:8000/api/payment/create-order";
+      const backendUrl = "https://ias-server-cpoh.onrender.com/api/payment/create-order";
       const orderPayload = { amount: payableAmount, currency: "INR" };
 
       console.log("Sending to backend:", orderPayload);
