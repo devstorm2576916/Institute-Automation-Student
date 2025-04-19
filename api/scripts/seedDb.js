@@ -11,13 +11,13 @@ import { FacultyCourse } from "../models/course.model.js";
 import { Feedback } from "../models/feedback.model.js";
 // Sample user data
 const userData = {
-  name: "Mahek Choudhary",
-  email: "mahek@iitg.ac.in",
-  hostel: "Disang",
-  rollNo: "220101066",
-  password: "pass123", // In a real app, you should hash this
-  refreshToken: "sample-refresh-token-10",
-  contactNo: "1234598890",
+  name: "Divyansh Chandak",
+  email: "testStudent@iitg.ac.in",
+  hostel: "Lohit",
+  rollNo: "220101039",
+  password: "password123", // In a real app, you should hash this
+  refreshToken: "sample-refresh-token-1",
+  contactNo: "1234567890",
   isVerified: true
 };
 const nonAcadAdminData = {
@@ -302,96 +302,96 @@ const seedDatabase = async () => {
     
     // Generate a salt
     const saltRounds = 10; // You can adjust this number for more or less security (higher is more secure but slower)
-    // const hashedPassword = await bcrypt.hash(facultyData.password, saltRounds);
+    const hashedPassword = await bcrypt.hash(facultyData.password, saltRounds);
     // Create user with the hashed password
-    // const createdFacultyUser = await User.create({
-    //   ...facultyData, // Spread the existing facultyData
-    //   password: hashedPassword, // Override the plain text password with the hashed one
-    // });
-    // console.log("User created:", createdFacultyUser.name, "with email:", createdFacultyUser.email);
+    const createdFacultyUser = await User.create({
+      ...facultyData, // Spread the existing facultyData
+      password: hashedPassword, // Override the plain text password with the hashed one
+    });
+    console.log("User created:", createdFacultyUser.name, "with email:", createdFacultyUser.email);
     // Create a faculty with the same email
-    // const faculty = await Faculty.create({
-    //   userId: createdFacultyUser._id,
-    //   email: facultyData.email,
-    //   department: facultyData.department,
-    //   designation: facultyData.designation,
-    //   courses: facultyData.courses,
-    //       specialization: facultyData.specialization,
-    //       qualifications: facultyData.qualifications,
-    //       status: facultyData.status,
-    //       createdAt: new Date(),
-    //       updatedAt: new Date()
-    //     });
-    //     console.log("Faculty created with designation:", faculty.designation);
-    //     console.log("Faculty is linked to user with email:", createdFacultyUser.email);
+    const faculty = await Faculty.create({
+      userId: createdFacultyUser._id,
+      email: facultyData.email,
+      department: facultyData.department,
+      designation: facultyData.designation,
+      courses: facultyData.courses,
+          specialization: facultyData.specialization,
+          qualifications: facultyData.qualifications,
+          status: facultyData.status,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+        console.log("Faculty created with designation:", faculty.designation);
+        console.log("Faculty is linked to user with email:", createdFacultyUser.email);
         
         // const hashedPassword = await bcrypt.hash(acadAdminData.password, saltRounds);
         
         // // Create user with the hashed password
         // const createdAcadAdminUser = await User.create({
-          //   ...acadAdminData, // Spread the existing acadAdminData
-          //   password: hashedPassword, // Override the plain text password with the hashed one
-          // });
-          // console.log("User created:", createdAcadAdminUser.name, "with email:", createdAcadAdminUser.email);
+        //     ...acadAdminData, // Spread the existing acadAdminData
+        //     password: hashedPassword, // Override the plain text password with the hashed one
+        //   });
+        //   console.log("User created:", createdAcadAdminUser.name, "with email:", createdAcadAdminUser.email);
           
-          // // Create an academic admin with the same email
-          // const acadAdmin = await AcadAdmin.create({
-            //       userId: createdAcadAdminUser._id,
-            //       email: acadAdminData.email,
-            //       designation: acadAdminData.designation,
-            //       qualifications: acadAdminData.qualifications,
-            //       status: acadAdminData.status,
-            //       createdAt: new Date(),
-            //       updatedAt: new Date()
-            //     });
-            //     console.log("Academic Admin created with designation:", acadAdmin.designation);
-            //     console.log("Academic Admin is linked to user with email:", createdAcadAdminUser.email);
+        //   // Create an academic admin with the same email
+        //   const acadAdmin = await AcadAdmin.create({
+        //           userId: createdAcadAdminUser._id,
+        //           email: acadAdminData.email,
+        //           designation: acadAdminData.designation,
+        //           qualifications: acadAdminData.qualifications,
+        //           status: acadAdminData.status,
+        //           createdAt: new Date(),
+        //           updatedAt: new Date()
+        //         });
+        //         console.log("Academic Admin created with designation:", acadAdmin.designation);
+        //         console.log("Academic Admin is linked to user with email:", createdAcadAdminUser.email);
             
-            const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
+            // const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
             
-            // Create user with the hashed password
-            const createdUser = await User.create({
-                ...userData, // Spread the existing userData
-                password: hashedPassword, // Override the plain text password with the hashed one
-              });
-              console.log("User created:", createdUser.name, "with email:", createdUser.email);
+            // // Create user with the hashed password
+            // const createdUser = await User.create({
+            //     ...userData, // Spread the existing userData
+            //     password: hashedPassword, // Override the plain text password with the hashed one
+            //   });
+            //   console.log("User created:", createdUser.name, "with email:", createdUser.email);
               
-              // Create a student with the same email
-              const student = await Student.create({
-                      userId: createdUser._id,
-                      hostel: "Disang",
-                      rollNo: "220101066",
-                      fatherName: "Anuraag",
-                      motherName:"Seema",
-                      email: "mahek@iitg.ac.in",
-                      department: "Computer Science and Engineering",
-                      semester: 6,
-                      batch: "2023-2027",
-                      program: "BTech",
-                      status: "active",
-                      roomNo: "G-180",
-                      createdAt: new Date(),
-                      updatedAt: new Date()
-                    });
-                    // console.log("Student created with register number:", student.registerNo);
-                    console.log("Student is linked to user with email:", createdUser.email);
+            //   // Create a student with the same email
+            //   const student = await Student.create({
+            //           userId: createdUser._id,
+            //           hostel: "Lohit",
+            //           rollNo: "220101039",
+            //           fatherName: "testPapa",
+            //           motherName:"testMumma",
+            //           email: "testStudent@iitg.ac.in",
+            //           department: "Computer Science and Engineering",
+            //           semester: 6,
+            //           batch: "2022-2026",
+            //           program: "BTech",
+            //           status: "active",
+            //           roomNo: "B-238",
+            //           createdAt: new Date(),
+            //           updatedAt: new Date()
+            //         });
+            //         // console.log("Student created with register number:", student.registerNo);
+            //         console.log("Student is linked to user with email:", createdUser.email);
                 
                 // const hashedPassword2 = await bcrypt.hash(nonAcadAdminData.password, saltRounds);
                 // console.log("Hashed password for non-academic admin:", hashedPassword2);
                 // // Create the Non-Academic Admin User
                 // const createdHabUser = await User.create({
-                  //     ...nonAcadAdminData,
-                  //     password: hashedPassword2,
-                  // });
-                  // console.log("Non-Academic Admin User created:", createdHabUser.name, "with email:", createdHabUser.email);
+                //       ...nonAcadAdminData,
+                //       password: hashedPassword2,
+                //   });
+                //   console.log("Non-Academic Admin User created:", createdHabUser.name, "with email:", createdHabUser.email);
                   
-                  // // Now create the HostelAdmin entry
-                  // const createdHab = await HostelAdmin.create({
-                    //     userId: createdHabUser._id,     // Link to created User
-                    //     email: createdHabUser.email,    // Same email
-                    //     status: "active",               // or "on-leave" / "inactive" if you want
-                    // });
-                    // console.log("HostelAdmin created:", createdHab.email);
+                //   // Now create the HostelAdmin entry
+                //   const createdHab = await HostelAdmin.create({
+                //         userId: createdHabUser._id,     // Link to created User
+                //         email: createdHabUser.email,    // Same email
+                //         status: "active",               // or "on-leave" / "inactive" if you want
+                //     });
+                //     console.log("HostelAdmin created:", createdHab.email);
                     
                     console.log("Database seeded successfully!");
                     process.exit(0);
