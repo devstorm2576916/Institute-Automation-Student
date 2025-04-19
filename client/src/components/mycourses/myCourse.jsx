@@ -135,7 +135,7 @@ function MyCourses() {
                   </Link>
                   
                   <Link
-                    to={`/course/${course.id}/assignment`}
+                    to={`/course/${course.id}/assignments`}
                     className="flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-md p-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition duration-200"
                   >
                     <FaClipboardList className="text-pink-400" />

@@ -100,7 +100,7 @@ const coursesData = [
       courseCode: "CS101",
       courseName: "Introduction to Computer Science",
       department: "Computer Science and Engineering",
-      slot: "A",
+      slot: "F1",
       credits: 6,
       announcements: [
           {
@@ -118,15 +118,13 @@ const coursesData = [
               postedBy: "FACULTY001"
           }
       ],
-      students: [
-        "67fb82e1fd693835a24dd230", // Example student ID, replace with actual IDs
-      ]
+      students: []
   },
   {
       courseCode: "MA102",
       courseName: "Calculus and Linear Algebra",
       department: "Mathematics",
-      slot: "C",
+      slot: "A1",
       credits: 8,
       announcements: [
           {
@@ -137,15 +135,13 @@ const coursesData = [
               postedBy: "FACULTY002"
           }
       ],
-      students: [
-        "67fb82e1fd693835a24dd230", // Example student ID, replace with actual IDs
-      ]
+      students: []
   },
   {
       courseCode: "EE204",
       courseName: "Digital Electronics",
       department: "Electrical Engineering",
-      slot: "E",
+      slot: "E1",
       credits: 6,
       announcements: [
           {
@@ -163,9 +159,7 @@ const coursesData = [
               postedBy: "FACULTY003"
           }
         ],
-        students: [
-          "67fb82e1fd693835a24dd230", // Example student ID, replace with actual IDs
-        ]
+        students: []
   },
   {
       courseCode: "HS103",
@@ -182,15 +176,13 @@ const coursesData = [
               postedBy: "FACULTY004"
           }
       ],
-      students: [
-        "67fb82e1fd693835a24dd230", // Example student ID, replace with actual IDs
-      ]
+      students: []
   },
   {
       courseCode: "CS201",
       courseName: "Data Structures and Algorithms",
       department: "Computer Science and Engineering",
-      slot: "B",
+      slot: "B2",
       credits: 8,
       announcements: [
           {
@@ -208,9 +200,7 @@ const coursesData = [
               postedBy: "FACULTY001"
           }
       ],
-      students: [
-        "67fb82e1fd693835a24dd230", // Example student ID, replace with actual IDs
-      ]
+      students: []
   },
   {
       courseCode: "ME101",
@@ -227,15 +217,13 @@ const coursesData = [
               postedBy: "FACULTY005"
           }
       ],
-      students: [
-        "67fb82e1fd693835a24dd230", // Example student ID, replace with actual IDs
-      ]
+      students: []
   },
   {
       courseCode: "CH102",
       courseName: "Physical Chemistry",
       department: "Chemistry",
-      slot: "F",
+      slot: "F2",
       credits: 6,
       announcements: [
           {
@@ -246,9 +234,7 @@ const coursesData = [
               postedBy: "FACULTY006"
           }
       ],
-      students: [
-        "67fb82e1fd693835a24dd230", // Example student ID, replace with actual IDs
-      ]
+      students: []
   }
 ];
 
@@ -447,13 +433,13 @@ const seedStudentCourses = async () => {
       
       // Check if courses already exist
       const existingCourses = await Course.find({
-        courseCode: { $in: coursesData.map(course => course.courseCode) }
+        // courseCode: { $in: coursesData.map(course => course.courseCode) }
       });
-      
+      console.log("Existing courses found:", existingCourses);
       if (existingCourses.length > 0) {
         console.log(`Found ${existingCourses.length} existing courses. Deleting them before re-seeding.`);
         await Course.deleteMany({
-          courseCode: { $in: coursesData.map(course => course.courseCode) }
+          // courseCode: { $in: coursesData.map(course => course.courseCode) }
         });
       }
       
@@ -576,42 +562,110 @@ const seedStudentCourses = async () => {
       // Connect to MongoDB
       await connectDB();
       console.log("Connected to MongoDB, starting faculty course filling process...");
-      const result = await Faculty.updateMany(
-        {}, // Empty filter means select all documents
-        { $set: { courses: [] } } // Set courses to an empty array
-      );
+      // const result = await Faculty.updateMany(
+      //   {}, // Empty filter means select all documents
+      //   { $set: { courses: [] } } // Set courses to an empty array
+      // );
       // Find the faculty with ID 67fb92cbabe317891d8c0c11
-      const facultyCourses = await FacultyCourse.find({});
-      console.log("Faculty courses found:", facultyCourses);
+      // const facultyCourses = await FacultyCourse.find({});
+      const courses1 = ["CS101", "MA102", "EE204"];
+      const courses2 = ["CS201", "ME101", "CH102", "HS103"];
+      const fac1Id = "68027a2d8046282b12c3b3b3";
+      const fac2Id = "6802b5627d04605a4cecf14e";
+
+      const currentYear = new Date().getFullYear();
+
+      // Array of possible sessions
+      const sessions = ['Winter Semester', 'Spring Semester', 'Summer Course'];
+      const stud1Id = "680268e4359e6305027d1f5e";
+      const roll1 = "220101039";
+      const stud2Id = "6802673cb698ebe4b9e7a7e6";
+      const roll2 = "220101066";
+
+      // const studentCourseObj = courses2.map(courseCode => {
+      //   return {
+      //     rollNo: roll2,
+      //     courseId: courseCode,
+      //     creditOrAudit: "Credit",
+      //     semester: "3",
+      //     status: "Approved",
+      //     grade: null,
+      //     isCompleted: false,
+      //     createdAt: new Date(),
+      //     updatedAt: new Date()
+      //   };
+      // });
+
+      const update = await Course.updateMany(
+        { courseCode: { $in: courses2 } },
+        { $push: { students: stud2Id } }
+      );
+
+      console.log("Updated course students:", update);
+      // const insert = await StudentCourse.insertMany(studentCourseObj);
+      // Create an array of documents to insert
+      // const facultyCourseDocs = courses2.map(courseCode => {
+      //   return {
+      //     facultyId: fac2Id,
+      //     courseCode: courseCode,
+      //     year: currentYear,
+      //     session: sessions[Math.floor(Math.random() * sessions.length)], // Random session
+      //     status: 'Ongoing', // Default status
+      //     createdAt: new Date(),
+      //     updatedAt: new Date()
+      //   };
+      // });
+
+      // const facultyCourseObjects = await FacultyCourse.find({ courseCode: { $in: courses2 } });
+      // const faculty = await Faculty.findOne({ userId: fac2Id });
+      // const updateResult = await Faculty.findByIdAndUpdate(
+      //   faculty._id,
+      //   { 
+      //     $push: { 
+      //       courses: { 
+      //         $each: facultyCourseObjects 
+      //       } 
+      //     },
+      //     updatedAt: new Date()
+      //   },
+      //   { new: true } // Return the updated document
+      // );
+      // console.log("Updated faculty courses:", updateResult);
+      // const result = await Course.updateMany(
+      //   { courseCode: { $in: courses2 } },
+      //   { $set: { "announcements.$[].postedBy": fac2Id } }
+      // );
+      // facultyCourse me daal ye sab
+      // console.log("Faculty courses found:", facultyCourses);
       
-      // map through all the FacultyCourses, through the facultyId find the faculty and put the id in the faculty course array
-      for (const course of facultyCourses) {
-        // Find the faculty by facultyId
-        const faculty = await Faculty.findOne({ userId: course.facultyId });
+      // // map through all the FacultyCourses, through the facultyId find the faculty and put the id in the faculty course array
+      // for (const course of facultyCourses) {
+      //   // Find the faculty by facultyId
+      //   const faculty = await Faculty.findOne({ userId: course.facultyId });
         
-        if (faculty) {
-          console.log(`Updating faculty ${faculty.email} with course ${course.courseCode}`);
+      //   if (faculty) {
+      //     console.log(`Updating faculty ${faculty.email} with course ${course.courseCode}`);
           
-          // Check if the course already exists in faculty's courses array
-          const courseExists = faculty.courses.some(existingCourse => 
-            existingCourse._id.toString() === course._id.toString()
-          );
+      //     // Check if the course already exists in faculty's courses array
+      //     const courseExists = faculty.courses.some(existingCourse => 
+      //       existingCourse._id.toString() === course._id.toString()
+      //     );
           
-          if (!courseExists) {
-            // Add the course to faculty's courses array
-            faculty.courses.push(course);
-            faculty.updatedAt = Date.now();
+      //     if (!courseExists) {
+      //       // Add the course to faculty's courses array
+      //       faculty.courses.push(course);
+      //       faculty.updatedAt = Date.now();
             
-            // Save the faculty document
-            await faculty.save();
-            console.log(`Added course ${course.courseCode} to faculty ${faculty.email}`);
-          } else {
-            console.log(`Course ${course.courseCode} already exists for faculty ${faculty.email}`);
-          }
-        } else {
-          console.log(`Faculty not found for course ${course.courseCode} with faculty ID ${course.facultyId}`);
-        }
-      }
+      //       // Save the faculty document
+      //       await faculty.save();
+      //       console.log(`Added course ${course.courseCode} to faculty ${faculty.email}`);
+      //     } else {
+      //       console.log(`Course ${course.courseCode} already exists for faculty ${faculty.email}`);
+      //     }
+      //   } else {
+      //     console.log(`Faculty not found for course ${course.courseCode} with faculty ID ${course.facultyId}`);
+      //   }
+      // }
       // Update the faculty's courses
       
       process.exit(0);
