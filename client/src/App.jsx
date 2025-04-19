@@ -41,6 +41,7 @@ import CreateAssignment from "./components/Assignment/CreateAssignment.jsx";
 import EditAssignment from "./components/Assignment/EditAssignment.jsx";
 import FacultyAssignmentSubmissions from "./components/Assignment/FacultyAssignmentSubmissions.jsx";
 import LoginPage from "./components/LoginPage/Login.jsx";
+import ResetPasswordPage from './components/LoginPage/ResetPasswordPage.jsx';
 import DropCourse from "./components/dropCourse/drop.jsx";
 import CourseAnnouncements from "./components/Announcements/studentAnnouncements.jsx";
 import MyCourses from "./components/mycourses/myCourse.jsx";
@@ -108,6 +109,10 @@ function App() {
         {
             path: "/login",
             element: <LoginPage/>,
+        },
+        {
+            path: "/reset-password/:token",
+            element: <ResetPasswordPage/>,
         },
         {
             path: "/",
