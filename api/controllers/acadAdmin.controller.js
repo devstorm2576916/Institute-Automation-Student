@@ -448,7 +448,7 @@ export const addComment = async (req, res) => {
 
 export const addFeeStructure = async (req, res) => {
   try {
-    console.log("Received request body:", req.body);
+    // console.log("Received request body:", req.body);
 
     const processedData = {
       ...req.body,
@@ -652,37 +652,37 @@ export const updateDropRequestStatus = async (req, res) => {
     try {
         const { requestId } = req.params;
         const { status, remarks } = req.body;
-        console.log("Step 1: Received params:", { requestId, status, remarks });
+        // console.log("Step 1: Received params:", { requestId, status, remarks });
 
         const request = await CourseDropRequest.findById(requestId);
-        console.log("Step 2: Fetched drop request:", request);
+        // console.log("Step 2: Fetched drop request:", request);
 
         if (!request) {
-            console.log("Step 2.1: Drop request not found");
+            // console.log("Step 2.1: Drop request not found");
             return res.status(404).json({ message: 'Drop request not found' });
         }
 
         request.status = status;
         request.remarks = remarks;
         await request.save();
-        console.log("Step 3: Updated request status and remarks, saved request");
+        // console.log("Step 3: Updated request status and remarks, saved request");
 
         if (status === 'Approved') {
             // Get student's rollNo from the request
             const student = await Student.findOne({ rollNo: request.rollNo })
-            console.log("Step 4: Fetched student:", student);
+            // console.log("Step 4: Fetched student:", student);
 
             if (!student) {
-                console.log("Step 4.1: Student not found");
+                // console.log("Step 4.1: Student not found");
                 return res.status(404).json({ message: 'Student not found' });
             }
 
             // Get course code from the course ID
             const course = await Course.findOne({ courseCode: request.courseId });
-            console.log("Step 5: Fetched course:", course);
+            // console.log("Step 5: Fetched course:", course);
 
             if (!course) {
-                console.log("Step 5.1: Course not found");
+                // console.log("Step 5.1: Course not found");
                 return res.status(404).json({ message: 'Course not found' });
             }
 
@@ -691,14 +691,14 @@ export const updateDropRequestStatus = async (req, res) => {
                 rollNo: student.rollNo,
                 courseId: course.courseCode
             });
-            console.log("Step 6: StudentCourse deletion result:", deletionResult);
+            // console.log("Step 6: StudentCourse deletion result:", deletionResult);
 
             if (deletionResult.deletedCount === 0) {
-                console.log("Step 6.1: Student course enrollment not found");
+                // console.log("Step 6.1: Student course enrollment not found");
                 return res.status(404).json({
                     message: 'Student course enrollment not found'
                 });
-            }
+            }``
 
             // delete the student from the student array of course
             const courseUpdateResult = await Course.updateOne(
@@ -707,12 +707,11 @@ export const updateDropRequestStatus = async (req, res) => {
             );
 
             if(courseUpdateResult.modifiedCount === 0) {
-                console.log("Step 6.2: Course enrollment not found");
+                // console.log("Step 6.2: Course enrollment not found");
                 return res.status(404).json({
                     message: 'Course enrollment not found'
                 });
             }
-
         }
 
         // console.log("Step 8: Drop request update process completed successfully");
@@ -817,7 +816,7 @@ export const updateStudentDocumentAccess = async (req, res) => {
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
-    console.log(student);
+    // console.log(student);
     const enrichedStudent = {
       id: student._id,
       name: student.userId.name,
