@@ -12,8 +12,9 @@ import createCourseRoute from "../api/routes/createCourse.route.js";
 import acadAdminRoute from "../api/routes/acadAdmin.route.js";
 import facultyRoute from "../api/routes/faculty.route.js";
 import feedbackRoute from "../api/routes/feedback.route.js";
-// import { seedDatabase, seedStudentCourses, seedCourses, removeAllStudentsFromCourse } from "../api/scripts/seedDb.js";
-// import { seedDatabase, seedStudentCourses, seedCourses, seedFacultyCourses } from "../api/scripts/seedDb.js";
+import { fillFacultyCourse, seedStudentCourses, seedCourses, removeAllStudentsFromCourse } from "../api/scripts/seedDb.js";
+// import {fillFacultyCourse, seedDatabase, seedStudentCourses, seedCourses, seedFacultyCourses, fillFacultyCourse } from "../api/scripts/seedDb.js";
+// import { fillFacultyCourse, seedStudentCourses, seedCourses, seedFacultyCourses } from "../api/scripts/seedDb.js";
 import seedSupportStaff from "./scripts/seedSupportStaff.js";
 import attendanceRoute from "../api/routes/attendance.route.js"
 import assignmentRoute from "../api/routes/assignment.route.js"
@@ -21,6 +22,8 @@ import gradeRoute from "../api/routes/grade.route.js";
 
 import Razorpay from "razorpay";
 import crypto from "crypto"; // Needed for signature verification (production)
+
+const __dirname = path.resolve(); // Get the current directory name
 
 const app = express();
 dotenv.config(); // Load environment variables first
@@ -57,6 +60,11 @@ app.use('/api/complaints', complaintsRouter);
 
 // --- Middleware ---
 app.use(express.urlencoded({ extended: true,limit: '5mb' }));
+
+// app.use(express.static(path.join(__dirname, "/client/dist")));
+// app.get("*", (req, res) => {
+//   res.sendFile(path.join(__dirname, "client","dist","index.html"));
+// });
 
 // --- Initialize Razorpay ---
 const razorpay = new Razorpay({
@@ -135,7 +143,7 @@ const startServer = async () => {
     // Seed support staff data
     // await seedSupportStaff();
     
-    app.listen(8000, () => {
+    app.listen(process.env.PORT ||8000, () => {
       console.log(`Backend server is running on port ${8000}`);
       if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
         console.warn(
@@ -155,11 +163,11 @@ export {app}
 
 // const runSeeds = async () => {
 //   try {
-//     // await seedDatabase();
+//     await fillFacultyCourse();
 //     // await seedStudentCourses();
 //     // await seedCourses();
 //     // seedFacultyCourses();
-//     removeAllStudentsFromCourse();
+//     // removeAllStudentsFromCourse();
 //     console.log("All seeding completed successfully!");
 //   } catch (error) {
 //     console.error("Error during seeding:", error);

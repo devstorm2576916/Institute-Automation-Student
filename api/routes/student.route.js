@@ -24,6 +24,7 @@ import {
   getFeePaymentHistory,
   getPerformance,
 } from "../controllers/student.controller.js";
+import { getAllAnnouncements } from "../controllers/announcements.controller.js";
 
 
 const router = express.Router();
@@ -34,6 +35,7 @@ router.get("/:id/performance", getPerformance);
 // router.delete("/:id/courses/:courseId", dropCourse);
 router.get("/courses/:courseId", getCourseAnnouncements);
 router.get("/:id/completed-courses", getCompletedCourses);
+router.get("/:id/announcements", getAllAnnouncements);
 
 // Course drop request routes
 router.post("/:id/drop-requests", createCourseDropRequest);

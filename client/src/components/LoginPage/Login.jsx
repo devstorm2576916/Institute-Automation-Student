@@ -21,7 +21,7 @@ export default function LoginPage() {
     }
     const emailRegex = /^[a-zA-Z.]+@iitg\.ac\.in$/;
     if (!emailRegex.test(email)) {
-      alert("Please enter a valid email address!");
+      alert("Please enter a valid IITG email address!");
       return;
     }
     console.log({ email, role });
@@ -32,7 +32,7 @@ export default function LoginPage() {
         role: role
       }
 
-      const response = await axios.post("http://localhost:8000/api/auth/login", user, {
+      const response = await axios.post("https://ias-server-cpoh.onrender.com/api/auth/login", user, {
         withCredentials: true,
       });
 
@@ -67,7 +67,7 @@ export default function LoginPage() {
   
     try {
       // Send password reset request to the server
-      const response = await axios.post("http://localhost:8000/api/auth/forgot-password", {
+      const response = await axios.post("https://ias-server-cpoh.onrender.com/api/auth/forgot-password", {
         email: resetEmail
       });
   
@@ -118,7 +118,7 @@ export default function LoginPage() {
                 Enter your email address below. We'll send you a link to reset your password.
               </p>
               <div className="mb-4">
-                <label className="block text-sm font-medium">Email</label>
+                <label className="block text-sm font-medium">IITG Email</label>
                 <input
                   type="email"
                   placeholder="Enter your email"
