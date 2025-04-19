@@ -60,10 +60,10 @@ app.use('/api/complaints', complaintsRouter);
 // --- Middleware ---
 app.use(express.urlencoded({ extended: true,limit: '5mb' }));
 
-app.use(express.static(path.join(__dirname, "/client/dist")));
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "client","dist","index.html"));
-});
+// app.use(express.static(path.join(__dirname, "/client/dist")));
+// app.get("*", (req, res) => {
+//   res.sendFile(path.join(__dirname, "client","dist","index.html"));
+// });
 
 // --- Initialize Razorpay ---
 const razorpay = new Razorpay({
