@@ -15,8 +15,9 @@ const AssignForm = ({ onClose, onAssign, complaint }) => {
             try {
                 console.log(`Fetching support staff for category: ${complaint.category}, subCategory: ${complaint.subCategory}`);
                 const token = localStorage.getItem("accessToken");
-                const response = await fetch(`${process.env.REACT_APP_API_URL}/complaints/admin/filteredSupportStaff`, {
-                    method: "POST",
+
+                const response = await fetch(`https://ias-server-cpoh.onrender.com/api/complaints/admin/filteredSupportStaff?category=${complaint.category}&subCategory=${complaint.subCategory}`, {
+                    method: "GET",
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${token}`,

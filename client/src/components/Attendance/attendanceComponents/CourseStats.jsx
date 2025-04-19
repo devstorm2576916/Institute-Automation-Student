@@ -124,7 +124,7 @@ export const CourseStats = () => {
           console.log(payload)
           setSubmitted('loading');
           try {
-            const response = await fetch(`http://localhost:8000/api/attendancelanding/add/bulk/${courseId}`, {
+            const response = await fetch(`https://ias-server-cpoh.onrender.com/api/attendancelanding/add/bulk/${courseId}`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -168,7 +168,7 @@ export const CourseStats = () => {
   const fetchAttendance = async (rollNo) => {
     try {
 
-      const response = await fetch(`http://localhost:8000/api/attendancelanding/student/${courseId}`, {
+      const response = await fetch(`https://ias-server-cpoh.onrender.com/api/attendancelanding/student/${courseId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

@@ -29,6 +29,18 @@ const FeedbackFaculty = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Feedback questions mapping for better display
+  const feedbackQuestions = {
+    course_content: 'Relevance of course content to your program',
+    course_materials: 'Quality and accessibility of course materials',
+    course_organization: 'Organization and structure of the course',
+    teaching_quality: 'Clarity of instruction and explanations',
+    faculty_knowledge: "Faculty's knowledge of the subject matter",
+    faculty_availability: "Faculty's availability and responsiveness",
+    assessment_fairness: 'Fairness of assessments and grading',
+    feedback_quality: 'Quality and timeliness of feedback on assignments'
+  };
+
   useEffect(() => {
     if (!selectedCourseCode) {
       setError('No course code provided.');
@@ -130,40 +142,47 @@ const FeedbackFaculty = () => {
         {activeTab === 'summary' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {feedbackStats?.sections?.map((section) => (
-              Object.entries(section.questions).map(([questionId, question]) => (
-                <div key={questionId} className="bg-gray-50 p-6 rounded-lg">
-                  <h3 className="text-lg font-semibold mb-4">
-                    {question.text}
-                  </h3>
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="bg-blue-500 text-white px-4 py-2 rounded-full">
-                      Avg. {question.average}/5
-                    </div>
-                    <div className="text-gray-600">
-                      {question.totalResponses} responses
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    {[5, 4, 3, 2, 1].map((rating) => (
-                      <div key={rating} className="flex items-center gap-4">
-                        <div className="w-8 text-gray-600">{rating}★</div>
-                        <div className="flex-1 bg-gray-200 rounded-full h-4">
-                          <div 
-                            className="bg-blue-500 h-4 rounded-full" 
-                            style={{ 
-                              width: `${(question.distribution[rating] / question.totalResponses) * 100}%`,
-                              opacity: question.totalResponses > 0 ? 1 : 0
-                            }}
-                          ></div>
+              <div key={section.id} className="col-span-2">
+                <h2 className="text-xl font-bold text-gray-700 mb-4 border-b pb-2">{section.title}</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {Object.entries(section.questions).map(([questionId, question]) => (
+                    <div key={questionId} className="bg-gray-50 p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                      <h3 className="text-lg font-semibold mb-4 text-gray-800">
+                        {feedbackQuestions[questionId] || question.text}
+                      </h3>
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="bg-blue-500 text-white px-4 py-2 rounded-full font-medium">
+                          Avg. {question.average.toFixed(1)}/5
                         </div>
-                        <div className="w-12 text-right text-gray-600">
-                          {question.distribution[rating] || 0}
+                        <div className="text-gray-600">
+                          {question.totalResponses} responses
                         </div>
                       </div>
-                    ))}
-                  </div>
+                      <div className="space-y-2">
+                        {[5, 4, 3, 2, 1].map((rating) => (
+                          <div key={rating} className="flex items-center gap-4">
+                            <div className="w-8 text-gray-600 flex items-center">
+                              {rating}<FaStar className="inline ml-1 text-yellow-400" size={12} />
+                            </div>
+                            <div className="flex-1 bg-gray-200 rounded-full h-4">
+                              <div 
+                                className="bg-blue-500 h-4 rounded-full" 
+                                style={{ 
+                                  width: `${(question.distribution[rating] / question.totalResponses) * 100}%`,
+                                  opacity: question.totalResponses > 0 ? 1 : 0
+                                }}
+                              ></div>
+                            </div>
+                            <div className="w-12 text-right text-gray-600">
+                              {question.distribution[rating] || 0}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))
+              </div>
             ))}
           </div>
         ) : (
@@ -174,7 +193,7 @@ const FeedbackFaculty = () => {
               </div>
             ) : (
               feedbacks.map((feedback, index) => (
-                <div key={index} className="bg-gray-50 p-6 rounded-lg">
+                <div key={index} className="bg-gray-50 p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex justify-between items-start mb-4">
                     <div className="text-gray-600 text-sm">
                       {new Date(feedback.createdAt).toLocaleDateString()}

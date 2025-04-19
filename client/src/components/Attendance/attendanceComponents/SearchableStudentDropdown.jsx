@@ -16,7 +16,7 @@ function SearchableStudentDropdown({ courseId, onStudentSelect }) {
             if (role === "faculty") {
                 setLoading(true);
                 try {
-                    const response = await fetch(`http://localhost:8000/api/attendancelanding/faculty/${courseId}`);
+                    const response = await fetch(`https://ias-server-cpoh.onrender.com/api/attendancelanding/faculty/${courseId}`);
                     const data = await response.json();
                     
                     if (data?.rollNumbers) {
@@ -37,7 +37,7 @@ function SearchableStudentDropdown({ courseId, onStudentSelect }) {
             if (role === 'acadAdmin') {
                 setLoading(true);
                 try {
-                    const response = await fetch('http://localhost:8000/api/attendancelanding/admin/student');
+                    const response = await fetch('https://ias-server-cpoh.onrender.com/api/attendancelanding/admin/student');
                     const data = await response.json();
                     
                     if (data?.data) {
