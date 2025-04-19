@@ -13,7 +13,7 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
     // DELETE
     const deleteMutation = useMutation({
         mutationFn: async () => {
-            const res = await fetch("http://localhost:8000/api/complaints/delete", {
+            const res = await fetch("https://ias-server-cpoh.onrender.com/api/complaints/delete", {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
@@ -38,7 +38,7 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
     // MARK AS DONE
     const markAsDoneMutation = useMutation({
         mutationFn: async () => {
-            const res = await fetch("http://localhost:8000/api/complaints/admin/updateStatus", {
+            const res = await fetch("https://ias-server-cpoh.onrender.com/api/complaints/admin/updateStatus", {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -70,7 +70,7 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
                 assignedContact: assignData.phoneNo,
             };
             
-            const res = await fetch("http://localhost:8000/api/complaints/admin/assign", {
+            const res = await fetch("https://ias-server-cpoh.onrender.com/api/complaints/admin/assign", {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -308,7 +308,7 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
                         {/* Main image display */}
                         <div className="mb-3 bg-gray-100 rounded-lg overflow-hidden flex justify-center">
                             <img
-                                src={`http://localhost:8000/uploads/complaints/${complaint.imageUrls[activeImageIndex]}`}
+                                src={`https://ias-server-cpoh.onrender.com/uploads/complaints/${complaint.imageUrls[activeImageIndex]}`}
                                 alt={`Complaint Image ${activeImageIndex + 1}`}
                                 className="max-h-80 object-contain"
                             />
@@ -326,7 +326,7 @@ const ComplaintDetails = ({ complaint, onBack, role }) => {
                                         }`}
                                     >
                                         <img
-                                            src={`http://localhost:8000/uploads/complaints/${url}`}
+                                            src={`https://ias-server-cpoh.onrender.com/uploads/complaints/${url}`}
                                             alt={`Thumbnail ${index + 1}`}
                                             className="h-16 w-16 object-cover"
                                         />

@@ -14,7 +14,7 @@ const Navbar = () => {
         try {
             // await newRequest.post("/auth/logout");
 
-            const response = await axios.post("http://localhost:8000/api/auth/logout", {}, { withCredentials: true });
+            const response = await axios.post("https://ias-server-cpoh.onrender.com/api/auth/logout", {}, { withCredentials: true });
             localStorage.setItem("currentUser", null);
 
             if (response.status === 200) {

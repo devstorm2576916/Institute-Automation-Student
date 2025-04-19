@@ -43,7 +43,7 @@ const SupportStaffManagement = () => {
   } = useQuery({
     queryKey: ["supportStaff"],
     queryFn: async () => {
-      const response = await fetch("http://localhost:8000/api/complaints/admin/supportStaff", {
+      const response = await fetch("https://ias-server-cpoh.onrender.com/api/complaints/admin/supportStaff", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -115,7 +115,7 @@ const SupportStaffManagement = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/api/complaints/admin/supportStaff", {
+      const response = await fetch("https://ias-server-cpoh.onrender.com/api/complaints/admin/supportStaff", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -160,7 +160,7 @@ const SupportStaffManagement = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/api/complaints/admin/supportStaff", {
+      const response = await fetch("https://ias-server-cpoh.onrender.com/api/complaints/admin/supportStaff", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
