@@ -14,8 +14,6 @@ const localizer = momentLocalizer(moment);
 function MyCalendar({ selectedStudent }) { 
     const {data:userData} = JSON.parse(localStorage.getItem("currentUser"));
     const {email, userId} = userData.user;
-    console.log(email);
-    console.log(userData);
     const { isLoading, error, data } = useQuery({
         queryKey: [`${userId}`],
         queryFn: () =>
@@ -61,7 +59,6 @@ function MyCalendar({ selectedStudent }) {
 
             if (response.ok) {
                 setMyEventsList(dataRecieved.eventList || []);  // Ensure we always have an array
-                console.log('Updated events:', dataRecieved.eventList);  // Debug log
             } else {
                 console.error("Error fetching attendance data:", dataRecieved.error);
             }
