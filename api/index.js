@@ -22,6 +22,8 @@ import gradeRoute from "../api/routes/grade.route.js";
 import Razorpay from "razorpay";
 import crypto from "crypto"; // Needed for signature verification (production)
 
+const __dirname = path.resolve(); // Get the current directory name
+
 const app = express();
 dotenv.config(); // Load environment variables first
 
@@ -57,6 +59,11 @@ app.use('/api/complaints', complaintsRouter);
 
 // --- Middleware ---
 app.use(express.urlencoded({ extended: true,limit: '5mb' }));
+
+app.use(express.static(path.join(__dirname, "/client/dist")));
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "client","dist","index.html"));
+});
 
 // --- Initialize Razorpay ---
 const razorpay = new Razorpay({

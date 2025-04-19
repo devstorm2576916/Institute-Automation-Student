@@ -30,7 +30,7 @@ const StudentProfile = () => {
     const student = {
         rollNumber: data?.rollNo,
         name: data?.userId?.name,
-        photo: data?.userId?.profilePhoto || "/student.jpg", // Place a placeholder student image in `public/` folder
+        photo: data?.userId?.profilePicture || "/dummy_user.png", // Place a placeholder student image in `public/` folder
         signphoto: data?.userId?.signature || "/sign.jpg",
         hostel: data?.hostel,
         email: data?.email,
@@ -39,6 +39,8 @@ const StudentProfile = () => {
         dob: data?.userId?.dateOfBirth,
         roomNo: data?.roomNo,
         semester: data?.semester,
+        fatherName: data?.fatherName,
+        motherName: data?.motherName,
         branch: data?.department,
         yearOfJoining: data?.batch.substr(0, 4),
         programme: data?.program,
@@ -80,6 +82,8 @@ const StudentProfile = () => {
                                 <p><span className="font-bold">Blood Group:</span> {student.Bloodgr || 'N/A'}</p>
                                 <p><span className="font-bold">Contact Number:</span> {student.contactno || 'N/A'}</p>
                                 <p><span className="font-bold">DOB:</span> {student.dob || 'N/A'}</p>
+                                <p><span className="font-bold">Father's Name:</span> {student.fatherName || 'N/A'}</p>
+                                <p><span className="font-bold">Mother's Name:</span> {student.motherName || 'N/A'}</p>
                                 <p><span className="font-bold">Branch:</span> {student.branch || 'N/A'}</p>
                                 <p><span className="font-bold">Year of Joining:</span> {student.yearOfJoining || 'N/A'}</p>
                                 <p><span className="font-bold">Programme:</span> {student.programme || 'N/A'}</p>

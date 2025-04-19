@@ -21,7 +21,7 @@ export default function LoginPage() {
     }
     const emailRegex = /^[a-zA-Z.]+@iitg\.ac\.in$/;
     if (!emailRegex.test(email)) {
-      alert("Please enter a valid email address!");
+      alert("Please enter a valid IITG email address!");
       return;
     }
     console.log({ email, role });
@@ -118,7 +118,7 @@ export default function LoginPage() {
                 Enter your email address below. We'll send you a link to reset your password.
               </p>
               <div className="mb-4">
-                <label className="block text-sm font-medium">Email</label>
+                <label className="block text-sm font-medium">IITG Email</label>
                 <input
                   type="email"
                   placeholder="Enter your email"
