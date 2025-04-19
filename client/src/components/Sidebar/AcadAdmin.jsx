@@ -45,7 +45,9 @@ const AcadAdmin = () => {
                             <li>
                                 <Link to="/acadAdmin/feedback/view" className="text-gray-700 hover:text-gray-900">Feedback</Link>
                             </li>
-                            <li>Announcements</li>
+                            <li>
+                                <Link to="/announcements" className="text-gray-700 hover:text-gray-900">Announcements</Link>
+                            </li>
                         </ul>
                     )}
                 </li>
