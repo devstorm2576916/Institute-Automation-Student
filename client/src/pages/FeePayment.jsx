@@ -197,7 +197,7 @@ const FeePayment = () => {
         return;
       }
 
-      const backendUrl = "http://localhost:8000/api/payment/create-order";
+      const backendUrl = "https://ias-server-cpoh.onrender.com/api/payment/create-order";
       const orderPayload = { amount: payableAmount, currency: "INR" };
 
       console.log("Sending to backend:", orderPayload);
@@ -443,7 +443,7 @@ const FeePayment = () => {
       {/* Student Identification Section */}
       <section className="flex items-center bg-gray-50 px-[25px] py-5 rounded-xl mb-[35px] border border-gray-200 shadow-md">
         <img
-          src="/default-avatar.png"
+          src="/dummy_user.png"
           alt={`${feeData.student.name}'s profile`}
           className="w-[75px] h-[75px] rounded-full object-cover mr-6 border-[3px] border-white shadow-lg"
         />

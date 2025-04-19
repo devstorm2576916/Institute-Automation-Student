@@ -42,7 +42,7 @@ function MyCourses() {
     const fetchStudentCourses = async (rollNo) => {
 
         try {
-            const response = await fetch("http://localhost:8000/api/attendancelanding/student", {
+            const response = await fetch("https://ias-server-cpoh.onrender.com/api/attendancelanding/student", {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -80,7 +80,7 @@ function MyCourses() {
                         throw new Error("Roll number not found in localStorage.");
                     }
 
-                    const response = await fetch("http://localhost:8000/api/attendancelanding/student", {
+                    const response = await fetch("https://ias-server-cpoh.onrender.com/api/attendancelanding/student", {
                         method: "GET",
                         headers: {
                             "Content-Type": "application/json",
@@ -119,7 +119,7 @@ function MyCourses() {
                         throw new Error("Faculty ID not found in localStorage.");
                     }
 
-                    const response = await fetch("http://localhost:8000/api/attendancelanding/faculty", {
+                    const response = await fetch("https://ias-server-cpoh.onrender.com/api/attendancelanding/faculty", {
                         method: "GET",
                         headers: {
                             "Content-Type": "application/json",
@@ -164,7 +164,7 @@ function MyCourses() {
         if (rollNumber) {
             setLoading(true);
             try {
-                const response = await fetch(`http://localhost:8000/api/attendancelanding/${rollNumber}`);
+                const response = await fetch(`https://ias-server-cpoh.onrender.com/api/attendancelanding/${rollNumber}`);
 
                 if (!response.ok) {
                     throw new Error(`Server responded with status: ${response.status}`);
