@@ -52,6 +52,9 @@ const Faculty = () => {
                             <li><Link to="/assignmentlanding" className="text-gray-700 hover:text-gray-900">
                                 Assignment
                                 </Link></li>
+                            <li><Link to="/announcements" className="text-gray-700 hover:text-gray-900">
+                                Announcements
+                                </Link></li>
                         </ul>
                     )}
                 </li>
