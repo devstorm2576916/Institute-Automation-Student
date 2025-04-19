@@ -24,7 +24,7 @@ export default function FacultyGradeLanding() {
     // Fetch courses based on the userId and role
     const fetchCourses = async () => {
       try { 
-        const response = await fetch(`http://localhost:8000/api/grades/${role}/${userId}/courses`);
+        const response = await fetch(`https://ias-server-cpoh.onrender.com/api/grades/${role}/${userId}/courses`);
         const data = await response.json();
         if (response.ok) {
           setCourses(data.courses); // Assuming the response contains an array of courses
