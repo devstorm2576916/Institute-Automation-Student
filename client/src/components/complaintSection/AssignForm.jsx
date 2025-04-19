@@ -13,12 +13,16 @@ const AssignForm = ({ onClose, onAssign, complaint }) => {
             setIsLoading(true);
             setError(null);
             try {
+                console.log(`Fetching support staff for category: ${complaint.category}, subCategory: ${complaint.subCategory}`);
                 const token = localStorage.getItem("accessToken");
+
                 const response = await fetch(`https://ias-server-cpoh.onrender.com/api/complaints/admin/filteredSupportStaff?category=${complaint.category}&subCategory=${complaint.subCategory}`, {
                     method: "GET",
                     headers: {
+                        "Content-Type": "application/json",
                         Authorization: `Bearer ${token}`,
                     },
+                    body: JSON.stringify({ category: complaint.category, subCategory: complaint.subCategory }),
                     credentials: "include",
                 });
 

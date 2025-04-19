@@ -143,7 +143,7 @@ const startServer = async () => {
     // Seed support staff data
     // await seedSupportStaff();
     
-    app.listen(8000, () => {
+    app.listen(process.env.PORT ||8000, () => {
       console.log(`Backend server is running on port ${8000}`);
       if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
         console.warn(
