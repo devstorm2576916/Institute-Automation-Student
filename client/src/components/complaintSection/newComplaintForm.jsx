@@ -22,7 +22,9 @@ const NewComplaintForm = ({ category, subCategory, onBack }) => {
 
     const submitComplaint = async (formData) => {
         const accessToken = localStorage.getItem("accessToken");
-        const res = await fetch(`${process.env.REACT_APP_API_URL}/complaints/create`, {
+
+        const res = await fetch("https://ias-server-cpoh.onrender.com/api/complaints/create", {
+
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

@@ -33,6 +33,7 @@ function MyCourses() {
       }),
   });
 
+  console.log("Student Courses:", studentCourses);
   const handleFeedback = (course) => {
     navigate('/student/feedback/submit', {
       state: {
@@ -134,7 +135,7 @@ function MyCourses() {
                   </Link>
                   
                   <Link
-                    to={`/course/${course.id}/assignment`}
+                    to={`/course/${course.id}/assignments`}
                     className="flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-md p-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition duration-200"
                   >
                     <FaClipboardList className="text-pink-400" />
@@ -169,13 +170,13 @@ function MyCourses() {
                 </div>
                 
                 <div className="mt-4">
-                  <Link 
+                  {/* <Link 
                     to={`/course/${course.id}`}
                     className="flex items-center justify-center gap-2 w-full bg-pink-50 text-pink-600 border border-pink-200 rounded-md p-2 text-sm font-medium hover:bg-pink-100 transition duration-200"
                   >
                     <span>View Course Details</span>
                     <FaExternalLinkAlt className="text-xs" />
-                  </Link>
+                  </Link> */}
                 </div>
               </div>
             </div>

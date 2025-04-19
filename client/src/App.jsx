@@ -41,6 +41,7 @@ import CreateAssignment from "./components/Assignment/CreateAssignment.jsx";
 import EditAssignment from "./components/Assignment/EditAssignment.jsx";
 import FacultyAssignmentSubmissions from "./components/Assignment/FacultyAssignmentSubmissions.jsx";
 import LoginPage from "./components/LoginPage/Login.jsx";
+import ResetPasswordPage from './components/LoginPage/ResetPasswordPage.jsx';
 import DropCourse from "./components/dropCourse/drop.jsx";
 import CourseAnnouncements from "./components/Announcements/studentAnnouncements.jsx";
 import MyCourses from "./components/mycourses/myCourse.jsx";
@@ -64,6 +65,9 @@ import FacultyCourseStudents from './components/courseStudents/courseStudent.jsx
 // import CourseStudents from './components/courseStudents/courseStudent.jsx';
 import CompletedCourses from './components/mycourses/CompletedCourses.jsx';
 import DropCourseWrapper from './components/dropCourse/dropCourseWrapper.jsx';
+import NotFound from './pages/Notfound.jsx';
+import AllAnnouncements from './components/Announcements/AllAnnouncements.jsx';
+import SideAnnouncementWrapper from './components/Announcements/wrapperAnn.jsx';
 
 const queryClient = new QueryClient()
 function App() {
@@ -105,6 +109,10 @@ function App() {
         {
             path: "/login",
             element: <LoginPage/>,
+        },
+        {
+            path: "/reset-password/:token",
+            element: <ResetPasswordPage/>,
         },
         {
             path: "/",
@@ -210,6 +218,10 @@ function App() {
                     element: <AnnouncementWrapper/>
                 },
                 {
+                    path:"/announcements",
+                    element: <SideAnnouncementWrapper/>
+                },
+                {
                     path:"/courses",
                     element: <CourseWrapper/>
                 },
@@ -305,6 +317,10 @@ function App() {
                 }
             ],
         },
+        {
+            path: "*",
+            element: <NotFound/>
+        }
     ]);
     return (
         <RoleProvider>
