@@ -2,8 +2,6 @@
 
 Institute Automation System is a full-stack web application designed to automate and streamline various institutional processes. The system consists of a backend server built with Node.js and Express, and a frontend client developed using React.js.
 
-Visit our website at [https://ias-iitg.onrender.com/](https://ias-iitg.onrender.com/)
-
 ## Table of Contents
 
 - [Project Structure](#project-structure)
